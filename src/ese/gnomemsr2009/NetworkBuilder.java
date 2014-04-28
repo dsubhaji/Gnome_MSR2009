@@ -24,10 +24,7 @@ public class NetworkBuilder
 		int dev1 = 0;
 		int dev2 = 0;
 		
-		int devSize = developers.size();
-		int dev2Size= developers2.size();
-		
-		for(int i = 0; i<devSize;i++)
+		for(int i = 0; i<developers.size();i++)
 		{
 			dcn = dcn + "\r\n" + vertexNumber + " \"" + developers.get(i) +"\"";
 			vertexNumber++;
@@ -36,9 +33,9 @@ public class NetworkBuilder
 		
 		dcn = dcn + "\r\n*Edges";
 		
-		for(int i = 0; i < dev2Size; i++)
+		for(int i = 0; i < developers2.size(); i++)
 		{
-			for(int j = 0; j < devSize; j++)
+			for(int j = 0; j < developers.size(); j++)
 			{
 				if(developers2.get(i).equals(developers.get(j)))
 				{

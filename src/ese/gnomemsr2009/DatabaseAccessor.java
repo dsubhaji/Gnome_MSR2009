@@ -135,31 +135,6 @@ public class DatabaseAccessor
 		
 	}
 	
-	public String generateCSV() throws Exception
-	{
-		s = con.createStatement(); //Statements to issue sql queries
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.text), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
-							+"from bugs a, comment b "
-							+"where a.bug_id = b.bugid "
-							+"group by a.product "
-							);
-		
-		StringBuilder csv = new StringBuilder();
-		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\"\n");
-		
-		while(rs.next())
-		{
-			csv.append("\""+rs.getString("(trim(' ' from replace(a.product, '\n', '')))")+"\", ");
-			csv.append(rs.getInt("count(distinct(b.bugid))") + ",");
-			csv.append(rs.getInt("count(b.text)") + ", ");
-			csv.append(rs.getInt("count(distinct(b.who))")+ ", ");
-			csv.append("\""+rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))")+"\", ");
-			csv.append("\""+rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))")+"\"\n");
-		}
-		
-		return csv.toString();
-	}
-	
 	public void closeConnection() throws Exception
 	{
 		rs.close(); //close connections
