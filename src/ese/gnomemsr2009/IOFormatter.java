@@ -148,7 +148,7 @@ public class IOFormatter
 		    bufferedWriter.write(content);
 		    bufferedWriter.close();
 		    
-		    System.out.println("\r\nPAJEK File Generated!");
+		    System.out.println("\nPAJEK File Generated!");
 		} catch(IOException e) {
 		    System.out.println("COULD NOT WRITE!!");
 		}
@@ -165,7 +165,7 @@ public class IOFormatter
 		    bufferedWriter.write(text);
 		    bufferedWriter.close();
 		    
-		    System.out.println("\r\n.CSV File Generated!");
+		    System.out.println("\n.CSV File Generated!");
 		} catch(IOException e) {
 		    System.out.println("COULD NOT WRITE!!");
 		}

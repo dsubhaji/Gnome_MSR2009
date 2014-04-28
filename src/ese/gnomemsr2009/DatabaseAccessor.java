@@ -137,6 +137,8 @@ public class DatabaseAccessor
 	
 	public String generateCSV() throws Exception
 	{
+		System.out.println("Extracting Data from Database...");
+		
 		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.text), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
 							+"from bugs a, comment b "
@@ -147,6 +149,7 @@ public class DatabaseAccessor
 		StringBuilder csv = new StringBuilder();
 		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\"\n");
 		
+		System.out.println("Generating .CSV File");
 		while(rs.next())
 		{
 			csv.append("\""+rs.getString("(trim(' ' from replace(a.product, '\n', '')))")+"\", ");
