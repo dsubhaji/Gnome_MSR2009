@@ -140,7 +140,7 @@ public class DatabaseAccessor
 		System.out.println("Extracting Data from Database...");
 		
 		s = con.createStatement(); //Statements to issue sql queries
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.text), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
 							+"from bugs a, comment b "
 							+"where a.bug_id = b.bugid "
 							+"group by a.product "
@@ -154,7 +154,7 @@ public class DatabaseAccessor
 		{
 			csv.append("\""+rs.getString("(trim(' ' from replace(a.product, '\n', '')))")+"\", ");
 			csv.append(rs.getInt("count(distinct(b.bugid))") + ",");
-			csv.append(rs.getInt("count(b.text)") + ", ");
+			csv.append(rs.getInt("count(b.bug_when)") + ", ");
 			csv.append(rs.getInt("count(distinct(b.who))")+ ", ");
 			csv.append("\""+rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))")+"\", ");
 			csv.append("\""+rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))")+"\"\n");
