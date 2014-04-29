@@ -109,9 +109,10 @@ public class IOFormatter
 		do
 		{
 			System.out.println("Available Services");
-			System.out.println("1. Generate PAJEK File");
-			System.out.println("2. Generate .CSV File");
-			System.out.print  ("Please Enter Your Choice (1 or 2): ");
+			System.out.println("1. Generate Developers Network File in PAJEK Format");
+			System.out.println("2. Generate Bugs-By-Developer Matrix in CSV Format");
+			System.out.println("3. Generate Project Data Summary in CSV Format");
+			System.out.print  ("Please Enter Your Choice (1, 2 or 3): ");
 			
 			try
 			{
@@ -124,20 +125,12 @@ public class IOFormatter
 			System.out.println("");
 			
 			user_input.nextLine();
-			if(choice == 1)
-			{
-				return 1;
-			}else if(choice == 2)
-			{
-				return 2;
-			}
-		} while((choice<1)||(choice>2));
-		
-		return 0;
+			return choice;
+		} while((choice<1)||(choice>3));
 	}
 	
 	
-	public void writePajekFile(String product, String content)
+	public void writePajekFile(String content)
 	{
 		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
 		File fileName = new File("DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net");
@@ -158,6 +151,23 @@ public class IOFormatter
 	public void writeCSVFile(String text)
 	{ 
 		File fileName = new File("ProductsAndBugs.csv");
+		try{
+		    FileWriter fileWriter = new FileWriter(fileName);
+
+		    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+		    bufferedWriter.write(text);
+		    bufferedWriter.close();
+		    
+		    System.out.println("\n.CSV File Generated!");
+		} catch(IOException e) {
+		    System.out.println("COULD NOT WRITE!!");
+		}
+	}
+	
+	public void writeBugsByDevCSV(String text)
+	{ 
+		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
+		File fileName = new File("BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv");
 		try{
 		    FileWriter fileWriter = new FileWriter(fileName);
 

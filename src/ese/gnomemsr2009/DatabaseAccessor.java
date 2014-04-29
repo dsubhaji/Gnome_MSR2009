@@ -163,6 +163,95 @@ public class DatabaseAccessor
 		return csv.toString();
 	}
 	
+	public String generateMatrix(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> distinctBug_id 			= new ArrayList<String>();
+		ArrayList<String> distinctDev_email 		= new ArrayList<String>();
+		ArrayList<String> bug_id 			= new ArrayList<String>();
+		ArrayList<String> dev_email 		= new ArrayList<String>();
+		ArrayList<Integer> numOfComments 	= new ArrayList<Integer>();
+		
+		s = con.createStatement(); //Statements to issue sql queries
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
+							"from bugs a, comment b "+
+							"where a.bug_id = b.bugid "+
+							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by bug_id;"	
+							);
+		
+		while(rs.next())
+		{
+			distinctBug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(trim(' ' from replace(b.who, '\n', ''))) " +
+							"from bugs a, comment b " +
+							"where a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by b.who;"
+							);
+		
+		while(rs.next())
+		{
+			distinctDev_email.add(rs.getString("(trim(' ' from replace(b.who, '\n', '')))"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(trim(' ' from replace(a.bug_id, '\n', ''))), trim(' ' from replace(b.who, '\n', '')), count(b.bug_when) "+
+							"from bugs a, comment b " +
+							"where a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"group by a.bug_id, b.who " +
+							"order by b.who, a.bug_id;"
+							);
+		
+		while(rs.next())
+		{
+			bug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+			dev_email.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
+			numOfComments.add(rs.getInt("count(b.bug_when)"));
+		}
+		
+		StringBuilder matrix = new StringBuilder();
+		
+		matrix.append("bug_id, ");
+		
+		for(int i = 0; i < distinctDev_email.size(); i++)
+		{
+			matrix.append(distinctDev_email.get(i));
+			matrix.append(", ");
+		}
+		
+		for(int i = 0; i < distinctBug_id.size(); i++)
+		{
+			matrix.append("\n");
+			matrix.append(distinctBug_id.get(i));
+			matrix.append(", ");
+			
+			for(int j = 0; j < distinctDev_email.size(); j++)
+			{
+				for(int k = 0; k < dev_email.size(); k++)
+				{
+					if(	(bug_id.get(k).equals(distinctBug_id.get(i)))	&& (dev_email.get(k).equals(distinctDev_email.get(j))))
+					{
+						matrix.append(numOfComments.get(k).toString());
+						matrix.append(" ");
+					}
+					
+				}
+				
+				matrix.append(", ");
+			}
+			
+		}
+		
+		return matrix.toString();
+	}
+	
 	public void closeConnection() throws Exception
 	{
 		rs.close(); //close connections
