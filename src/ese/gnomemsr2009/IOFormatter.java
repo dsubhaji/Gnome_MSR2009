@@ -3,9 +3,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -111,7 +108,8 @@ public class IOFormatter
 			System.out.println("Available Services");
 			System.out.println("1. Generate Developers Network File in PAJEK Format");
 			System.out.println("2. Generate Bugs-By-Developer Matrix in CSV Format");
-			System.out.println("3. Generate Project Data Summary in CSV Format");
+			System.out.println("3. Generate Devs-By-Devs Matris in CSV Format");
+			System.out.println("4. Generate Project Data Summary in CSV Format");
 			System.out.print  ("Please Enter Your Choice (1, 2 or 3): ");
 			
 			try
@@ -126,7 +124,7 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>3));
+		} while((choice<1)||(choice>4));
 	}
 	
 	

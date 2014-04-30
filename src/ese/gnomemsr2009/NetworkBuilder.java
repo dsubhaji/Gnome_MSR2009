@@ -2,28 +2,13 @@ package ese.gnomemsr2009;
 
 import java.util.ArrayList;
 
-//no longer used
-//building of matrix/csv/pajek file all done in DatabaseAccessor.
-
 
 public class NetworkBuilder 
 {
-	private String dcn;
-	
-	public NetworkBuilder()
-	{
-		dcn = "";
-	}
-	
-	public String getDCN()
-	{
-		return dcn;
-	}
-	
-	public void networkBuilder(ArrayList<String> developers, ArrayList<String> developers2, ArrayList<String> developers3, ArrayList<Integer> edges, int num)
+	public String networkBuilder(ArrayList<String> developers, ArrayList<String> developers2, ArrayList<String> developers3, ArrayList<Integer> edges, int num)
 	{
 		int vertexNumber = 1;
-		dcn = "*Vertices " + num;
+		String fileContent = "*Vertices " + num;
 		int dev1 = 0;
 		int dev2 = 0;
 		int f = 0;
@@ -65,12 +50,12 @@ public class NetworkBuilder
 		
 		for(int i = 0; i<devSize;i++)
 		{
-			dcn = dcn + "\r\n" + vertexNumber + " \"" + developers.get(i) +"\"";
+			fileContent = fileContent + "\r\n" + vertexNumber + " \"" + developers.get(i) +"\"";
 			vertexNumber++;
 			//append the vertices to variable 'vertices'
 		}
 		
-		dcn = dcn + "\r\n*Edges";
+		fileContent = fileContent + "\r\n*Edges";
 		
 		for(int i = 0; i < newDev2.size(); i++)
 		{
@@ -88,9 +73,85 @@ public class NetworkBuilder
 			
 			if((dev1 > 0) && (dev2 > 0))
 			{
-				dcn = dcn + "\r\n" + dev1 + "\t" + dev2 + "\t" + newEdges.get(i);
+				fileContent = fileContent + "\r\n" + dev1 + "\t" + dev2 + "\t" + newEdges.get(i);
 			}
 			
 		}
+		
+		return fileContent;
+	}
+
+	public String bugsByDevs(ArrayList<String> distinctDev_email, ArrayList<String> distinctBug_id, ArrayList<String> dev_email, ArrayList<String> bug_id, ArrayList<Integer> numOfComments)
+	{
+		StringBuilder matrix = new StringBuilder();
+		
+		System.out.println("Building BugsByDevelopers Matrix...");
+		
+		matrix.append("bug_id, ");
+		
+		for(int i = 0; i < distinctDev_email.size(); i++)
+		{
+			matrix.append(distinctDev_email.get(i));
+			matrix.append(", ");
+		}
+		
+		for(int i = 0; i < distinctBug_id.size(); i++)
+		{
+			matrix.append("\n");
+			matrix.append(distinctBug_id.get(i));
+			matrix.append(", ");
+			
+			for(int j = 0; j < distinctDev_email.size(); j++)
+			{
+				for(int k = 0; k < dev_email.size(); k++)
+				{
+					if(	(bug_id.get(k).equals(distinctBug_id.get(i)))	&& (dev_email.get(k).equals(distinctDev_email.get(j))))
+					{
+						matrix.append(numOfComments.get(k).toString());
+						matrix.append(" ");
+					}
+				}
+				matrix.append(", ");
+			}
+		}
+		
+		return matrix.toString();
+	}
+	
+	public String devsByDevs(ArrayList<String> developers, ArrayList<String> developers2, ArrayList<String> developers3, ArrayList<Integer> edges)
+	{
+		StringBuilder matrix = new StringBuilder();
+		
+		System.out.println("Building DevsByDevs Matrix...");
+		
+		matrix.append("Developers, ");
+		
+		for(int i = 0; i < developers.size(); i++)
+		{
+			matrix.append(developers.get(i));
+			matrix.append(", ");
+		}
+		
+		for(int i = 0; i < developers.size(); i++)
+		{
+			matrix.append("\n");
+			matrix.append(developers.get(i));
+			matrix.append(", ");
+			
+			for(int j = 0; j < developers.size(); j++)
+			{
+				for(int k = 0; k < developers2.size(); k++)
+				{
+					if(	(developers2.get(k).equals(developers.get(i)))	&& (developers3.get(k).equals(developers.get(j))))
+					{
+						matrix.append(edges.get(k).toString());
+						matrix.append(" ");
+					}
+				}
+				matrix.append(", ");
+			}
+		}
+		
+		return matrix.toString();
 	}
 }

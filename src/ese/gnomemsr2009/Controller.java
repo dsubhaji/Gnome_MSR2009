@@ -47,11 +47,20 @@ public class Controller {
 				
 				startTime = System.nanoTime();
 				
-				da.generateMatrix(io.getProduct(), io.getStartDate(), io.getEndDate());
+				da.generateBugsByDev(io.getProduct(), io.getStartDate(), io.getEndDate());
 				//Queries database for result, rearrange it into a bugs-by-developers matrix and save it to variable 'matrix'
 				
 				endTime = System.nanoTime();
 			}else if(choice == 3)
+			{
+				io.inputData();
+				
+				startTime = System.nanoTime();
+				
+				da.generateDevsByDevs(io.getProduct(), io.getStartDate(), io.getEndDate());
+				
+				endTime = System.nanoTime();
+			}else if(choice == 4)
 			{				
 				startTime = System.nanoTime();
 				

@@ -1,6 +1,5 @@
 package ese.gnomemsr2009;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -18,12 +17,11 @@ public class DatabaseAccessor
 	ResultSet rs;
 	Statement s;
 	
+	private NetworkBuilder nb = new NetworkBuilder();
+	
 	private String fileContent;
 	private String fileName;
-	private ArrayList<String> developers;
-	private ArrayList<String> developers2;
-	private ArrayList<String> developers3;
-	private ArrayList<Integer> edges;
+
 	private int num;
 
 	public DatabaseAccessor()
@@ -61,6 +59,11 @@ public class DatabaseAccessor
 	
 	public void sqlQueries(String product, String startDate, String endDate) throws Exception
 	{
+		ArrayList<String> developers = new ArrayList<String>();
+		ArrayList<String> developers2= new ArrayList<String>();
+		ArrayList<String> developers3= new ArrayList<String>();
+		ArrayList<Integer> edges     = new ArrayList<Integer>();
+		
 		
 		System.out.println("");
 		System.out.println("Calculating the Total Number of Distinct Developers...");
@@ -121,80 +124,12 @@ public class DatabaseAccessor
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
 		
-		int vertexNumber = 1;
 		
-		String dcn = "*Vertices " + num;
-		int dev1 = 0;
-		int dev2 = 0;
-		int f = 0;
-		int devSize = developers.size();
-		int dev2Size= developers2.size();
 		
-		ArrayList<String> newDev2 = new ArrayList<String>();
-		ArrayList<String> newDev3 = new ArrayList<String>();
-		ArrayList<Integer> newEdges = new ArrayList<Integer>();
-		
-		for(int i = 0; i < dev2Size; i++)
-		{
-			String d = ""+developers2.get(i)+" "+developers3.get(i);
-			if(newDev2.size() > 0)
-			{
-				for(int j = 0; j < newDev2.size(); j++)
-				{
-					String e = ""+newDev3.get(j)+" "+newDev2.get(j);
-					if(d.equals(e))
-					{
-						f = 1;
-					}
-				}
-				if(f == 0)
-				{
-					newDev2.add(developers2.get(i));
-					newDev3.add(developers3.get(i));
-					newEdges.add(edges.get(i));
-					
-				}
-				f = 0;
-			}else 
-			{
-				newDev2.add(developers2.get(i));
-				newDev3.add(developers3.get(i));
-				newEdges.add(edges.get(i));
-			}
-		}
-		
-		for(int i = 0; i<devSize;i++)
-		{
-			dcn = dcn + "\r\n" + vertexNumber + " \"" + developers.get(i) +"\"";
-			vertexNumber++;
-			//append the vertices to variable 'vertices'
-		}
-		
-		dcn = dcn + "\r\n*Edges";
-		
-		for(int i = 0; i < newDev2.size(); i++)
-		{
-			for(int j = 0; j < devSize; j++)
-			{
-				if(newDev2.get(i).equals(developers.get(j)))
-				{
-					dev1 = j+1;
-				}
-				if(newDev3.get(i).equals(developers.get(j)))
-				{
-					dev2 = j+1;
-				}
-			}
-			
-			if((dev1 > 0) && (dev2 > 0))
-			{
-				dcn = dcn + "\r\n" + dev1 + "\t" + dev2 + "\t" + newEdges.get(i);
-			}
-		}
 		
 		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
 		fileName = "DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net";
-		fileContent = dcn;
+		fileContent = nb.networkBuilder(developers, developers2, developers3, edges, num);
 		
 	}
 	
@@ -227,7 +162,7 @@ public class DatabaseAccessor
 		fileContent = csv.toString();
 	}
 	
-	public void generateMatrix(String product, String startDate, String endDate) throws Exception
+	public void generateBugsByDev(String product, String startDate, String endDate) throws Exception
 	{
 		ArrayList<String> distinctBug_id 			= new ArrayList<String>();
 		ArrayList<String> distinctDev_email 		= new ArrayList<String>();
@@ -235,7 +170,7 @@ public class DatabaseAccessor
 		ArrayList<String> dev_email 		= new ArrayList<String>();
 		ArrayList<Integer> numOfComments 	= new ArrayList<Integer>();
 		
-		System.out.println("Extracting Data from Database...");
+		System.out.println("\nExtracting Data from Database...");
 		
 		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
@@ -282,44 +217,70 @@ public class DatabaseAccessor
 			numOfComments.add(rs.getInt("count(b.bug_when)"));
 		}
 		
-		StringBuilder matrix = new StringBuilder();
 		
-		System.out.println("Building BugsByDevelopers Matrix...");
-		
-		matrix.append("bug_id, ");
-		
-		for(int i = 0; i < distinctDev_email.size(); i++)
-		{
-			matrix.append(distinctDev_email.get(i));
-			matrix.append(", ");
-		}
-		
-		for(int i = 0; i < distinctBug_id.size(); i++)
-		{
-			matrix.append("\n");
-			matrix.append(distinctBug_id.get(i));
-			matrix.append(", ");
-			
-			for(int j = 0; j < distinctDev_email.size(); j++)
-			{
-				for(int k = 0; k < dev_email.size(); k++)
-				{
-					if(	(bug_id.get(k).equals(distinctBug_id.get(i)))	&& (dev_email.get(k).equals(distinctDev_email.get(j))))
-					{
-						matrix.append(numOfComments.get(k).toString());
-						matrix.append(" ");
-					}
-					
-				}
-				
-				matrix.append(", ");
-			}
-			
-		}
 		
 		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
 		fileName = "BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv";
-		fileContent = matrix.toString();
+		fileContent = nb.bugsByDevs(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
+	}
+	
+	public void generateDevsByDevs(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> developers = new ArrayList<String>();
+		ArrayList<String> developers2= new ArrayList<String>();
+		ArrayList<String> developers3= new ArrayList<String>();
+		ArrayList<Integer> edges     = new ArrayList<Integer>();
+		
+		
+		System.out.println("");
+		System.out.println("Retrieving the Developer's E-Mail Addresses...");
+		
+		s = con.createStatement(); //Statements to issue sql queries
+		rs = s.executeQuery(
+				"select distinct(trim(' ' from replace(b.who, '\n', ''))) \"who\""+
+				"from bugs c, comment b " +
+				"where c.bug_id = b.bugid " +
+				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s')) between '"+startDate+"' and '"+endDate+"' "  +
+				"and trim(' ' from product) like '%"+product+"\n' " +
+				"order by who;"
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			developers.add(rs.getString("who"));
+		}
+		
+		System.out.println("Building the Developer Communication Network...");
+		
+		rs = s.executeQuery(
+				"select trim(' ' from replace(a.who, '\n', '')), count(distinct(a.bugid)), trim(' ' from replace(b.who, '\n', '')) " +
+						"from comment a, comment b " +
+						"where a.bugid IN " +
+						"(" +
+							"select b.bugid " +
+							"from bugs c, comment b " +
+							"where c.bug_id = b.bugid " +
+							"and trim(' ' from c.product) like '%"+product+"\n' "+
+						") " +
+						"and a.who <> b.who " +
+						"and a.bugid = b.bugid "+
+						"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+						"group by a.who, b.who " +
+						"order by trim(' ' from replace(a.who, '\n', ''));"
+						//Query to find how many times a developer work with another developer on the bugs of a particular component
+				);
+		
+		while(rs.next())
+		{
+			developers2.add(rs.getString("trim(' ' from replace(a.who, '\n', ''))"));
+			developers3.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
+			edges.add((rs.getInt("count(distinct(a.bugid))")));
+		}
+		
+		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
+		fileName = "DevsByDevsMatrix-"+product+"-"+df.format(new Date())+".csv";
+		fileContent = nb.devsByDevs(developers, developers2, developers3, edges);
+		
 	}
 	
 	public void closeConnection() throws Exception
