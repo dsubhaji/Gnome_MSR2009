@@ -1,11 +1,15 @@
 package ese.gnomemsr2009;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class DatabaseAccessor 
@@ -14,6 +18,8 @@ public class DatabaseAccessor
 	ResultSet rs;
 	Statement s;
 	
+	private String fileContent;
+	private String fileName;
 	private ArrayList<String> developers;
 	private ArrayList<String> developers2;
 	private ArrayList<String> developers3;
@@ -22,36 +28,18 @@ public class DatabaseAccessor
 
 	public DatabaseAccessor()
 	{
-		developers = new ArrayList<String>();
-		developers2 = new ArrayList<String>();
-		developers3 = new ArrayList<String>();
-		edges = new ArrayList<Integer>();
-		num = 0;
+		fileContent = "";
+		fileName = "";
 	}
 	
-	public ArrayList<String> getDevelopers()
+	public String getFileContent()
 	{
-		return developers;
+		return fileContent;
 	}
 	
-	public ArrayList<String> getDevelopers2()
+	public String getFileName()
 	{
-		return developers2;
-	}
-	
-	public ArrayList<String> getDevelopers3()
-	{
-		return developers3;
-	}
-	
-	public ArrayList<Integer> getEdges()
-	{
-		return edges;
-	}
-	
-	public int getNum()
-	{
-		return num;
+		return fileName;
 	}
 	
 	public boolean openConnection(String databaseName, String mysqlUser, String password) throws Exception
@@ -133,9 +121,84 @@ public class DatabaseAccessor
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
 		
+		int vertexNumber = 1;
+		
+		String dcn = "*Vertices " + num;
+		int dev1 = 0;
+		int dev2 = 0;
+		int f = 0;
+		int devSize = developers.size();
+		int dev2Size= developers2.size();
+		
+		ArrayList<String> newDev2 = new ArrayList<String>();
+		ArrayList<String> newDev3 = new ArrayList<String>();
+		ArrayList<Integer> newEdges = new ArrayList<Integer>();
+		
+		for(int i = 0; i < dev2Size; i++)
+		{
+			String d = ""+developers2.get(i)+" "+developers3.get(i);
+			if(newDev2.size() > 0)
+			{
+				for(int j = 0; j < newDev2.size(); j++)
+				{
+					String e = ""+newDev3.get(j)+" "+newDev2.get(j);
+					if(d.equals(e))
+					{
+						f = 1;
+					}
+				}
+				if(f == 0)
+				{
+					newDev2.add(developers2.get(i));
+					newDev3.add(developers3.get(i));
+					newEdges.add(edges.get(i));
+					
+				}
+				f = 0;
+			}else 
+			{
+				newDev2.add(developers2.get(i));
+				newDev3.add(developers3.get(i));
+				newEdges.add(edges.get(i));
+			}
+		}
+		
+		for(int i = 0; i<devSize;i++)
+		{
+			dcn = dcn + "\r\n" + vertexNumber + " \"" + developers.get(i) +"\"";
+			vertexNumber++;
+			//append the vertices to variable 'vertices'
+		}
+		
+		dcn = dcn + "\r\n*Edges";
+		
+		for(int i = 0; i < newDev2.size(); i++)
+		{
+			for(int j = 0; j < devSize; j++)
+			{
+				if(newDev2.get(i).equals(developers.get(j)))
+				{
+					dev1 = j+1;
+				}
+				if(newDev3.get(i).equals(developers.get(j)))
+				{
+					dev2 = j+1;
+				}
+			}
+			
+			if((dev1 > 0) && (dev2 > 0))
+			{
+				dcn = dcn + "\r\n" + dev1 + "\t" + dev2 + "\t" + newEdges.get(i);
+			}
+		}
+		
+		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
+		fileName = "DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net";
+		fileContent = dcn;
+		
 	}
 	
-	public String generateCSV() throws Exception
+	public void generateCSV() throws Exception
 	{
 		System.out.println("Extracting Data from Database...");
 		
@@ -160,16 +223,19 @@ public class DatabaseAccessor
 			csv.append("\""+rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))")+"\"\n");
 		}
 		
-		return csv.toString();
+		fileName = "ProjectDataSummary.csv";
+		fileContent = csv.toString();
 	}
 	
-	public String generateMatrix(String product, String startDate, String endDate) throws Exception
+	public void generateMatrix(String product, String startDate, String endDate) throws Exception
 	{
 		ArrayList<String> distinctBug_id 			= new ArrayList<String>();
 		ArrayList<String> distinctDev_email 		= new ArrayList<String>();
 		ArrayList<String> bug_id 			= new ArrayList<String>();
 		ArrayList<String> dev_email 		= new ArrayList<String>();
 		ArrayList<Integer> numOfComments 	= new ArrayList<Integer>();
+		
+		System.out.println("Extracting Data from Database...");
 		
 		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
@@ -218,6 +284,8 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
+		System.out.println("Building BugsByDevelopers Matrix...");
+		
 		matrix.append("bug_id, ");
 		
 		for(int i = 0; i < distinctDev_email.size(); i++)
@@ -249,7 +317,9 @@ public class DatabaseAccessor
 			
 		}
 		
-		return matrix.toString();
+		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
+		fileName = "BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv";
+		fileContent = matrix.toString();
 	}
 	
 	public void closeConnection() throws Exception

@@ -130,46 +130,12 @@ public class IOFormatter
 	}
 	
 	
-	public void writePajekFile(String content)
+	public void writeFile(String text, String fileName)
 	{
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
-		File fileName = new File("DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net");
+		File file = new File(fileName);
+		
 		try{
-		    FileWriter fileWriter = new FileWriter(fileName);
-
-		    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-		    bufferedWriter.write(content);
-		    bufferedWriter.close();
-		    
-		    System.out.println("\nPAJEK File Generated!");
-		} catch(IOException e) {
-		    System.out.println("COULD NOT WRITE!!");
-		}
-	}
-	
-	
-	public void writeCSVFile(String text)
-	{ 
-		File fileName = new File("ProductsAndBugs.csv");
-		try{
-		    FileWriter fileWriter = new FileWriter(fileName);
-
-		    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-		    bufferedWriter.write(text);
-		    bufferedWriter.close();
-		    
-		    System.out.println("\n.CSV File Generated!");
-		} catch(IOException e) {
-		    System.out.println("COULD NOT WRITE!!");
-		}
-	}
-	
-	public void writeBugsByDevCSV(String text)
-	{ 
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
-		File fileName = new File("BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv");
-		try{
-		    FileWriter fileWriter = new FileWriter(fileName);
+		    FileWriter fileWriter = new FileWriter(file);
 
 		    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 		    bufferedWriter.write(text);

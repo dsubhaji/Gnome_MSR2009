@@ -2,6 +2,9 @@ package ese.gnomemsr2009;
 
 import java.util.ArrayList;
 
+//no longer used
+//building of matrix/csv/pajek file all done in DatabaseAccessor.
+
 
 public class NetworkBuilder 
 {

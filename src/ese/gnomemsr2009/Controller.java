@@ -7,8 +7,8 @@ public class Controller {
 		//initialize objects
 		DatabaseAccessor da = new DatabaseAccessor();
 		IOFormatter io = new IOFormatter();
-		NetworkBuilder nb = new NetworkBuilder();
-		
+		long startTime = 0;
+		long endTime = 0;
 		//request for user input of Database name, database user-name and password
 		io.inputConString();
 		
@@ -32,50 +32,44 @@ public class Controller {
 				//request user input for product name, start date and end date.
 				io.inputData();
 				
-				long startTime = System.nanoTime();
+				startTime = System.nanoTime();
 				
 				//queries database for result
 				da.sqlQueries(io.getProduct(), io.getStartDate(), io.getEndDate());
 				
-				//rearrange result into a PAJEK file format
-				nb.networkBuilder(da.getDevelopers(), da.getDevelopers2(), da.getDevelopers3(), da.getEdges(), da.getNum());
+				endTime = System.nanoTime();
 				
-				//output text into file
-				io.writePajekFile(nb.getDCN());
-				long endTime = System.nanoTime();
 				
-				System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
 			}else if(choice == 2)
 			{
 				//request user input for product name, start date and end date.
 				io.inputData();
 				
-				long startTime = System.nanoTime();
+				startTime = System.nanoTime();
 				
+				da.generateMatrix(io.getProduct(), io.getStartDate(), io.getEndDate());
 				//Queries database for result, rearrange it into a bugs-by-developers matrix and save it to variable 'matrix'
-				String matrix = da.generateMatrix(io.getProduct(), io.getStartDate(), io.getEndDate());
 				
-				//output 'matrix' to a .csv file and append product name to the file name
-				io.writeBugsByDevCSV(matrix);
-				
-				long endTime = System.nanoTime();
-				
-				System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
+				endTime = System.nanoTime();
 			}else if(choice == 3)
 			{				
-				long startTime = System.nanoTime();
+				startTime = System.nanoTime();
 				
 				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
-				String projectData = da.generateCSV();
+				da.generateCSV();
 				
 				//output 'projectData' to a .csv file
-				io.writeCSVFile(projectData);
-				long endTime = System.nanoTime();
-				System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
+				endTime = System.nanoTime();
 			}
 			
+			String matrix = da.getFileContent();
+			String fN = da.getFileName();
+			
+			//output 'matrix' to a .csv file and append product name to the file name
+			io.writeFile(matrix, fN);
 			//close connection
 			da.closeConnection();
+			System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
 			
 		}
 		else
