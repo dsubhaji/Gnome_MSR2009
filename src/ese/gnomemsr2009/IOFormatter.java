@@ -110,6 +110,7 @@ public class IOFormatter
 			System.out.println("2. Generate Bugs-By-Developer Matrix in CSV Format");
 			System.out.println("3. Generate Devs-By-Devs Matris in CSV Format");
 			System.out.println("4. Generate Project Data Summary in CSV Format");
+			System.out.println("5. Generate Bug-Model in CSV Format");
 			System.out.print  ("Please Enter Your Choice (1, 2 or 3): ");
 			
 			try
@@ -124,7 +125,7 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>4));
+		} while((choice<1)||(choice>5));
 	}
 	
 	
