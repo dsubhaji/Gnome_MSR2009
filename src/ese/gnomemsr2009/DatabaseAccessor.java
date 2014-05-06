@@ -19,6 +19,7 @@ public class DatabaseAccessor
 	
 	private NetworkBuilder nb = new NetworkBuilder();
 	
+	
 	private String fileContent;
 	private String fileName;
 
@@ -447,8 +448,6 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		System.out.println("Building Bug-Model Matrix...");
-		
 		//Column Headers
 		matrix.append("Bug_ID, Owner, Elapsed-Time, Component, Version, Rep-Platform, Op-Sys, Bug-Status, Resolution, Priority, Severity, Target-Milestone, Duplicate, Activity-Level, Number-of-Comments, Number-Of-Commenter, Interest-Span, Number-of-Comments-by-Owner, Owner-Workload, Owner-Comment-Arc");
 		
@@ -534,15 +533,263 @@ public class DatabaseAccessor
 			matrix.append(", ");
 			
 		}
+
+		
+		fileName = product+"-("+startDate+")-("+endDate+")-Bugs-Details.csv";
+		fileContent = matrix.toString();
+		System.out.println("");
+		System.out.println("Building " + fileName);
+	}
+	
+	public void generateDevModel(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> owners		 		= new ArrayList<String>();
+		ArrayList<String> bugsOwned		 		= new ArrayList<String>();
+		
+		ArrayList<String> bugsCommented		 	= new ArrayList<String>();
+		ArrayList<String> bugsCommentSpan	 	= new ArrayList<String>();
+		
+		ArrayList<String> commentsOnOwned		= new ArrayList<String>();
+		ArrayList<String> commentsOffOwned	 	= new ArrayList<String>();
+		
+		ArrayList<String> noOfActivities	 	= new ArrayList<String>();
+		
+		ArrayList<String> avgElapsedTime	 	= new ArrayList<String>();
+		ArrayList<String> medianElapsedTime		= new ArrayList<String>();
+		
+		ArrayList<String> avgInterestSpan	 	= new ArrayList<String>();
+		ArrayList<String> medianInterestSpan	= new ArrayList<String>();
+		
+		ArrayList<Double> elapsedTime 			= new ArrayList<Double>();
+		ArrayList<Double> interestSpan 			= new ArrayList<Double>();
 		
 		
+		System.out.println("");
+		System.out.println("Finding the Number of Bugs Owned by Each Developers...");
+		
+		s = con.createStatement(); //Statements to issue sql queries
+		rs = s.executeQuery(
+				"select distinct(trim(' ' from replace(a.assigned_to, '\n', ''))), count(a.bug_id) " +
+				"from bugs a " +
+				"where assigned_to in " +
+				"(	select distinct(assigned_to) from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
+				"and trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
+				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"group by assigned_to " +
+				"order by assigned_to;"
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			owners.add(rs.getString("(trim(' ' from replace(a.assigned_to, '\n', '')))"));
+			bugsOwned.add(rs.getString("count(a.bug_id)"));
+		}
+		
+		System.out.println("Calculating the Number of Comments and the Timespan by the Developers...");
+		
+		rs = s.executeQuery(
+				"select who, count(text), timestampdiff(second, MIN(bug_when), MAX(bug_when))/3600 AS comment_span "+
+				"from comment " +
+				"where bugid in " +
+				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
+				"and trim(' ' from replace(who, '\n', '')) in " +
+				"(	select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) "+
+				"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"group by who " +
+				"order by who;"
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			bugsCommented.add(rs.getString("count(text)"));
+			bugsCommentSpan.add(rs.getString("comment_span"));
+		}
+		
+		System.out.println("Calculating Activity Level of Each Developer...");
+		
+		rs = s.executeQuery(
+				"select who, count(bug_when) " +
+				"from activity " +
+				"where bugid in " +
+				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
+				"and trim(' ' from replace(who, '\n', '')) in " +
+				"(	select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
+				"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"group by who " +
+				"order by who;"
+				); 
+		
+		while(rs.next())
+		{
+			noOfActivities.add(rs.getString("count(bug_when)"));
+		}
+		
+		System.out.println("Calculating Average Elapsed Time...");
+		
+		rs = s.executeQuery(
+				"select a.assigned_to,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime " +
+				"from bugs a " +
+				"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"group by a.assigned_to " +
+				"order by a.assigned_to; "
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			avgElapsedTime.add(rs.getString("avgElapsedTime"));
+		}
+		
+		System.out.println("Calculating Average Interest Span...");
+		
+		rs = s.executeQuery(
+				"select a.ownerz, avg(a.interest_span) " +
+				"from " +
+				"(select a.assigned_to as ownerz,  timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 as interest_span " +
+				"from bugs a, comment b " +
+				"where a.bug_id = b.bugid " +
+				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and b.bugid in " +
+				"(	select bug_id from bugs where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' 	) " +
+				"group by b.bugid " +
+				"order by b.bugid asc) a " +
+				"group by ownerz " +
+				"order by ownerz; " 
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			avgInterestSpan.add(rs.getString("avg(a.interest_span)"));
+		}
 		
 		
+		System.out.println("Retrieving Specific Owners' Data and Median Elapsed and Interest Span...");
+		/* A product can have many bugs, and not every bugs are owned by a single developer
+		 * The next few queries require it to be repeated N times.
+		 * N is the number of distinct developers that owns the bugs in the specified product.
+		 */
+		for(int i = 0; i < owners.size(); i++)
+		{
+			//find the number of times the owner has commented on their own bugs
+			rs = s.executeQuery(
+					"select who, count(text) " +
+					"from comment " +
+					"where bugid in " +
+					"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"' and assigned_to like '%" +owners.get(i) + "%' ) " +
+					"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and who like '%" +owners.get(i) + "%' ; " 
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs.next())
+			{
+				commentsOnOwned.add(rs.getString("count(text)"));
+			}
+			
+			//find the number of times the owner has commented on bugs that they don't own
+			rs = s.executeQuery(
+					"select who, count(text) " +
+					"from comment " +
+					"where bugid in " +
+					"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"' and assigned_to not like '%" +owners.get(i) + "%' ) " +
+					"and who like '%" +owners.get(i) + "%' " +
+					"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"');"
+					);
+			
+			while(rs.next())
+			{
+				commentsOffOwned.add(rs.getString("count(text)"));
+			}
+			
+			
+			//find the elapsed time for every bug the owner has
+			rs = s.executeQuery(
+					"select timestampdiff(second, a.creation_ts, a.delta_ts)/3600 as elapsed_time " +
+					"from bugs a " +
+					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"and a.assigned_to like '%" +owners.get(i) + "%' " +
+					"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs.next())
+			{
+				elapsedTime.add(rs.getDouble("elapsed_time"));
+			}
+			
+			//find the median of the elapsed time
+			int mid = elapsedTime.size()/2; 
+			double median = elapsedTime.get(mid); 
+			if (elapsedTime.size()%2 == 0) 
+			{ 
+				median = (median + elapsedTime.get(mid-1))/2; 
+			}
+			
+			medianElapsedTime.add(""+median);
+			
+			//find median interest spans for every bug the owner has
+			rs = s.executeQuery(
+					"select timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 as interest_span " +
+					"from bugs a, comment b " +
+					"where a.bug_id = b.bugid " +
+					"and b.bugid in " +
+					"(	select bug_id from bugs where trim(' ' from replace(a.product, '\n', '')) like '"+product+"'	) " +
+					"AND a.assigned_to like '%" +owners.get(i) + "%' " +
+					"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"group by b.bugid " +
+					"order by timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 asc " 
+					);
+			
+			while(rs.next())
+			{
+				interestSpan.add(rs.getDouble("interest_span"));
+			}
+			
+			//find the median of the interest span
+			int mid2 = interestSpan.size()/2; 
+			double median2 = interestSpan.get(mid2); 
+			if (interestSpan.size()%2 == 0) 
+			{ 
+				median2 = (median2 + interestSpan.get(mid2-1))/2; 
+			}
 		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "BugsModel-"+product+"-"+df.format(new Date())+".csv";
+			medianInterestSpan.add(""+median2);
+			
+		}
+		
+		StringBuilder matrix = new StringBuilder();
+		
+		//Column Headers
+		matrix.append("Developer, Bugs Owned, Bugs Commented, Comment Span, Comments On Owned, Comments On Not Owned, No. Of Activities, Avg. Elapsed Time, Median Elapsed Time, Avg. Interest Span, Median Interest Span");
+		
+		for(int i = 0; i < owners.size(); i++)
+		{
+			matrix.append("\n");
+			matrix.append(owners.get(i) + ", ");
+			matrix.append(bugsOwned.get(i) + ", ");
+			matrix.append(bugsCommented.get(i) + ", ");
+			matrix.append(bugsCommentSpan.get(i) + ", ");
+			matrix.append(commentsOnOwned.get(i) + ", ");
+			matrix.append(commentsOffOwned.get(i) + ", ");
+			matrix.append(noOfActivities.get(i) + ", ");
+			matrix.append(avgElapsedTime.get(i) + ", ");
+			matrix.append(medianElapsedTime.get(i) + ", ");
+			matrix.append(avgInterestSpan.get(i) + ", ");
+			matrix.append(medianInterestSpan.get(i) + ", ");
+		}
+
+		
+		fileName = product+"-("+startDate+")-("+endDate+")-Devs-Details.csv";
 		fileContent = matrix.toString();
 		
+		System.out.println("");
+		System.out.println("Building " + fileName);
 	}
 	
 	public void closeConnection() throws Exception

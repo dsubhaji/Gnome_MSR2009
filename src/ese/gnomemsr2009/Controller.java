@@ -66,19 +66,26 @@ public class Controller {
 				
 				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
 				da.generateCSV();
-				
 				//output 'projectData' to a .csv file
 				endTime = System.nanoTime();
 			}else if(choice == 5)
 			{
 				io.inputData();
 				
-				
 				startTime = System.nanoTime();
 				
 				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
 				da.generateBugModel(io.getProduct(), io.getStartDate(), io.getEndDate());
+				//output 'projectData' to a .csv file
+				endTime = System.nanoTime();
+			}else if(choice == 6)
+			{
+				io.inputData();
 				
+				startTime = System.nanoTime();
+				
+				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
+				da.generateDevModel(io.getProduct(), io.getStartDate(), io.getEndDate());
 				//output 'projectData' to a .csv file
 				endTime = System.nanoTime();
 			}
