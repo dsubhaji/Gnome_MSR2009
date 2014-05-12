@@ -108,7 +108,7 @@ public class IOFormatter
 			System.out.println("Available Services");
 			System.out.println("1. Generate Developers Network File in PAJEK Format");
 			System.out.println("2. Generate Bugs-By-Developer Matrix in CSV Format");
-			System.out.println("3. Generate Devs-By-Devs Matris in CSV Format");
+			System.out.println("3. Generate Devs-By-Devs Matrix in CSV Format");
 			System.out.println("4. Generate Project Data Summary in CSV Format");
 			System.out.println("5. Generate Bug-Details in CSV Format");
 			System.out.println("6. Generate Dev-Details in CSV Format");

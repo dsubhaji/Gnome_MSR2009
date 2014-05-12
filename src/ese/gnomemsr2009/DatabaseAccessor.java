@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class DatabaseAccessor 
@@ -146,7 +147,7 @@ public class DatabaseAccessor
 							);
 		
 		StringBuilder csv = new StringBuilder();
-		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\"\n");
+		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\"\n");
 		
 		System.out.println("Generating .CSV File");
 		while(rs.next())
@@ -155,8 +156,26 @@ public class DatabaseAccessor
 			csv.append(rs.getInt("count(distinct(b.bugid))") + ",");
 			csv.append(rs.getInt("count(b.bug_when)") + ", ");
 			csv.append(rs.getInt("count(distinct(b.who))")+ ", ");
-			csv.append("\""+rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))")+"\", ");
-			csv.append("\""+rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))")+"\"\n");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
+			
+			String minDate = rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))");
+			String maxDate = rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))");
+			
+			Date dateMin = sdf.parse(minDate);
+			Date dateMax = sdf.parse(maxDate);
+			
+			csv.append("\""+minDate+"\", ");
+			csv.append("\""+maxDate+"\", ");
+			
+			long differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
+			int days = (int)(((differenceInTime/1000)/3600)/24); //elapsed time in days
+			int hours = (int)((differenceInTime/1000)/3600); //elapsed time in hours
+			int minutes = (int)((differenceInTime/1000)/60); //elapsed time in minutes
+			
+			csv.append(days+", ");
+			csv.append(hours+", ");
+			csv.append(minutes+"\n ");
+			
 		}
 		
 		fileName = "ProjectDataSummary.csv";
