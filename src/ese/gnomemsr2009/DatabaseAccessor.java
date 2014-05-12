@@ -167,10 +167,10 @@ public class DatabaseAccessor
 			csv.append("\""+minDate+"\", ");
 			csv.append("\""+maxDate+"\", ");
 			
-			long differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
-			int days = (int)(((differenceInTime/1000)/3600)/24); //elapsed time in days
-			int hours = (int)((differenceInTime/1000)/3600); //elapsed time in hours
-			int minutes = (int)((differenceInTime/1000)/60); //elapsed time in minutes
+			float differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
+			float days = (((differenceInTime/1000)/3600)/24); //elapsed time in days
+			float hours = ((differenceInTime/1000)/3600); //elapsed time in hours
+			float minutes = ((differenceInTime/1000)/60); //elapsed time in minutes
 			
 			csv.append(days+", ");
 			csv.append(hours+", ");
