@@ -779,11 +779,17 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
+		RFunctions rf = new RFunctions();
+		System.out.println("");
+		System.out.println("Calculating Degree and Betweenness of the Developers...");
+		sqlQueries(product, startDate, endDate);
+		rf.startRengine();
 		//Column Headers
-		matrix.append("Developer, Bugs Owned, Bugs Commented, Comment Span, Comments On Owned, Comments On Not Owned, No. Of Activities, Avg. Elapsed Time, Median Elapsed Time, Avg. Interest Span, Median Interest Span");
+		matrix.append("Developer, Bugs Owned, Bugs Commented, Comment Span, Comments On Owned, Comments On Not Owned, No. Of Activities, Avg. Elapsed Time, Median Elapsed Time, Avg. Interest Span, Median Interest Span, Degree, Betweenness");
 		
 		for(int i = 0; i < owners.size(); i++)
 		{
+			rf.rScript(fileContent, owners.get(i));
 			matrix.append("\n");
 			matrix.append(owners.get(i) + ", ");
 			matrix.append(bugsOwned.get(i) + ", ");
@@ -796,14 +802,9 @@ public class DatabaseAccessor
 			matrix.append(medianElapsedTime.get(i) + ", ");
 			matrix.append(avgInterestSpan.get(i) + ", ");
 			matrix.append(medianInterestSpan.get(i) + ", ");
+			matrix.append(rf.getTextToAppend());
+			
 		}
-
-		RFunctions rf = new RFunctions();
-		
-		sqlQueries(product, startDate, endDate);
-		rf.rScript(fileContent);
-		matrix.append("\r\n\r\n");
-		matrix.append(rf.getTextToAppend());
 		
 		
 		

@@ -56,13 +56,16 @@ public class IOFormatter
 	
 	
 	
-	
+	/*
+	 * Method Name: inputConString
+	 * Input: void
+	 * Output: void
+	 * Function: 
+	 * Takes user input for database name, user name and password and store it to the respective variable.
+	 */
 	public void inputConString()
 	{
 		System.out.print("Please Enter Database Name: ");
-		//examples of connection strings
-		//jdbc:mysql://127.0.0.1:3306/database?
-		//jdbc:mysql://localhost:3306/database?
 		
 		dbN = user_input.nextLine();
 		
