@@ -16,7 +16,7 @@ public class DatabaseAccessor
 {
 	Connection con;
 	ResultSet rs;
-	Statement s;
+	Statement s ;
 	
 	private NetworkBuilder nb = new NetworkBuilder();
 	
@@ -48,7 +48,7 @@ public class DatabaseAccessor
 		try
 		{
 			con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/" + databaseName + "?user=" + mysqlUser + "&password=" + password); //set-up connection with database
-			
+			s = con.createStatement(); //Statements to issue sql queries
 			
 		} catch (SQLException e) 
 		{
@@ -69,13 +69,13 @@ public class DatabaseAccessor
 		
 		System.out.println("");
 		System.out.println("Calculating the Total Number of Distinct Developers...");
-		s = con.createStatement(); //Statements to issue sql queries
+
 		rs = s.executeQuery(
 				"select count(distinct(b.who)) "+
 				"from bugs c, comment b " +
 				"where c.bug_id = b.bugid " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"' ) "+
-				"and trim(' ' from product) like '%"+product+"\n';"
+				"and trim(' ' from c.product) like '%"+product+"\n';"
 				); //ResultSet gets Query results. Query to find out the total number of distinct developers commenting on the bugs of a specific product
 		
 		while(rs.next())
@@ -90,7 +90,7 @@ public class DatabaseAccessor
 				"from bugs c, comment b " +
 				"where c.bug_id = b.bugid " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s')) between '"+startDate+"' and '"+endDate+"' "  +
-				"and trim(' ' from product) like '%"+product+"\n' " +
+				"and trim(' ' from c.product) like '%"+product+"\n' " +
 				"order by who;"
 				); //Query to find the distinct developers working on the bugs
 		
@@ -139,7 +139,6 @@ public class DatabaseAccessor
 	{
 		System.out.println("Extracting Data from Database...");
 		
-		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
 							+"from bugs a, comment b "
 							+"where a.bug_id = b.bugid "
@@ -192,7 +191,6 @@ public class DatabaseAccessor
 		
 		System.out.println("\nExtracting Data from Database...");
 		
-		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
 							"from bugs a, comment b "+
 							"where a.bug_id = b.bugid "+
@@ -255,7 +253,6 @@ public class DatabaseAccessor
 		System.out.println("");
 		System.out.println("Retrieving the Developer's E-Mail Addresses...");
 		
-		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery(
 				"select distinct(trim(' ' from replace(b.who, '\n', ''))) \"who\""+
 				"from bugs c, comment b " +
@@ -341,7 +338,6 @@ public class DatabaseAccessor
 		System.out.println("");
 		System.out.println("Retrieving Data from 'Bugs' Table...");
 		
-		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery(
 				"select a.bug_id, trim(' ' from replace(a.assigned_to, '\n', '')) \"owner\", timestampdiff(second, a.creation_ts, a.delta_ts)/3600 \"ElapsedTime\", trim(' ' from replace(a.Component, '\n', '')), trim(' ' from replace(a.Version, '\n', '')), trim(' ' from replace(a.Rep_Platform, '\n', '')), trim(' ' from replace(a.Op_Sys, '\n', '')), trim(' ' from replace(a.Bug_Status, '\n', '')), trim(' ' from replace(a.Resolution, '\n', '')), trim(' ' from replace(a.Priority, '\n', '')), trim(' ' from replace(a.Bug_Severity, '\n', '')), trim(' ' from replace(a.Target_Milestone, '\n', '')), trim(' ' from replace(a.duplicate_Of, '\n', '')) " +
 				"from bugs a " +
@@ -586,7 +582,6 @@ public class DatabaseAccessor
 		System.out.println("");
 		System.out.println("Finding the Number of Bugs Owned by Each Developers...");
 		
-		s = con.createStatement(); //Statements to issue sql queries
 		rs = s.executeQuery(
 				"select distinct(trim(' ' from replace(a.assigned_to, '\n', ''))), count(a.bug_id) " +
 				"from bugs a " +
@@ -803,6 +798,14 @@ public class DatabaseAccessor
 			matrix.append(medianInterestSpan.get(i) + ", ");
 		}
 
+		RFunctions rf = new RFunctions();
+		
+		sqlQueries(product, startDate, endDate);
+		rf.rScript(fileContent);
+		matrix.append("\r\n\r\n");
+		matrix.append(rf.getTextToAppend());
+		
+		
 		
 		fileName = product+"-("+startDate+")-("+endDate+")-Devs-Details.csv";
 		fileContent = matrix.toString();

@@ -73,13 +73,23 @@ public class IOFormatter
 		mysqlPass = user_input.nextLine();
 	}
 	
+	
+	/*
+	 * Method Name: inputData
+	 * Input: Void
+	 * Output: Void
+	 * Function: 
+	 * Takes keyboard input from user and stores it to the respective variable.
+	 * If no input for start date, default it to "0000-00-00"
+	 * If no input for end date, default it to "9999-12-31"
+	 */
 	public void inputData()
 	{
-		//while(product.trim().isEmpty())
-		//{
+		while(product.trim().isEmpty())
+		{
 			System.out.print("Please Input Product Name:");
 			product = user_input.nextLine();
-		//}
+		}
 		
 		System.out.print("Enter Start Date(e.g 2002-05-28):");
 		startDate = user_input.nextLine();
@@ -129,8 +139,13 @@ public class IOFormatter
 		} while((choice<1)||(choice>6));
 	}
 	
-	
-	public void writeFile(String text, String fileName)
+	/*
+	 * Method Name: writeFile
+	 * Input: File Name and It's Content
+	 * Output: If it succeeds in writing a file, return true, else it will return false
+	 * Function: Creates a file.
+	 */
+	public boolean writeFile(String text, String fileName)
 	{
 		File file = new File(fileName);
 		
@@ -141,9 +156,9 @@ public class IOFormatter
 		    bufferedWriter.write(text);
 		    bufferedWriter.close();
 		    
-		    System.out.println("\nFile Generated!");
+		    return true;
 		} catch(IOException e) {
-		    System.out.println("COULD NOT WRITE!!");
+		    return false;
 		}
 	}
 	

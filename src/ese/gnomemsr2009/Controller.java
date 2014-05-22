@@ -94,7 +94,15 @@ public class Controller {
 			String fN = da.getFileName();
 			
 			//output 'matrix' to a .csv file and append product name to the file name
-			io.writeFile(matrix, fN);
+			if(io.writeFile(matrix, fN))
+			{
+				System.out.println("");
+				System.out.println("File Generated");
+			}else
+			{
+				System.out.println("");
+				System.out.println("COULD NOT WRITE!");
+			}
 			//close connection
 			da.closeConnection();
 			System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
