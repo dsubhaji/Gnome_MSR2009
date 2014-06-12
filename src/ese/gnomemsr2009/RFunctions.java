@@ -123,10 +123,19 @@ public class RFunctions
 			int i=0;
 			while(i<m.length)
 			{
-				b = b + m[i].substring(8, m[i].length()-2) + ", ";
+				String a = "";
+				
+				a = m[i].substring(8, m[i].length()-2);
+				
+				if(a.isEmpty())
+					a = "0";
+				
+				b = b + a + ", ";
 				i++;
 			}
 		}
+		
+		
 		
 		File file = new File("tempFile.net");
 		File file2= new File("tempFile2.csv");
@@ -140,6 +149,12 @@ public class RFunctions
 		//re.end();
 	}
 	
+	/* Method Name: startRengine
+	 * INPUT: NONE
+	 * OUTPUT: NONE
+	 * Function: Create an REngine object so we can send R commands
+	 */
+	
 	public void startRengine()
 	{
 		/*if (!Rengine.versionCheck()) {
@@ -150,7 +165,7 @@ public class RFunctions
 		tc = new TextConsole();
 		
 		re = new Rengine(args, false, null);
-		re.DEBUG = 10;
+		//re.DEBUG = 10;
 		if (!re.waitForR()) 
 		{
 	        System.out.println("Cannot load R");

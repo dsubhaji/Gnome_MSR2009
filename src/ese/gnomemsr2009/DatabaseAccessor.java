@@ -602,42 +602,78 @@ public class DatabaseAccessor
 		
 		System.out.println("Calculating the Number of Comments and the Timespan by the Developers...");
 		
-		rs = s.executeQuery(
-				"select who, count(text), timestampdiff(second, MIN(bug_when), MAX(bug_when))/3600 AS comment_span "+
-				"from comment " +
-				"where bugid in " +
-				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
-				"and trim(' ' from replace(who, '\n', '')) in " +
-				"(	select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) "+
-				"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
-				"group by who " +
-				"order by who;"
-				); //Query to find the distinct developers working on the bugs
-		
-		while(rs.next())
+		for(int i = 0; i < owners.size(); i++)
 		{
-			bugsCommented.add(rs.getString("count(text)"));
-			bugsCommentSpan.add(rs.getString("comment_span"));
+			rs = s.executeQuery(
+					"select count(text), timestampdiff(second, MIN(bug_when), MAX(bug_when))/3600 AS comment_span "+
+					"from comment " +
+					"where bugid in " +
+					"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
+					"and trim(' ' from replace(who, '\n', '')) like '"+owners.get(i) + "' " +
+					"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"group by who " +
+					"order by who;"
+					); //Query to find the distinct developers working on the bugs
+			
+			String comment = "";
+			String commentSpan = "";
+			
+			while(rs.next())
+			{	
+				comment = rs.getString("count(text)");
+				commentSpan = rs.getString("comment_span");
+				
+				
+				bugsCommented.add(comment);
+				bugsCommentSpan.add(commentSpan);
+			}
+			
+			if(comment.isEmpty())
+			{
+				comment = "0";
+				bugsCommented.add(comment);
+			}
+			
+			if(commentSpan.isEmpty())
+			{
+				commentSpan = "0";
+				bugsCommentSpan.add(commentSpan);
+			}
+				
 		}
 		
 		System.out.println("Calculating Activity Level of Each Developer...");
 		
-		rs = s.executeQuery(
-				"select who, count(bug_when) " +
-				"from activity " +
-				"where bugid in " +
-				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
-				"and trim(' ' from replace(who, '\n', '')) in " +
-				"(	select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
-				"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
-				"group by who " +
-				"order by who;"
-				); 
-		
-		while(rs.next())
+		for(int i = 0; i < owners.size(); i++)
 		{
-			noOfActivities.add(rs.getString("count(bug_when)"));
+			rs = s.executeQuery(
+					"select who, count(bug_when) " +
+					"from activity " +
+					"where bugid in " +
+					"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
+					"and trim(' ' from replace(who, '\n', '')) like '"+owners.get(i)+"' " +
+					"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"group by who " +
+					"order by who;"
+					); 
+			
+			String numOfAct = "";
+			
+			while(rs.next())
+			{
+				numOfAct = rs.getString("count(bug_when)");
+				
+				noOfActivities.add(numOfAct);
+			}
+			
+			if(numOfAct.isEmpty())
+			{
+				numOfAct = "0";
+				noOfActivities.add(numOfAct);
+			}
+			
 		}
+		
 		
 		System.out.println("Calculating Average Elapsed Time...");
 		
@@ -698,9 +734,18 @@ public class DatabaseAccessor
 					"and who like '%" +owners.get(i) + "%' ; " 
 					); //Query to find the distinct developers working on the bugs
 			
+			String comOnOwned = "";
+			
 			while(rs.next())
 			{
-				commentsOnOwned.add(rs.getString("count(text)"));
+				comOnOwned = rs.getString("count(text)");
+				commentsOnOwned.add(comOnOwned);
+			}
+			
+			if(comOnOwned.isEmpty())
+			{
+				comOnOwned = "0";
+				commentsOnOwned.add(comOnOwned);
 			}
 			
 			//find the number of times the owner has commented on bugs that they don't own
@@ -713,11 +758,19 @@ public class DatabaseAccessor
 					"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"');"
 					);
 			
+			String comOffOwned = "";
+			
 			while(rs.next())
 			{
-				commentsOffOwned.add(rs.getString("count(text)"));
+				comOffOwned = rs.getString("count(text)");
+				commentsOffOwned.add(comOffOwned);
 			}
 			
+			if(comOffOwned.isEmpty())
+			{
+				comOffOwned = "0";
+				commentsOffOwned.add(comOffOwned);
+			}
 			
 			//find the elapsed time for every bug the owner has
 			rs = s.executeQuery(
@@ -787,10 +840,11 @@ public class DatabaseAccessor
 		//Column Headers
 		matrix.append("Developer, Bugs Owned, Bugs Commented, Comment Span, Comments On Owned, Comments On Not Owned, No. Of Activities, Avg. Elapsed Time, Median Elapsed Time, Avg. Interest Span, Median Interest Span, Degree, Betweenness");
 		
+		
 		for(int i = 0; i < owners.size(); i++)
 		{
-			rf.rScript(fileContent, owners.get(i));
 			matrix.append("\n");
+			rf.rScript(fileContent, owners.get(i));
 			matrix.append(owners.get(i) + ", ");
 			matrix.append(bugsOwned.get(i) + ", ");
 			matrix.append(bugsCommented.get(i) + ", ");
