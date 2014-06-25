@@ -59,7 +59,7 @@ public class DatabaseAccessor
 		return true;
 	}
 	
-	public void sqlQueries(String product, String startDate, String endDate) throws Exception
+	public void createPajek(String product, String startDate, String endDate) throws Exception
 	{
 		ArrayList<String> developers = new ArrayList<String>();
 		ArrayList<String> developers2= new ArrayList<String>();
@@ -180,6 +180,54 @@ public class DatabaseAccessor
 		fileName = "ProjectDataSummary.csv";
 		fileContent = csv.toString();
 	}
+	
+	public void generateCSV(String productName) throws Exception
+	{
+		System.out.println("Extracting Data from Database...");
+		
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
+							+"from bugs a, comment b "
+							+"where a.bug_id = b.bugid "
+							+"and trim(' ' from replace(a.product, '\n', '')) like '"+productName+"'"
+							+"group by a.product "
+							);
+		
+		StringBuilder csv = new StringBuilder();
+		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\"\n");
+		
+		System.out.println("Generating .CSV File");
+		while(rs.next())
+		{
+			csv.append("\""+rs.getString("(trim(' ' from replace(a.product, '\n', '')))")+"\", ");
+			csv.append(rs.getInt("count(distinct(b.bugid))") + ",");
+			csv.append(rs.getInt("count(b.bug_when)") + ", ");
+			csv.append(rs.getInt("count(distinct(b.who))")+ ", ");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
+			
+			String minDate = rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))");
+			String maxDate = rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))");
+			
+			Date dateMin = sdf.parse(minDate);
+			Date dateMax = sdf.parse(maxDate);
+			
+			csv.append("\""+minDate+"\", ");
+			csv.append("\""+maxDate+"\", ");
+			
+			float differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
+			float days = (((differenceInTime/1000)/3600)/24); //elapsed time in days
+			float hours = ((differenceInTime/1000)/3600); //elapsed time in hours
+			float minutes = ((differenceInTime/1000)/60); //elapsed time in minutes
+			
+			csv.append(days+", ");
+			csv.append(hours+", ");
+			csv.append(minutes+"\n ");
+			
+		}
+		
+		fileName = "ProjectDataSummary.csv";
+		fileContent = csv.toString();
+	}
+	
 	
 	public void generateBugsByDev(String product, String startDate, String endDate) throws Exception
 	{
@@ -832,11 +880,10 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		RFunctions rf = new RFunctions();
+		RFunctions rf = Controller.rf;
 		System.out.println("");
 		System.out.println("Calculating Degree and Betweenness of the Developers...");
-		sqlQueries(product, startDate, endDate);
-		rf.startRengine();
+		createPajek(product, startDate, endDate);
 		//Column Headers
 		matrix.append("Developer, Bugs Owned, Bugs Commented, Comment Span, Comments On Owned, Comments On Not Owned, No. Of Activities, Avg. Elapsed Time, Median Elapsed Time, Avg. Interest Span, Median Interest Span, Degree, Betweenness");
 		

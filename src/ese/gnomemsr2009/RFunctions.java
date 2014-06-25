@@ -149,6 +149,12 @@ public class RFunctions
 		//re.end();
 	}
 	
+	public void bugModel()
+	{
+		
+	}
+	
+	
 	/* Method Name: startRengine
 	 * INPUT: NONE
 	 * OUTPUT: NONE

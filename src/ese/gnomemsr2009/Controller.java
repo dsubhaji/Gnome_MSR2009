@@ -2,13 +2,19 @@ package ese.gnomemsr2009;
 
 public class Controller {
 
+	static DatabaseAccessor da = new DatabaseAccessor();
+	static IOFormatter io = new IOFormatter();
+	static BatchProcess bp = new BatchProcess();
+	static RFunctions rf = new RFunctions();
+	
+	
 	public static void main(String[] args) throws Exception
 	{
 		//initialize objects
-		DatabaseAccessor da = new DatabaseAccessor();
-		IOFormatter io = new IOFormatter();
+		
 		long startTime = 0;
 		long endTime = 0;
+		rf.startRengine();
 		//request for user input of Database name, database user-name and password
 		io.inputConString();
 		
@@ -35,7 +41,7 @@ public class Controller {
 				startTime = System.nanoTime();
 				
 				//queries database for result
-				da.sqlQueries(io.getProduct(), io.getStartDate(), io.getEndDate());
+				da.createPajek(io.getProduct(), io.getStartDate(), io.getEndDate());
 				
 				endTime = System.nanoTime();
 				
@@ -88,24 +94,33 @@ public class Controller {
 				da.generateDevModel(io.getProduct(), io.getStartDate(), io.getEndDate());
 				//output 'projectData' to a .csv file
 				endTime = System.nanoTime();
+			}else if(choice == 7)
+			{
+				io.batchInput();
+				
+				bp.batch(io.getDirectoryPath());
 			}
 			
-			String matrix = da.getFileContent();
-			String fN = da.getFileName();
+			
 			
 			//output 'matrix' to a .csv file and append product name to the file name
-			if(io.writeFile(matrix, fN))
+			if(choice != 7)
 			{
-				System.out.println("");
-				System.out.println("File Generated");
-			}else
-			{
-				System.out.println("");
-				System.out.println("COULD NOT WRITE!");
+				if(io.writeFile(da.getFileContent(), da.getFileName()))
+				{
+					System.out.println("");
+					System.out.println("File Generated");
+				}else
+				{
+					System.out.println("");
+					System.out.println("COULD NOT WRITE!");
+				}
 			}
+			
+			System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
 			//close connection
 			da.closeConnection();
-			System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
+			
 			
 		}
 		else

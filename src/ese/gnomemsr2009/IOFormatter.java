@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class IOFormatter 
 {
 	private String dbN, mysqlUserName, mysqlPass;
-	private String product, startDate, endDate;
+	private String product, startDate, endDate, directoryPath;
 	private Scanner user_input = new Scanner( System.in );
 	
 	
@@ -22,6 +22,7 @@ public class IOFormatter
 		product = "";
 		startDate = "";
 		endDate = "";
+		directoryPath = "";
 	}
 	
 	public String getDBN()
@@ -54,6 +55,10 @@ public class IOFormatter
 		return endDate;
 	}
 	
+	public String getDirectoryPath()
+	{
+		return directoryPath;
+	}
 	
 	
 	/*
@@ -112,6 +117,14 @@ public class IOFormatter
 		}
 	}
 	
+	public void batchInput()
+	{
+		System.out.print("Enter Directory of Product-Names.csv:");
+		directoryPath = user_input.nextLine();
+		
+		user_input.close();
+	}
+	
 	public int inputChoice()
 	{
 		int choice = 0;
@@ -125,7 +138,8 @@ public class IOFormatter
 			System.out.println("4. Generate Project Data Summary in CSV Format");
 			System.out.println("5. Generate Bug-Details in CSV Format");
 			System.out.println("6. Generate Dev-Details in CSV Format");
-			System.out.print  ("Please Enter Your Choice (1 to 6): ");
+			System.out.println("7. PlaceholderName");
+			System.out.print  ("Please Enter Your Choice (1 to 7): ");
 			
 			try
 			{
