@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 
 
 
+import java.util.ArrayList;
+
 import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.REXP;
 import org.rosuda.JRI.RList;
@@ -80,11 +82,16 @@ public class RFunctions
 		return textToAppend;
 	}
 	
+	public void setTextToAppend(String s)
+	{
+		textToAppend = s;
+	}
+	
 	public void rScript(String fileContent, String devEmail) throws Exception
 	{
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
-		//re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
 		re.eval("library('blockmodeling')");
 		re.eval("library('igraph')");
 		re.eval("library('Matrix')");
@@ -106,6 +113,7 @@ public class RFunctions
 		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\")");
 		
 		re.eval("devInf <- subset(bnd, bnd$Developers == '"+devEmail+"')");
+		re.eval("write.csv(bnd, file=\"db-metrics.csv\")");
 		
 		String b = "";
 		
@@ -130,7 +138,14 @@ public class RFunctions
 				if(a.isEmpty())
 					a = "0";
 				
-				b = b + a + ", ";
+				if(i==0)
+				{
+					b = b + a + ", ";
+				} else
+				{
+					b = b + a;
+				}
+				
 				i++;
 			}
 		}
@@ -149,8 +164,85 @@ public class RFunctions
 		//re.end();
 	}
 	
-	public void bugModel()
+	/*Input: Directory to csv files and product name
+	 *Output: network-metrics.csv for each product I.E Degree and betweenness
+	 */
+	public void nwMatrix(String s, String prodName)
 	{
+		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
+		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("library('blockmodeling')");
+		re.eval("library('igraph')");
+		re.eval("library('Matrix')");
+		
+		s=s.replaceAll("\\\\", "/");
+		
+		System.out.println("dcn = loadnetwork(\""+s+"\\\\"+prodName+"\\\\"+prodName+"-DCN.net\")");
+		System.out.println("write.csv(bnd, file="+s+"\\\\"+prodName+"\\\\"+prodName+"-nw-metrics)");
+		re.eval("dcn = loadnetwork(\""+s+"/"+prodName+"/"+prodName+"-DCN.net\")");
+		re.eval("dcnGraphWeighted = graph.adjacency(dcn, mode=c(\"undirected\"), weighted=TRUE)");
+		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
+		re.eval("Degree = degree(dcnGraphWeighted)");
+		re.eval("Betweenness = betweenness(dcnGraph)");
+		re.eval("bnd = merge(as.data.frame(Degree), as.data.frame(Betweenness), by=\"row.names\")");
+		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\")");
+		re.eval("write.csv(bnd, file=\""+s+"/"+prodName+"/"+prodName+"-nw-metrics.csv\")");
+	}
+	
+	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name
+	 * Output: Summary of the regression in csv
+	 */
+	public void linRegression(String model, String dependentVar, ArrayList<String> independentVar, String s, String prodName)
+	{
+		int noOfVar = independentVar.size();
+		String indVars = "";
+		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
+		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("library('blockmodeling')");
+		re.eval("library('igraph')");
+		re.eval("library('Matrix')");
+		
+		re.eval(
+				"fun1<-function(x){ "
+				+ "res<-c(paste(as.character(summary(x)$call,collapse=\" \"), "
+				+ "x$coefficients[1], "
+				+ "x$coefficients[2], "
+				+ "length(x$model), "
+				+ "summary(x)$coefficients[2,2], "
+				+ "summary(x)$r.squared, "
+				+ "summary(x)$adj.r.squared, "
+				+ "summary(x)$fstatistic, "
+				+ "pf(summary(x)$fstatistic[1],summary(x)$fstatistic[2],summary(x)$fstatistic[3],lower.tail=FALSE)) "
+				+ "names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") "
+				+ "return(res)}"
+				);
+		
+		s=s.replaceAll("\\\\", "/");
+		
+		for(int i = 0; i < noOfVar; i++)
+		{
+			if(i < noOfVar-1)
+				indVars = indVars + independentVar.get(i).replace("-", ".") + " + ";
+			if(i == noOfVar-1)
+				indVars = indVars + independentVar.get(i).replace("-", ".");
+		}
+		
+		if(model.equals("developer"))
+		{
+			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+			re.eval("m1 <- lm("+dependentVar.replace("-", ".")+" ~ "+indVars+", data=deets)");
+		} else if(model.equals("bug"))
+		{
+			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+			re.eval("m1 <- lm("+dependentVar+" ~ "+indVars+", data=deets)");
+		}
+		re.eval("res<-c(paste(as.character(summary(m1)$call),collapse=\" \"), m1$coefficients[1], m1$coefficients[2], length(m1$model), summary(m1)$coefficients[2,2], summary(m1)$r.squared, summary(m1)$adj.r.squared, summary(m1)$fstatistic, pf(summary(m1)$fstatistic[1],summary(m1)$fstatistic[2],summary(m1)$fstatistic[3],lower.tail=FALSE))");
+		re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
+		re.eval("sumM1 <- res");
+		re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
+		
 		
 	}
 	

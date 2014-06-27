@@ -138,7 +138,7 @@ public class IOFormatter
 			System.out.println("4. Generate Project Data Summary in CSV Format");
 			System.out.println("5. Generate Bug-Details in CSV Format");
 			System.out.println("6. Generate Dev-Details in CSV Format");
-			System.out.println("7. PlaceholderName");
+			System.out.println("7. Generate Files in Batches");
 			System.out.print  ("Please Enter Your Choice (1 to 7): ");
 			
 			try

@@ -511,12 +511,17 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		//Column Headers
-		matrix.append("Bug_ID, Owner, Elapsed-Time, Component, Version, Rep-Platform, Op-Sys, Bug-Status, Resolution, Priority, Severity, Target-Milestone, Duplicate, Activity-Level, Number-of-Comments, Number-Of-Commenter, Interest-Span, Number-of-Comments-by-Owner, Owner-Workload, Owner-Comment-Arc");
+		RFunctions rf = Controller.rf;
+		System.out.println("");
+		System.out.println("Calculating Degree and Betweenness of the Developers...");
+		createPajek(product, startDate, endDate);
 		
+		//Column Headers
+		matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc, degree, betweenness");
+		matrix.append("\n");
 		for(int i = 0; i < bug_id.size(); i++)
 		{
-			matrix.append("\n");
+			rf.rScript(fileContent, owner.get(i));
 			matrix.append(bug_id.get(i) + ", ");
 			matrix.append(owner.get(i) + ", ");
 			matrix.append(elapsedTime.get(i) + ", ");
@@ -595,13 +600,16 @@ public class DatabaseAccessor
 			}
 			matrix.append(", ");
 			
+			matrix.append(rf.getTextToAppend());
+			rf.setTextToAppend("");
+			matrix.append("\n");
 		}
 
 		
 		fileName = product+"-("+startDate+")-("+endDate+")-Bugs-Details.csv";
 		fileContent = matrix.toString();
 		System.out.println("");
-		System.out.println("Building " + fileName);
+		System.out.println("Generating .CSV File");
 	}
 	
 	public void generateDevModel(String product, String startDate, String endDate) throws Exception
@@ -885,12 +893,12 @@ public class DatabaseAccessor
 		System.out.println("Calculating Degree and Betweenness of the Developers...");
 		createPajek(product, startDate, endDate);
 		//Column Headers
-		matrix.append("Developer, Bugs Owned, Bugs Commented, Comment Span, Comments On Owned, Comments On Not Owned, No. Of Activities, Avg. Elapsed Time, Median Elapsed Time, Avg. Interest Span, Median Interest Span, Degree, Betweenness");
-		
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness");
+		matrix.append("\n");
 		
 		for(int i = 0; i < owners.size(); i++)
 		{
-			matrix.append("\n");
+			
 			rf.rScript(fileContent, owners.get(i));
 			matrix.append(owners.get(i) + ", ");
 			matrix.append(bugsOwned.get(i) + ", ");
@@ -904,7 +912,7 @@ public class DatabaseAccessor
 			matrix.append(avgInterestSpan.get(i) + ", ");
 			matrix.append(medianInterestSpan.get(i) + ", ");
 			matrix.append(rf.getTextToAppend());
-			
+			matrix.append("\n");
 		}
 		
 		

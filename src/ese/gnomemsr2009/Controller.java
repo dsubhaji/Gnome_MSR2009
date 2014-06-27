@@ -96,9 +96,10 @@ public class Controller {
 				endTime = System.nanoTime();
 			}else if(choice == 7)
 			{
+				startTime = System.nanoTime();
 				io.batchInput();
-				
 				bp.batch(io.getDirectoryPath());
+				endTime = System.nanoTime();
 			}
 			
 			
