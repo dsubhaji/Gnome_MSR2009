@@ -178,8 +178,6 @@ public class RFunctions
 		
 		s=s.replaceAll("\\\\", "/");
 		
-		System.out.println("dcn = loadnetwork(\""+s+"\\\\"+prodName+"\\\\"+prodName+"-DCN.net\")");
-		System.out.println("write.csv(bnd, file="+s+"\\\\"+prodName+"\\\\"+prodName+"-nw-metrics)");
 		re.eval("dcn = loadnetwork(\""+s+"/"+prodName+"/"+prodName+"-DCN.net\")");
 		re.eval("dcnGraphWeighted = graph.adjacency(dcn, mode=c(\"undirected\"), weighted=TRUE)");
 		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
@@ -204,20 +202,6 @@ public class RFunctions
 		re.eval("library('igraph')");
 		re.eval("library('Matrix')");
 		
-		re.eval(
-				"fun1<-function(x){ "
-				+ "res<-c(paste(as.character(summary(x)$call,collapse=\" \"), "
-				+ "x$coefficients[1], "
-				+ "x$coefficients[2], "
-				+ "length(x$model), "
-				+ "summary(x)$coefficients[2,2], "
-				+ "summary(x)$r.squared, "
-				+ "summary(x)$adj.r.squared, "
-				+ "summary(x)$fstatistic, "
-				+ "pf(summary(x)$fstatistic[1],summary(x)$fstatistic[2],summary(x)$fstatistic[3],lower.tail=FALSE)) "
-				+ "names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") "
-				+ "return(res)}"
-				);
 		
 		s=s.replaceAll("\\\\", "/");
 		
@@ -246,6 +230,49 @@ public class RFunctions
 		
 	}
 	
+	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name
+	 * Output: Description and correlation of the variables in csv
+	 */
+	public void varDescAndCor(String model, String dependentVar, ArrayList<String> independentVar, String s, String prodName)
+	{
+		int noOfVar = independentVar.size();
+		String indVars = "\""+dependentVar.replace("-", ".")+"\", ";
+		
+		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
+		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("if(\"psych\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"psych\")}");
+		re.eval("library('blockmodeling')");
+		re.eval("library('igraph')");
+		re.eval("library('Matrix')");
+		re.eval("library('psych')");
+		
+		s=s.replaceAll("\\\\", "/");
+		
+		if(model.equals("developer"))
+		{
+			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+		} else if(model.equals("bug"))
+		{
+			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+		}
+		
+		for(int i = 0; i < noOfVar; i++)
+		{
+			if(i < noOfVar-1)
+				indVars = indVars + "\"" + independentVar.get(i).replace("-", ".") + "\", ";
+			if(i == noOfVar-1)
+				indVars = indVars + "\"" + independentVar.get(i).replace("-", ".") + "\"";
+		}
+		
+		re.eval("deets2 <- deets[ ,c("+indVars+")]");
+		
+		re.eval("varDesc <- describe(deets2)");
+		re.eval("varCor  <- cor(deets2)");
+		
+		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
+		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
+	}
 	
 	/* Method Name: startRengine
 	 * INPUT: NONE

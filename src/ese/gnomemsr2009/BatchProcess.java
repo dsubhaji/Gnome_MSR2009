@@ -144,6 +144,8 @@ public class BatchProcess {
 			rf.nwMatrix(dirName, productNames.get(i));
 			
 			rf.linRegression(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+			
+			rf.varDescAndCor(modelType, dependentVar, independentVars, dirName, productNames.get(i));
 		}
 	}
 	

@@ -616,6 +616,7 @@ public class DatabaseAccessor
 	{
 		ArrayList<String> owners		 		= new ArrayList<String>();
 		ArrayList<String> bugsOwned		 		= new ArrayList<String>();
+		ArrayList<String> assignedTo			= new ArrayList<String>();
 		
 		ArrayList<String> bugsCommented		 	= new ArrayList<String>();
 		ArrayList<String> bugsCommentSpan	 	= new ArrayList<String>();
@@ -745,6 +746,7 @@ public class DatabaseAccessor
 		
 		while(rs.next())
 		{
+			
 			avgElapsedTime.add(rs.getString("avgElapsedTime"));
 		}
 		
@@ -753,7 +755,7 @@ public class DatabaseAccessor
 		rs = s.executeQuery(
 				"select a.ownerz, avg(a.interest_span) " +
 				"from " +
-				"(select a.assigned_to as ownerz,  timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 as interest_span " +
+				"(select trim(' ' from replace(a.assigned_to, '\n', '')) as ownerz,  timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 as interest_span " +
 				"from bugs a, comment b " +
 				"where a.bug_id = b.bugid " +
 				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
@@ -769,6 +771,7 @@ public class DatabaseAccessor
 		
 		while(rs.next())
 		{
+			assignedTo.add(rs.getString("ownerz"));
 			avgInterestSpan.add(rs.getString("avg(a.interest_span)"));
 		}
 		
@@ -896,6 +899,8 @@ public class DatabaseAccessor
 		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness");
 		matrix.append("\n");
 		
+		String tempString = "0";
+		
 		for(int i = 0; i < owners.size(); i++)
 		{
 			
@@ -907,12 +912,22 @@ public class DatabaseAccessor
 			matrix.append(commentsOnOwned.get(i) + ", ");
 			matrix.append(commentsOffOwned.get(i) + ", ");
 			matrix.append(noOfActivities.get(i) + ", ");
+			
+			for(int j = 0; j < assignedTo.size(); j++)
+			{
+				if(owners.get(i).equals(assignedTo.get(j)))
+				{
+					tempString = avgInterestSpan.get(j);
+				}
+			}
 			matrix.append(avgElapsedTime.get(i) + ", ");
+			
 			matrix.append(medianElapsedTime.get(i) + ", ");
-			matrix.append(avgInterestSpan.get(i) + ", ");
+			matrix.append(tempString + ", ");
 			matrix.append(medianInterestSpan.get(i) + ", ");
 			matrix.append(rf.getTextToAppend());
 			matrix.append("\n");
+			tempString = "0";
 		}
 		
 		
