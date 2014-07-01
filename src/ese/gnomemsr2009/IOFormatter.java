@@ -139,7 +139,8 @@ public class IOFormatter
 			System.out.println("5. Generate Bug-Details in CSV Format");
 			System.out.println("6. Generate Dev-Details in CSV Format");
 			System.out.println("7. Generate Files in Batches");
-			System.out.print  ("Please Enter Your Choice (1 to 7): ");
+			System.out.println("8. Generate Correlation and Description of Variables in CSV Format");
+			System.out.print  ("Please Enter Your Choice (1 to 8): ");
 			
 			try
 			{
@@ -153,7 +154,7 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>6));
+		} while((choice<1)||(choice>8));
 	}
 	
 	/*

@@ -132,18 +132,22 @@ public class RFunctions
 			while(i<m.length)
 			{
 				String a = "";
+				float f = 0.0f;
+				
 				
 				a = m[i].substring(8, m[i].length()-2);
 				
 				if(a.isEmpty())
 					a = "0";
 				
+				f = Float.parseFloat(a);
+				
 				if(i==0)
 				{
-					b = b + a + ", ";
+					b = b + f + ", ";
 				} else
 				{
-					b = b + a;
+					b = b + f;
 				}
 				
 				i++;
@@ -268,7 +272,7 @@ public class RFunctions
 		re.eval("deets2 <- deets[ ,c("+indVars+")]");
 		
 		re.eval("varDesc <- describe(deets2)");
-		re.eval("varCor  <- cor(deets2)");
+		re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
 		
 		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
 		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");

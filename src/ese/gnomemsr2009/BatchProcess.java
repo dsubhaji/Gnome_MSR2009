@@ -149,6 +149,35 @@ public class BatchProcess {
 		}
 	}
 	
+	/* descRegAndCor(ArrayList<String>, ArrayList<String>, ArrayList<String)
+	 * Input: ArrayList of the product names, start and end dates listed on the csv file read in createDir()
+	 * Output: Similar to batchQueries but only outputs linear regression, variables description and correlation
+	 */
+	public void descRegAndCor(ArrayList<String> productNames, ArrayList<String> startDate, ArrayList<String> endDate) throws Exception
+	{
+		int prodCount = productNames.size();
+		DatabaseAccessor da = Controller.da;
+		IOFormatter io = new IOFormatter();
+		RFunctions rf = Controller.rf;
+		
+		for(int i = 0; i < prodCount; i++)
+		{
+			if(modelType.equals("bug"))
+			{
+			da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
+			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+			}else if(modelType.equals("developer"))
+			{
+			da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
+			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+			}
+			
+			rf.linRegression(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+			
+			rf.varDescAndCor(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+		}
+	}
+	
 	/* checkModelType(String)
 	 * Input: String of the modeltype
 	 * Output: boolean
@@ -239,12 +268,20 @@ public class BatchProcess {
 	 * Function: Executes the various methods if all the dependent variable, independent variables and model type are legal
 	 */
 	
-	public void batch(String s) throws Exception
+	public void batch(String s, int i) throws Exception
 	{
 		createDir(s);
 		if(checkVars(s))
 		{
-			batchQueries(productNames, startDates, endDates);
+			switch(i)
+			{
+				case 1: batchQueries(productNames, startDates, endDates);
+						break;
+				case 2: descRegAndCor(productNames, startDates, endDates);
+						break;
+				default:break;
+			}
+			
 		} else
 		{
 			System.out.println("Illegal dependent variable, independent variables or model-type.");
