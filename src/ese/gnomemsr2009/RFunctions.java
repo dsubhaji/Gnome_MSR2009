@@ -87,7 +87,7 @@ public class RFunctions
 		textToAppend = s;
 	}
 	
-	public void rScript(String fileContent, String devEmail) throws Exception
+	public ArrayList<String> rScript(String fileContent, ArrayList<String> devEmail) throws Exception
 	{
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -96,6 +96,7 @@ public class RFunctions
 		re.eval("library('igraph')");
 		re.eval("library('Matrix')");
 		
+		ArrayList<String> degNBetweenness = new ArrayList<String>();
 		IOFormatter io = new IOFormatter();
 		
 		
@@ -112,60 +113,65 @@ public class RFunctions
 		re.eval("bnd = merge(as.data.frame(Degree), as.data.frame(Betweenness), by=\"row.names\")");
 		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\")");
 		
-		re.eval("devInf <- subset(bnd, bnd$Developers == '"+devEmail+"')");
-		re.eval("write.csv(bnd, file=\"db-metrics.csv\")");
-		
-		String b = "";
-		
-		REXP x = re.eval("devInf[, 2:3]");
-		RList vl = x.asList();
-		String[] k = vl.keys();
-		String[] m = new String[k.length];
-		
-		if (k!=null) {
-			int i=0; while (i<k.length) m[i] = "" + vl.at(k[i++]);
-		}	
-		
-		if (m!=null)
+		for(int j = 0; j < devEmail.size(); j++)
 		{
-			int i=0;
-			while(i<m.length)
+			re.eval("devInf <- subset(bnd, bnd$Developers == '"+devEmail.get(j)+"')");
+		
+			//re.eval("devInf <- subset(bnd, bnd$Developers == '"+devEmail+"')");
+			//re.eval("write.csv(bnd, file=\"db-metrics.csv\")");
+		
+			String b = "";
+			
+			REXP x = re.eval("devInf[, 2:3]");
+			RList vl = x.asList();
+			String[] k = vl.keys();
+			String[] m = new String[k.length];
+			
+			if (k!=null) {
+				int i=0; while (i<k.length) m[i] = "" + vl.at(k[i++]);
+			}	
+			
+			if (m!=null)
 			{
-				String a = "";
-				float f = 0.0f;
-				
-				
-				a = m[i].substring(8, m[i].length()-2);
-				
-				if(a.isEmpty())
-					a = "0";
-				
-				f = Float.parseFloat(a);
-				
-				if(i==0)
+				int i=0;
+				while(i<m.length)
 				{
-					b = b + f + ", ";
-				} else
-				{
-					b = b + f;
+					String a = "";
+					float f = 0.0f;
+					
+					
+					a = m[i].substring(8, m[i].length()-2);
+					
+					if(a.isEmpty())
+						a = "0";
+					
+					f = Float.parseFloat(a);
+					
+					if(i==0)
+					{
+						b = b + f + ", ";
+					} else
+					{
+						b = b + f;
+					}
+					
+					i++;
 				}
-				
-				i++;
 			}
+			degNBetweenness.add(b);
 		}
-		
-		
 		
 		File file = new File("tempFile.net");
 		File file2= new File("tempFile2.csv");
 		
 		
-		textToAppend = b;
-
+		//textToAppend = b;
+		
 		
 		file.delete();
 		file2.delete();
 		//re.end();
+		return degNBetweenness;
 	}
 	
 	/*Input: Directory to csv files and product name
