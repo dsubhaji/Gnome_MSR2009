@@ -159,6 +159,7 @@ public class BatchProcess {
 		DatabaseAccessor da = Controller.da;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
+		File file = new File("");
 		
 		for(int i = 0; i < prodCount; i++)
 		{
@@ -166,15 +167,19 @@ public class BatchProcess {
 			{
 			da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 			}else if(modelType.equals("developer"))
 			{
 			da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
 			rf.linRegression(modelType, dependentVar, independentVars, dirName, productNames.get(i));
 			
 			rf.varDescAndCor(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+			
+			file.delete();
 		}
 	}
 	

@@ -226,10 +226,13 @@ public class RFunctions
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
 			re.eval("m1 <- lm("+dependentVar+" ~ "+indVars+", data=deets)");
 		}
-		re.eval("res<-c(paste(as.character(summary(m1)$call),collapse=\" \"), m1$coefficients[1], m1$coefficients[2], length(m1$model), summary(m1)$coefficients[2,2], summary(m1)$r.squared, summary(m1)$adj.r.squared, summary(m1)$fstatistic, pf(summary(m1)$fstatistic[1],summary(m1)$fstatistic[2],summary(m1)$fstatistic[3],lower.tail=FALSE))");
-		re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
-		re.eval("sumM1 <- res");
-		re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
+		//re.eval("res<-c(paste(as.character(summary(m1)$call),collapse=\" \"), m1$coefficients[1], m1$coefficients[2], length(m1$model), summary(m1)$coefficients[2,2], summary(m1)$r.squared, summary(m1)$adj.r.squared, summary(m1)$fstatistic, pf(summary(m1)$fstatistic[1],summary(m1)$fstatistic[2],summary(m1)$fstatistic[3],lower.tail=FALSE))");
+		//re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
+		//re.eval("sumM1 <- res");
+		
+		re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
+		
+		//re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
 		
 		
 	}
