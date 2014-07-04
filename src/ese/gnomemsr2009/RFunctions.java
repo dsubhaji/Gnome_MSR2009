@@ -174,6 +174,7 @@ public class RFunctions
 		return degNBetweenness;
 	}
 	
+	
 	/*Input: Directory to csv files and product name
 	 *Output: network-metrics.csv for each product I.E Degree and betweenness
 	 */
@@ -236,6 +237,7 @@ public class RFunctions
 		//re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
 		//re.eval("sumM1 <- res");
 		
+		
 		re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
 		
 		//re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
@@ -285,6 +287,7 @@ public class RFunctions
 		
 		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
 		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
+		re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
 	}
 	
 	/* Method Name: startRengine

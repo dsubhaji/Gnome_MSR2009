@@ -163,6 +163,9 @@ public class BatchProcess {
 		
 		for(int i = 0; i < prodCount; i++)
 		{
+			da.createPajek(productNames.get(i), startDate.get(i), endDate.get(i));
+			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+			
 			if(modelType.equals("bug"))
 			{
 			da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
