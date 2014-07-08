@@ -411,5 +411,10 @@ public class RFunctions
 	        return;
 	   	}
 	}
+	
+	public void closeRengine()
+	{
+		re.end();
+	}
 }
 

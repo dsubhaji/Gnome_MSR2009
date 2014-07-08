@@ -12,8 +12,8 @@ public class Controller {
 	{
 		//initialize objects
 		
-		long startTime = 0;
-		long endTime = 0;
+		float startTime = 0;
+		float endTime = 0;
 		rf.startRengine();
 		//request for user input of Database name, database user-name and password
 		io.inputConString();
@@ -124,7 +124,7 @@ public class Controller {
 				}
 			}
 			
-			System.out.println("Total Time Elapsed: " + (((float)(endTime - startTime)/1000000000)/60) + " minutes");
+			System.out.println("Total Time Elapsed: " + (((endTime - startTime)/1000000000)/60) + " minutes");
 			//close connection
 			da.closeConnection();
 			
@@ -134,6 +134,8 @@ public class Controller {
 		{
 			System.out.println("Wrong Connection String/UserName/Password!");
 		}
+		
+		rf.closeRengine();
 	}
 
 }
