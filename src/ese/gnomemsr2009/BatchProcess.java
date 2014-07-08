@@ -18,25 +18,22 @@ public class BatchProcess {
 	private String legalBugVariables[] = {"owner", "elapsed-time", "component", "version", "rep-platform", "op-sys",
 			"bug-status", "resolution", "priority", "severity", "target-milestone", 
 			"duplicate", "activity-level", "number-of-comments", "number-of-comments-by-owner",
-			"number-of-commenters", "interest-span", "owner-workload", "owner-comment-arc", "degree", "betweenness"
+			"number-of-commenters", "interest-span", "owner-workload", "owner-comment-arc", "degree", "betweenness", "clustcoeff",
+			"closeness", "eigencentrality", "pagerank"
 			};
 	private String legalDevVariables[] = {"bugs-owned",
 			"bugs-commented", "comment-span", "comments-on-owned", "comments-on-nonowned", "noof-activities",
 			"average-elapsed-time", "median-elapsed-time", "average-interest-span", "median-interest-span",
-			"degree", "betweenness"
+			"degree", "betweenness", "clustcoeff", "closeness", "eigencentrality", "pagerank"
 			};
 	
 	private ArrayList<String> productNames = new ArrayList<String>();
 	private ArrayList<String> startDates = new ArrayList<String>();
 	private ArrayList<String> endDates = new ArrayList<String>();
-	private ArrayList<String> independentVars= new ArrayList<String>();
-	private ArrayList<String> varTransform	 = new ArrayList<String>();
-	private ArrayList<String> transformedVars = new ArrayList<String>();
-	private ArrayList<String> transformedRVars= new ArrayList<String>();
 	
+	private ArrayList<String> varTransform	 = new ArrayList<String>();
 	private ArrayList<String> variables = new ArrayList<String>();
 	
-	private String dependentVar = "";
 	private String modelType = "";
 	
 	/*
@@ -124,7 +121,7 @@ public class BatchProcess {
 			}
 		}
 		
-		transformVariables(variables, varTransform);
+		
 		//transformedVars = transformVariables(independentVars, varTransform);
 		
 		
@@ -169,9 +166,9 @@ public class BatchProcess {
 			
 			rf.nwMatrix(dirName, productNames.get(i));
 			
-			rf.linRegression(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
 			
-			rf.varDescAndCor(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 		}
 	}
 	
@@ -189,6 +186,9 @@ public class BatchProcess {
 		
 		for(int i = 0; i < prodCount; i++)
 		{
+			long timeStart = System.nanoTime();
+			System.out.println("STARTING: "+productNames.get(i));
+			
 			da.createPajek(productNames.get(i), startDate.get(i), endDate.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			
@@ -204,10 +204,15 @@ public class BatchProcess {
 			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
-			rf.linRegression(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
-			rf.varDescAndCor(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 			
-			//file.delete();
+			long timeEnd = System.nanoTime();
+			System.out.println("");
+			System.out.println(productNames.get(i)+" ENDED");
+			System.out.println("TIME TAKEN: " + ((timeEnd - timeStart)/1000000) + " milliseconds");
+			System.out.println("");
+			
 		}
 	}
 	
@@ -296,52 +301,7 @@ public class BatchProcess {
 		return truth;
 	}
 	
-	/* transformVariables(ArrayList<String>, ArrayList<String>)
-	 * Input: Two arraylists, the list of independent vars, and the transformation
-	 * Output: arraylist of the variables after it is transformed
-	 * Function: transforms the variables if specified (square root, inverse, square, natural log, etc).
-	 */
-	public void transformVariables(ArrayList<String> indVars, ArrayList<String> transform)
-	{
-		int varSize = indVars.size();
-		
-		
-		for(int i = 0; i < varSize; i++)
-		{
-			
-			if(transform.get(i).equalsIgnoreCase("ln"))
-			{
-				transformedVars.add("log("+indVars.get(i).replace("-", ".")+")");
-				transformedRVars.add("log(deets$"+indVars.get(i).replace("-", ".")+")");
-			} else if(transform.get(i).equalsIgnoreCase("invminus"))
-			{
-				transformedVars.add("-(1/"+indVars.get(i).replace("-", ".")+")");
-				transformedRVars.add("-(1/deets$"+indVars.get(i).replace("-", ".")+")");
-			} else if(transform.get(i).equalsIgnoreCase("frthroot"))
-			{
-				transformedVars.add(indVars.get(i).replace("-", ".")+"^0.25");
-				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.25");
-			} else if(transform.get(i).equalsIgnoreCase("sqroot"))
-			{
-				transformedVars.add(indVars.get(i).replace("-", ".")+"^0.5");
-				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.5");
-			} else if(transform.get(i).equalsIgnoreCase("square"))
-			{
-				transformedVars.add(indVars.get(i).replace("-", ".")+"^2");
-				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^2");
-			} else if(transform.get(i).equalsIgnoreCase("cube"))
-			{
-				transformedVars.add(indVars.get(i).replace("-", ".")+"^3");
-				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^3");
-			} else if(transform.get(i).equalsIgnoreCase("none"))
-			{
-				transformedVars.add(indVars.get(i).replace("-", "."));
-				transformedRVars.add("deets$"+indVars.get(i).replace("-", "."));
-			}
-			//System.out.println("" + v.get(i));
-		}
-		
-	}
+	
 	
 	/* batch(String)
 	 * Input: String of the directory

@@ -124,7 +124,7 @@ public class Controller {
 				}
 			}
 			
-			System.out.println("Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
+			System.out.println("Total Time Elapsed: " + ((endTime - startTime)/1000000) + " milliseconds");
 			//close connection
 			da.closeConnection();
 			

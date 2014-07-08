@@ -72,6 +72,10 @@ public class RFunctions
 	Rengine re;
 	TextConsole tc;
 	
+	private ArrayList<String> transformedVars = new ArrayList<String>();
+	private ArrayList<String> transformedRVars= new ArrayList<String>();
+	private ArrayList<String> colNames 		  = new ArrayList<String>();
+	
 	public RFunctions()
 	{
 		textToAppend = "";
@@ -202,11 +206,13 @@ public class RFunctions
 	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name
 	 * Output: Summary of the regression in csv
 	 */
-	public void linRegression(String model, ArrayList<String> variables ,ArrayList<String> transformedVars,ArrayList<String> transformedRVars, String s, String prodName)
+	public void linRegression(String model, ArrayList<String> variables, ArrayList<String> transform, String s, String prodName)
 	{
 		int noOfVar = variables.size();
 		String indVars = "";
 		String transVars = "";
+		
+		transformVariables(variables, transform);
 		
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -223,12 +229,12 @@ public class RFunctions
 			if(i < noOfVar-1)
 			{
 				indVars = indVars + variables.get(i).replace("-", ".") + " + ";
-				transVars = transVars + "`" + transformedVars.get(i) + "` + ";
+				transVars = transVars + "`" + colNames.get(i) + "` + ";
 			}
 			if(i == noOfVar-1)
 			{
 				indVars = indVars + variables.get(i).replace("-", ".");
-				transVars = transVars + "`" + transformedVars.get(i) +"`";
+				transVars = transVars + "`" + colNames.get(i) +"`";
 			}
 		}
 		
@@ -238,19 +244,19 @@ public class RFunctions
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			for(int i = 0; i < noOfVar; i++)
 			{
-				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")] <- "+transformedRVars.get(i));
-				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")][deets[ , c(\""+transformedVars.get(i)+"\")] == -Inf] <- 0.01");
+				re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
+				re.eval("deets[ , c(\""+colNames.get(i)+"\")][deets[ , c(\""+colNames.get(i)+"\")] == -Inf] <- 0.01");
 			}
-			re.eval("m1 <- lm("+transformedVars.get(0)+" ~ "+transVars+", data=deets)");
+			re.eval("m1 <- lm(`"+colNames.get(0)+"` ~ "+transVars+", data=deets)");
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
 			for(int i = 0; i < noOfVar; i++)
 			{
-				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")] <- "+transformedRVars.get(i));
-				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")][deets[ , c(\""+transformedVars.get(i)+"\")] == -Inf] <- 0.01");
+				re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
+				re.eval("deets[ , c(\""+colNames.get(i)+"\")][deets[ , c(\""+colNames.get(i)+"\")] == -Inf] <- 0.01");
 			}
-			re.eval("m1 <- lm(`"+transformedVars.get(0)+"` ~ "+transVars+", data=deets)");
+			re.eval("m1 <- lm(`"+colNames.get(0)+"` ~ "+transVars+", data=deets)");
 		}
 		//re.eval("res<-c(paste(as.character(summary(m1)$call),collapse=\" \"), m1$coefficients[1], m1$coefficients[2], length(m1$model), summary(m1)$coefficients[2,2], summary(m1)$r.squared, summary(m1)$adj.r.squared, summary(m1)$fstatistic, pf(summary(m1)$fstatistic[1],summary(m1)$fstatistic[2],summary(m1)$fstatistic[3],lower.tail=FALSE))");
 		//re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
@@ -267,11 +273,15 @@ public class RFunctions
 	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name
 	 * Output: Description and correlation of the variables in csv
 	 */
-	public void varDescAndCor(String model, ArrayList<String> variables, ArrayList<String> transformedVars, ArrayList<String> transformedRVars, String s, String prodName)
+	public void varDescAndCor(String model, ArrayList<String> variables, ArrayList<String> transform, String s, String prodName)
 	{
+		transformVariables(variables, transform);
+		
+		
 		int noOfVar = variables.size();
 		String indVars = "\""+variables.get(0).replace("-", ".")+"\", ";
 		String transVars = "\""+transformedVars.get(0).replace("-", ".")+"\", ";
+		String collumn = "\""+colNames.get(0).replace("-", ".")+"\", ";
 		
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -298,21 +308,23 @@ public class RFunctions
 			{
 				indVars = indVars + "\"" + variables.get(i).replace("-", ".") + "\", ";
 				transVars = transVars + "\"" + transformedVars.get(i) + "\", ";
+				collumn = collumn + "\"" + colNames.get(i) + "\", ";
 			}
 			if(i == noOfVar-1)
 			{
 				indVars = indVars + "\"" + variables.get(i).replace("-", ".") + "\"";
 				transVars = transVars + "\"" + transformedVars.get(i) + "\"";
+				collumn = collumn + "\"" + colNames.get(i) + "\"";
 			}
 		}
 		
 		for(int i = 0; i < noOfVar; i++)
 		{
-			re.eval("deets[ , c(\""+transformedVars.get(i)+"\")] <- "+transformedRVars.get(i));
-			re.eval("deets[ , c(\""+transformedVars.get(i)+"\")][deets[ , c(\""+transformedVars.get(i)+"\")] == -Inf] <- 0.01");
+			re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
+			re.eval("deets[ , c(\""+colNames.get(i)+"\")][deets[ , c(\""+colNames.get(i)+"\")] == -Inf] <- 0.01");
 		}
 		
-		re.eval("deets2 <- deets[ ,c("+transVars+")]");
+		re.eval("deets2 <- deets[ ,c("+collumn+")]");
 		
 		re.eval("varDesc <- describe(deets2)");
 		re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
@@ -320,6 +332,60 @@ public class RFunctions
 		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
 		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
 		re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
+	}
+	
+	/*
+	 * Input: Two arraylists, the list of independent vars, and the transformation
+	 * Output: arraylist of the variables after it is transformed
+	 * Function: transforms the variables if specified (square root, inverse, square, natural log, etc).
+	 */
+	public void transformVariables(ArrayList<String> indVars, ArrayList<String> transform)
+	{
+		int varSize = indVars.size();
+		
+		
+		for(int i = 0; i < varSize; i++)
+		{
+			
+			if(transform.get(i).equalsIgnoreCase("ln"))
+			{
+				transformedVars.add("log("+indVars.get(i).replace("-", ".")+")");
+				transformedRVars.add("log(deets$"+indVars.get(i).replace("-", ".")+")");
+				colNames.add("LN("+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("invminus"))
+			{
+				transformedVars.add("-(1/"+indVars.get(i).replace("-", ".")+")");
+				transformedRVars.add("-(1/deets$"+indVars.get(i).replace("-", ".")+")");
+				colNames.add("INVMINUS("+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("frthroot"))
+			{
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^0.25");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.25");
+				colNames.add("FRTHROOT("+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("sqroot"))
+			{
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^0.5");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.5");
+				colNames.add("SQROOT("+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("square"))
+			{
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^2");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^2");
+				colNames.add("SQUARE("+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("cube"))
+			{
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^3");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^3");
+				colNames.add("CUBE("+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("none"))
+			{
+				transformedVars.add(indVars.get(i).replace("-", "."));
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", "."));
+				colNames.add(indVars.get(i).replace("-", "."));
+			}
+			//System.out.println("" + v.get(i));
+		}
+		
 	}
 	
 	/* Method Name: startRengine
