@@ -33,6 +33,9 @@ public class BatchProcess {
 	private ArrayList<String> varTransform	 = new ArrayList<String>();
 	private ArrayList<String> transformedVars = new ArrayList<String>();
 	private ArrayList<String> transformedRVars= new ArrayList<String>();
+	
+	private ArrayList<String> variables = new ArrayList<String>();
+	
 	private String dependentVar = "";
 	private String modelType = "";
 	
@@ -95,14 +98,23 @@ public class BatchProcess {
 		reader = new CSVReader(new FileReader(dirName+"/dependent.csv"));
 		
 		nextLine = reader.readNext();
-		dependentVar = nextLine[0].trim();
-		isTrue2 = checkVariables(dependentVar, modelType);
+		variables.add(nextLine[0].trim());
+		if(nextLine[1].trim().isEmpty())
+		{
+			varTransform.add("none");
+		} else 
+		{
+			varTransform.add(nextLine[1].trim());
+		}
+		//dependentVar = nextLine[0].trim();
+		isTrue2 = checkVariables(variables.get(0), modelType);
 		
 		reader = new CSVReader(new FileReader(dirName+"/independent.csv"));
 		
 		while ((nextLine = reader.readNext()) != null)
 		{
-			independentVars.add(nextLine[0].trim());
+			variables.add(nextLine[0].trim());
+			//independentVars.add(nextLine[0].trim());
 			if(nextLine[1].trim().isEmpty())
 			{
 				varTransform.add("none");
@@ -112,10 +124,11 @@ public class BatchProcess {
 			}
 		}
 		
-		transformedVars = transformVariables(independentVars, varTransform);
+		transformVariables(variables, varTransform);
+		//transformedVars = transformVariables(independentVars, varTransform);
 		
 		
-		isTrue3 = checkVariables(independentVars, modelType);
+		isTrue3 = checkVariables(variables, modelType);
 		
 		if((isTrue1&&isTrue2&&isTrue3) == true)
 			areTheyTrue = true;
@@ -156,9 +169,9 @@ public class BatchProcess {
 			
 			rf.nwMatrix(dirName, productNames.get(i));
 			
-			rf.linRegression(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.linRegression(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
 			
-			rf.varDescAndCor(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
 		}
 	}
 	
@@ -191,8 +204,8 @@ public class BatchProcess {
 			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
-			rf.linRegression(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
-			rf.varDescAndCor(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.linRegression(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, variables, transformedVars, transformedRVars, dirName, productNames.get(i));
 			
 			//file.delete();
 		}
@@ -288,10 +301,9 @@ public class BatchProcess {
 	 * Output: arraylist of the variables after it is transformed
 	 * Function: transforms the variables if specified (square root, inverse, square, natural log, etc).
 	 */
-	public ArrayList<String> transformVariables(ArrayList<String> indVars, ArrayList<String> transform)
+	public void transformVariables(ArrayList<String> indVars, ArrayList<String> transform)
 	{
 		int varSize = indVars.size();
-		ArrayList<String> v  = new ArrayList<String>();
 		
 		
 		for(int i = 0; i < varSize; i++)
@@ -299,37 +311,36 @@ public class BatchProcess {
 			
 			if(transform.get(i).equalsIgnoreCase("ln"))
 			{
-				v.add("log("+indVars.get(i).replace("-", ".")+")");
+				transformedVars.add("log("+indVars.get(i).replace("-", ".")+")");
 				transformedRVars.add("log(deets$"+indVars.get(i).replace("-", ".")+")");
 			} else if(transform.get(i).equalsIgnoreCase("invminus"))
 			{
-				v.add("-(1/"+indVars.get(i).replace("-", ".")+")");
+				transformedVars.add("-(1/"+indVars.get(i).replace("-", ".")+")");
 				transformedRVars.add("-(1/deets$"+indVars.get(i).replace("-", ".")+")");
 			} else if(transform.get(i).equalsIgnoreCase("frthroot"))
 			{
-				v.add(indVars.get(i).replace("-", ".")+"^0.25");
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^0.25");
 				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.25");
 			} else if(transform.get(i).equalsIgnoreCase("sqroot"))
 			{
-				v.add(indVars.get(i).replace("-", ".")+"^0.5");
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^0.5");
 				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.5");
 			} else if(transform.get(i).equalsIgnoreCase("square"))
 			{
-				v.add(indVars.get(i).replace("-", ".")+"^2");
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^2");
 				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^2");
 			} else if(transform.get(i).equalsIgnoreCase("cube"))
 			{
-				v.add(indVars.get(i).replace("-", ".")+"^3");
+				transformedVars.add(indVars.get(i).replace("-", ".")+"^3");
 				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^3");
 			} else if(transform.get(i).equalsIgnoreCase("none"))
 			{
-				v.add(indVars.get(i).replace("-", "."));
+				transformedVars.add(indVars.get(i).replace("-", "."));
 				transformedRVars.add("deets$"+indVars.get(i).replace("-", "."));
 			}
 			//System.out.println("" + v.get(i));
 		}
 		
-		return v;
 	}
 	
 	/* batch(String)
