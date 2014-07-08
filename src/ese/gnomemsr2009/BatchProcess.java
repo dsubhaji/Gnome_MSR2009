@@ -29,7 +29,10 @@ public class BatchProcess {
 	private ArrayList<String> productNames = new ArrayList<String>();
 	private ArrayList<String> startDates = new ArrayList<String>();
 	private ArrayList<String> endDates = new ArrayList<String>();
-	private ArrayList<String> independentVars = new ArrayList<String>();
+	private ArrayList<String> independentVars= new ArrayList<String>();
+	private ArrayList<String> varTransform	 = new ArrayList<String>();
+	private ArrayList<String> transformedVars = new ArrayList<String>();
+	private ArrayList<String> transformedRVars= new ArrayList<String>();
 	private String dependentVar = "";
 	private String modelType = "";
 	
@@ -100,7 +103,17 @@ public class BatchProcess {
 		while ((nextLine = reader.readNext()) != null)
 		{
 			independentVars.add(nextLine[0].trim());
+			if(nextLine[1].trim().isEmpty())
+			{
+				varTransform.add("none");
+			} else
+			{
+				varTransform.add(nextLine[1].trim());
+			}
 		}
+		
+		transformedVars = transformVariables(independentVars, varTransform);
+		
 		
 		isTrue3 = checkVariables(independentVars, modelType);
 		
@@ -143,9 +156,9 @@ public class BatchProcess {
 			
 			rf.nwMatrix(dirName, productNames.get(i));
 			
-			rf.linRegression(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+			rf.linRegression(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
 			
-			rf.varDescAndCor(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
 		}
 	}
 	
@@ -178,11 +191,10 @@ public class BatchProcess {
 			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
-			rf.linRegression(modelType, dependentVar, independentVars, dirName, productNames.get(i));
+			rf.linRegression(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, dependentVar, independentVars, transformedVars, transformedRVars, dirName, productNames.get(i));
 			
-			rf.varDescAndCor(modelType, dependentVar, independentVars, dirName, productNames.get(i));
-			
-			file.delete();
+			//file.delete();
 		}
 	}
 	
@@ -269,6 +281,55 @@ public class BatchProcess {
 		}
 		
 		return truth;
+	}
+	
+	/* transformVariables(ArrayList<String>, ArrayList<String>)
+	 * Input: Two arraylists, the list of independent vars, and the transformation
+	 * Output: arraylist of the variables after it is transformed
+	 * Function: transforms the variables if specified (square root, inverse, square, natural log, etc).
+	 */
+	public ArrayList<String> transformVariables(ArrayList<String> indVars, ArrayList<String> transform)
+	{
+		int varSize = indVars.size();
+		ArrayList<String> v  = new ArrayList<String>();
+		
+		
+		for(int i = 0; i < varSize; i++)
+		{
+			
+			if(transform.get(i).equalsIgnoreCase("ln"))
+			{
+				v.add("log("+indVars.get(i).replace("-", ".")+")");
+				transformedRVars.add("log(deets$"+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("invminus"))
+			{
+				v.add("-(1/"+indVars.get(i).replace("-", ".")+")");
+				transformedRVars.add("-(1/deets$"+indVars.get(i).replace("-", ".")+")");
+			} else if(transform.get(i).equalsIgnoreCase("frthroot"))
+			{
+				v.add(indVars.get(i).replace("-", ".")+"^0.25");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.25");
+			} else if(transform.get(i).equalsIgnoreCase("sqroot"))
+			{
+				v.add(indVars.get(i).replace("-", ".")+"^0.5");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^0.5");
+			} else if(transform.get(i).equalsIgnoreCase("square"))
+			{
+				v.add(indVars.get(i).replace("-", ".")+"^2");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^2");
+			} else if(transform.get(i).equalsIgnoreCase("cube"))
+			{
+				v.add(indVars.get(i).replace("-", ".")+"^3");
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", ".")+"^3");
+			} else if(transform.get(i).equalsIgnoreCase("none"))
+			{
+				v.add(indVars.get(i).replace("-", "."));
+				transformedRVars.add("deets$"+indVars.get(i).replace("-", "."));
+			}
+			//System.out.println("" + v.get(i));
+		}
+		
+		return v;
 	}
 	
 	/* batch(String)

@@ -202,10 +202,12 @@ public class RFunctions
 	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name
 	 * Output: Summary of the regression in csv
 	 */
-	public void linRegression(String model, String dependentVar, ArrayList<String> independentVar, String s, String prodName)
+	public void linRegression(String model, String dependentVar, ArrayList<String> independentVar ,ArrayList<String> transformedVars,ArrayList<String> transformedRVars, String s, String prodName)
 	{
 		int noOfVar = independentVar.size();
 		String indVars = "";
+		String transVars = "";
+		
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
 		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
@@ -219,19 +221,36 @@ public class RFunctions
 		for(int i = 0; i < noOfVar; i++)
 		{
 			if(i < noOfVar-1)
+			{
 				indVars = indVars + independentVar.get(i).replace("-", ".") + " + ";
+				transVars = transVars + "`" + transformedVars.get(i) + "` + ";
+			}
 			if(i == noOfVar-1)
+			{
 				indVars = indVars + independentVar.get(i).replace("-", ".");
+				transVars = transVars + "`" + transformedVars.get(i) +"`";
+			}
 		}
+		
 		
 		if(model.equals("developer"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-			re.eval("m1 <- lm("+dependentVar.replace("-", ".")+" ~ "+indVars+", data=deets)");
+			for(int i = 0; i < noOfVar; i++)
+			{
+				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")] <- "+transformedRVars.get(i));
+				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")][deets[ , c(\""+transformedVars.get(i)+"\")] == -Inf] <- 0.01");
+			}
+			re.eval("m1 <- lm("+dependentVar.replace("-", ".")+" ~ "+transVars+", data=deets)");
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
-			re.eval("m1 <- lm("+dependentVar+" ~ "+indVars+", data=deets)");
+			for(int i = 0; i < noOfVar; i++)
+			{
+				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")] <- "+transformedRVars.get(i));
+				re.eval("deets[ , c(\""+transformedVars.get(i)+"\")][deets[ , c(\""+transformedVars.get(i)+"\")] == -Inf] <- 0.01");
+			}
+			re.eval("m1 <- lm("+dependentVar+" ~ "+transVars+", data=deets)");
 		}
 		//re.eval("res<-c(paste(as.character(summary(m1)$call),collapse=\" \"), m1$coefficients[1], m1$coefficients[2], length(m1$model), summary(m1)$coefficients[2,2], summary(m1)$r.squared, summary(m1)$adj.r.squared, summary(m1)$fstatistic, pf(summary(m1)$fstatistic[1],summary(m1)$fstatistic[2],summary(m1)$fstatistic[3],lower.tail=FALSE))");
 		//re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
@@ -248,10 +267,11 @@ public class RFunctions
 	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name
 	 * Output: Description and correlation of the variables in csv
 	 */
-	public void varDescAndCor(String model, String dependentVar, ArrayList<String> independentVar, String s, String prodName)
+	public void varDescAndCor(String model, String dependentVar, ArrayList<String> independentVar, ArrayList<String> transformedVars, ArrayList<String> transformedRVars, String s, String prodName)
 	{
 		int noOfVar = independentVar.size();
 		String indVars = "\""+dependentVar.replace("-", ".")+"\", ";
+		String transVars = "\""+dependentVar.replace("-", ".")+"\", ";
 		
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -275,12 +295,24 @@ public class RFunctions
 		for(int i = 0; i < noOfVar; i++)
 		{
 			if(i < noOfVar-1)
+			{
 				indVars = indVars + "\"" + independentVar.get(i).replace("-", ".") + "\", ";
+				transVars = transVars + "\"" + transformedVars.get(i) + "\", ";
+			}
 			if(i == noOfVar-1)
+			{
 				indVars = indVars + "\"" + independentVar.get(i).replace("-", ".") + "\"";
+				transVars = transVars + "\"" + transformedVars.get(i) + "\"";
+			}
 		}
 		
-		re.eval("deets2 <- deets[ ,c("+indVars+")]");
+		for(int i = 0; i < noOfVar; i++)
+		{
+			re.eval("deets[ , c(\""+transformedVars.get(i)+"\")] <- "+transformedRVars.get(i));
+			re.eval("deets[ , c(\""+transformedVars.get(i)+"\")][deets[ , c(\""+transformedVars.get(i)+"\")] == -Inf] <- 0.01");
+		}
+		
+		re.eval("deets2 <- deets[ ,c("+transVars+")]");
 		
 		re.eval("varDesc <- describe(deets2)");
 		re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
