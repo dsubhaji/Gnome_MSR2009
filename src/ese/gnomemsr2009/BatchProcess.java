@@ -210,7 +210,7 @@ public class BatchProcess {
 			long timeEnd = System.nanoTime();
 			System.out.println("");
 			System.out.println(productNames.get(i)+" ENDED");
-			System.out.println("TIME TAKEN: " + ((timeEnd - timeStart)/1000000) + " milliseconds");
+			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
 			System.out.println("");
 			
 		}
