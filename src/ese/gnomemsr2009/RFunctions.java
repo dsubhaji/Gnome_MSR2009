@@ -218,7 +218,7 @@ public class RFunctions
 		
 		for(int i = 0; i < noOfVar; i++)
 		{
-			if(transform.get(i).equalsIgnoreCase("none"))
+			if(colNames.get(i).equals(variables.get(i).replace("-", ".")))
 			{
 				boo = boo||false;
 			} else
@@ -276,11 +276,13 @@ public class RFunctions
 		//re.eval("sumM1 <- res");
 		
 		
-		re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output-transformed.txt\")");
+		//re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output-transformed.txt\")");
 		
 		//re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
 		if(boo == true)
 		{
+			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output-transformed.txt\")");
+			
 			if(model.equals("developer"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
@@ -292,6 +294,9 @@ public class RFunctions
 			}
 			
 			
+			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
+		} else
+		{
 			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
 		}
 		
@@ -310,7 +315,7 @@ public class RFunctions
 		
 		for(int i = 0; i < noOfVar; i++)
 		{
-			if(transform.get(i).equalsIgnoreCase("none"))
+			if(colNames.get(i).equals(variables.get(i).replace("-", ".")))
 			{
 				boo = boo||false;
 			} else
@@ -370,16 +375,26 @@ public class RFunctions
 		re.eval("varDesc <- describe(deets2)");
 		re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
 		
-		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe-transformed.csv\")");
-		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations-transformed.csv\")");
-		re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters-transformed.csv\")");
+		//re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe-transformed.csv\")");
+		//re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations-transformed.csv\")");
+		//re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters-transformed.csv\")");
 		
 		if(boo == true)
 		{
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe-transformed.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations-transformed.csv\")");
+			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters-transformed.csv\")");
+			
 			re.eval("deets2 <- deets[ ,c("+indVars+")]");
 			re.eval("varDesc <- describe(deets2)");
 			re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
 			
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
+			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
+			
+		}else
+		{
 			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
 			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
 			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
