@@ -214,6 +214,19 @@ public class RFunctions
 		
 		transformVariables(variables, transform);
 		
+		boolean boo = false;
+		
+		for(int i = 0; i < noOfVar; i++)
+		{
+			if(transform.get(i).equalsIgnoreCase("none"))
+			{
+				boo = boo||false;
+			} else
+			{
+				boo = boo||true;
+			}
+		}
+		
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
 		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
@@ -263,10 +276,24 @@ public class RFunctions
 		//re.eval("sumM1 <- res");
 		
 		
-		re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
+		re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output-transformed.txt\")");
 		
 		//re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
-		
+		if(boo == true)
+		{
+			if(model.equals("developer"))
+			{
+				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
+			} else if(model.equals("bug"))
+			{
+				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
+			}
+			
+			
+			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
+		}
 		
 	}
 	
@@ -277,8 +304,22 @@ public class RFunctions
 	{
 		transformVariables(variables, transform);
 		
-		
 		int noOfVar = variables.size();
+		
+		boolean boo = false;
+		
+		for(int i = 0; i < noOfVar; i++)
+		{
+			if(transform.get(i).equalsIgnoreCase("none"))
+			{
+				boo = boo||false;
+			} else
+			{
+				boo = boo||true;
+			}
+		}
+		
+		
 		String indVars = "\""+variables.get(0).replace("-", ".")+"\", ";
 		String transVars = "\""+transformedVars.get(0).replace("-", ".")+"\", ";
 		String collumn = "\""+colNames.get(0).replace("-", ".")+"\", ";
@@ -329,9 +370,22 @@ public class RFunctions
 		re.eval("varDesc <- describe(deets2)");
 		re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
 		
-		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
-		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
-		re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
+		re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe-transformed.csv\")");
+		re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations-transformed.csv\")");
+		re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters-transformed.csv\")");
+		
+		if(boo == true)
+		{
+			re.eval("deets2 <- deets[ ,c("+indVars+")]");
+			re.eval("varDesc <- describe(deets2)");
+			re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
+			
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
+			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
+			
+		}
+		
 	}
 	
 	/*
