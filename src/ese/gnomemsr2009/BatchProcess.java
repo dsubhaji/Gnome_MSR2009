@@ -75,7 +75,7 @@ public class BatchProcess {
 	 * Output: True if all the values in all three files are legal, false otherwise
 	 */
 	@SuppressWarnings("resource")
-	public boolean checkVars(String s, int i) throws Exception
+	public boolean checkVars(String s) throws Exception
 	{
 		dirName = s;
 		
@@ -85,56 +85,51 @@ public class BatchProcess {
 		Boolean isTrue3 = false;
 		Boolean areTheyTrue = false;
 		
-		if(i == 1)
+		CSVReader reader = new CSVReader(new FileReader(dirName+"/model-type.csv"));
+		
+		nextLine = reader.readNext();
+		modelType = nextLine[0].trim();
+		
+		isTrue1 = checkModelType(modelType);
+		
+		reader = new CSVReader(new FileReader(dirName+"/dependent.csv"));
+		
+		nextLine = reader.readNext();
+		variables.add(nextLine[0].trim());
+		if(nextLine[1].trim().isEmpty())
 		{
-			areTheyTrue = true;
+			varTransform.add("none");
+		} else 
+		{
+			varTransform.add(nextLine[1].trim());
 		}
-		if(i == 2)
+		//dependentVar = nextLine[0].trim();
+		isTrue2 = checkVariables(variables.get(0), modelType);
+		
+		reader = new CSVReader(new FileReader(dirName+"/independent.csv"));
+		
+		while ((nextLine = reader.readNext()) != null)
 		{
-			CSVReader reader = new CSVReader(new FileReader(dirName+"/model-type.csv"));
-			
-			nextLine = reader.readNext();
-			modelType = nextLine[0].trim();
-			
-			isTrue1 = checkModelType(modelType);
-			
-			reader = new CSVReader(new FileReader(dirName+"/dependent.csv"));
-			
-			nextLine = reader.readNext();
 			variables.add(nextLine[0].trim());
+			//independentVars.add(nextLine[0].trim());
 			if(nextLine[1].trim().isEmpty())
 			{
 				varTransform.add("none");
-			} else 
+			} else
 			{
 				varTransform.add(nextLine[1].trim());
 			}
-			//dependentVar = nextLine[0].trim();
-			isTrue2 = checkVariables(variables.get(0), modelType);
-			
-			reader = new CSVReader(new FileReader(dirName+"/independent.csv"));
-			
-			while ((nextLine = reader.readNext()) != null)
-			{
-				variables.add(nextLine[0].trim());
-				//independentVars.add(nextLine[0].trim());
-				if(nextLine[1].trim().isEmpty())
-				{
-					varTransform.add("none");
-				} else
-				{
-					varTransform.add(nextLine[1].trim());
-				}
-			}
-			
-			//transformedVars = transformVariables(independentVars, varTransform);
-			
-			isTrue3 = checkVariables(variables, modelType);
-			
-			if((isTrue1&&isTrue2&&isTrue3) == true)
-				areTheyTrue = true;
 		}
-			
+		
+		
+		//transformedVars = transformVariables(independentVars, varTransform);
+		
+		
+		isTrue3 = checkVariables(variables, modelType);
+		
+		if((isTrue1&&isTrue2&&isTrue3) == true)
+			areTheyTrue = true;
+		
 		return areTheyTrue;
 	}
 	
@@ -171,9 +166,9 @@ public class BatchProcess {
 			
 			rf.nwMatrix(dirName, productNames.get(i));
 			
-			//rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
+			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
 			
-			//rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+			rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 		}
 	}
 	
@@ -187,12 +182,11 @@ public class BatchProcess {
 		DatabaseAccessor da = Controller.da;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
-		
+		File file = new File("");
 		
 		for(int i = 0; i < prodCount; i++)
 		{
 			long timeStart = System.nanoTime();
-			File file = null;
 			System.out.println("STARTING: "+productNames.get(i));
 			
 			da.createPajek(productNames.get(i), startDate.get(i), endDate.get(i));
@@ -200,19 +194,18 @@ public class BatchProcess {
 			
 			if(modelType.equals("bug"))
 			{
-				da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+			da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
+			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 			}else if(modelType.equals("developer"))
 			{
-				da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
-				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+			da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
+			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
-			rf.nwMatrix(dirName, productNames.get(i));
 			
-			//System.out.println(variables);
+			System.out.println(variables);
 			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
 			rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 			
@@ -222,7 +215,6 @@ public class BatchProcess {
 			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
 			System.out.println("");
 			
-			file.delete();
 		}
 	}
 	
@@ -321,7 +313,7 @@ public class BatchProcess {
 	public void batch(String s, int i) throws Exception
 	{
 		createDir(s);
-		if(checkVars(s, i))
+		if(checkVars(s))
 		{
 			switch(i)
 			{
