@@ -138,8 +138,8 @@ public class IOFormatter
 			System.out.println("4. Generate Project Data Summary in CSV Format");
 			System.out.println("5. Generate Bug-Details in CSV Format");
 			System.out.println("6. Generate Dev-Details in CSV Format");
-			System.out.println("7. Generate Files in Batches");
-			System.out.println("8. Generate Regression, Correlation and Description of Variables in CSV Format");
+			System.out.println("7. Generate Regression, Correlation and Description of Variables in CSV Format");
+			System.out.println("8. All of the Above");
 			System.out.print  ("Please Enter Your Choice (1 to 8): ");
 			
 			try
