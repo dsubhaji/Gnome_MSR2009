@@ -98,13 +98,13 @@ public class Controller {
 			{
 				startTime = System.nanoTime();
 				io.batchInput();
-				bp.batch(io.getDirectoryPath(), 2);
+				bp.batch(io.getDirectoryPath(), 1);
 				endTime = System.nanoTime();
 			}else if(choice == 8)
 			{
 				startTime = System.nanoTime();
 				io.batchInput();
-				bp.batch(io.getDirectoryPath(), 1);
+				bp.batch(io.getDirectoryPath(), 2);
 				endTime = System.nanoTime();
 			}
 			
