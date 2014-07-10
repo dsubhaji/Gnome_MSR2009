@@ -498,7 +498,7 @@ public class RFunctions
 		tc = new TextConsole();
 		
 		re = new Rengine(args, false, null);
-		re.DEBUG = 10;
+		//re.DEBUG = 10;
 		if (!re.waitForR()) 
 		{
 	        System.out.println("Cannot load R");
