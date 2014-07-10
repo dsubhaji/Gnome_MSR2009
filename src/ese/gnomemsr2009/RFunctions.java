@@ -112,10 +112,22 @@ public class RFunctions
 		re.eval("dcn = loadnetwork(\"tempFile.net\")");
 		re.eval("dcnGraphWeighted = graph.adjacency(dcn, mode=c(\"undirected\"), weighted=TRUE)");
 		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
-		re.eval("Degree = degree(dcnGraphWeighted)");
-		re.eval("Betweenness = betweenness(dcnGraph)");
-		re.eval("bnd = merge(as.data.frame(Degree), as.data.frame(Betweenness), by=\"row.names\")");
-		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\")");
+		re.eval("Degree = as.data.frame(degree(dcnGraph))");
+		re.eval("Betweenness = as.data.frame(betweenness(dcnGraph))");
+		
+		re.eval("Clustcoef = as.data.frame(transitivity(dcnGraph, type=c(\"local\"), isolates=c(\"zero\")))");
+		re.eval("Closeness = as.data.frame(closeness(dcnGraph, mode=c(\"all\"), normalized=TRUE))");
+		re.eval("Eigencentrality = as.data.frame(evcent(dcnGraph)$vector)");
+		re.eval("Pagerank = as.data.frame(page.rank(dcnGraph, directed=FALSE)$vector)");
+		
+		re.eval("Closeness[, c(\"Clustcoef\")] = Clustcoef");
+		
+		re.eval("bnd = merge(Degree, Betweenness, by=\"row.names\")");
+		re.eval("bnd = merge(bnd, Closeness, by.x=\"Row.names\", by.y=\"row.names\")");
+		re.eval("bnd = merge(bnd, Eigencentrality, by.x=\"Row.names\", by.y=\"row.names\")");
+		re.eval("bnd = merge(bnd, Pagerank, by.x=\"Row.names\", by.y=\"row.names\")");
+		
+		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\", \"Closeness\", \"Clustcoef\", \"Eigencentrality\", \"Pagerank\")");
 		
 		for(int j = 0; j < devEmail.size(); j++)
 		{
@@ -126,7 +138,7 @@ public class RFunctions
 		
 			String b = "";
 			
-			REXP x = re.eval("devInf[, 2:3]");
+			REXP x = re.eval("devInf[, 2:7]");
 			RList vl = x.asList();
 			String[] k = vl.keys();
 			String[] m = new String[k.length];
@@ -151,12 +163,12 @@ public class RFunctions
 					
 					f = Float.parseFloat(a);
 					
-					if(i==0)
-					{
-						b = b + f + ", ";
-					} else
+					if(i==5)
 					{
 						b = b + f;
+					} else
+					{
+						b = b + f + ", ";
 					}
 					
 					i++;
@@ -194,12 +206,25 @@ public class RFunctions
 		s=s.replaceAll("\\\\", "/");
 		
 		re.eval("dcn = loadnetwork(\""+s+"/"+prodName+"/"+prodName+"-DCN.net\")");
+		
 		re.eval("dcnGraphWeighted = graph.adjacency(dcn, mode=c(\"undirected\"), weighted=TRUE)");
 		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
-		re.eval("Degree = degree(dcnGraphWeighted)");
-		re.eval("Betweenness = betweenness(dcnGraph)");
-		re.eval("bnd = merge(as.data.frame(Degree), as.data.frame(Betweenness), by=\"row.names\")");
-		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\")");
+		re.eval("Degree = as.data.frame(degree(dcnGraph))");
+		re.eval("Betweenness = as.data.frame(betweenness(dcnGraph))");
+		
+		re.eval("Clustcoef = as.data.frame(transitivity(dcnGraph, type=c(\"local\")))");
+		re.eval("Closeness = as.data.frame(closeness(dcnGraph, mode=c(\"all\"), normalized=TRUE))");
+		re.eval("Eigencentrality = as.data.frame(evcent(dcnGraph)$vector)");
+		re.eval("Pagerank = as.data.frame(page.rank(dcnGraph, directed=FALSE)$vector)");
+		
+		re.eval("Closeness[, c(\"Clustcoef\")] = Clustcoef");
+		
+		re.eval("bnd = merge(Degree, Betweenness, by=\"row.names\")");
+		re.eval("bnd = merge(bnd, Closeness, by.x=\"Row.names\", by.y=\"row.names\")");
+		re.eval("bnd = merge(bnd, Eigencentrality, by.x=\"Row.names\", by.y=\"row.names\")");
+		re.eval("bnd = merge(bnd, Pagerank, by.x=\"Row.names\", by.y=\"row.names\")");
+		
+		re.eval("colnames(bnd) <- c(\"Developers\", \"Degree\", \"Betweenness\", \"Closeness\", \"Clustcoef\", \"Eigencentrality\", \"Pagerank\")");
 		re.eval("write.csv(bnd, file=\""+s+"/"+prodName+"/"+prodName+"-nw-metrics.csv\")");
 	}
 	
@@ -473,7 +498,7 @@ public class RFunctions
 		tc = new TextConsole();
 		
 		re = new Rengine(args, false, null);
-		//re.DEBUG = 10;
+		re.DEBUG = 10;
 		if (!re.waitForR()) 
 		{
 	        System.out.println("Cannot load R");

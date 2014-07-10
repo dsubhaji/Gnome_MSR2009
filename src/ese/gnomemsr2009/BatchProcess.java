@@ -204,6 +204,8 @@ public class BatchProcess {
 			file = new File(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
+			
+			System.out.println(variables);
 			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
 			rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 			

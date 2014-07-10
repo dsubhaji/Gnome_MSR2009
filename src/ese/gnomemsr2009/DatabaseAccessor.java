@@ -519,7 +519,7 @@ public class DatabaseAccessor
 		ArrayList<String> degNBetweenness = rf.rScript(fileContent, owner);
 		
 		//Column Headers
-		matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc, degree, betweenness");
+		matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
 		matrix.append("\n");
 		for(int i = 0; i < bug_id.size(); i++)
 		{
@@ -900,7 +900,7 @@ public class DatabaseAccessor
 		ArrayList<String> degNBet = rf.rScript(fileContent, owners);
 		
 		//Column Headers
-		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness");
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
 		matrix.append("\n");
 		
 		String tempString = "0";
