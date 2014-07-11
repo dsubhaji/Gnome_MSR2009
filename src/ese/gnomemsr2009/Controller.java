@@ -120,7 +120,7 @@ public class Controller {
 			
 			
 			//output 'matrix' to a .csv file and append product name to the file name
-			if((choice != 7)||(choice != 8)||(choice != 9))
+			/*if((choice != 7)||(choice != 8)||(choice != 9))
 			{
 				if(io.writeFile(da.getFileContent(), da.getFileName()))
 				{
@@ -131,7 +131,7 @@ public class Controller {
 					System.out.println("");
 					System.out.println("COULD NOT WRITE!");
 				}
-			}
+			}*/
 			
 			System.out.println("Total Time Elapsed: " + (((endTime - startTime)/1000000000)/60) + " minutes");
 			//close connection
