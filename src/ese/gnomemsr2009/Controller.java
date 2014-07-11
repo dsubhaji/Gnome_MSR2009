@@ -36,12 +36,12 @@ public class Controller {
 			if(choice == 1)
 			{
 				//request user input for product name, start date and end date.
-				io.inputData();
+				io.batchInput();
 				
 				startTime = System.nanoTime();
 				
 				//queries database for result
-				da.createPajek(io.getProduct(), io.getStartDate(), io.getEndDate());
+				bp.singleServices(io.getDirectoryPath(), 1);
 				
 				endTime = System.nanoTime();
 				
@@ -49,61 +49,64 @@ public class Controller {
 			}else if(choice == 2)
 			{
 				//request user input for product name, start date and end date.
-				io.inputData();
+				io.batchInput();
 				
 				startTime = System.nanoTime();
 				
-				da.generateBugsByDev(io.getProduct(), io.getStartDate(), io.getEndDate());
-				//Queries database for result, rearrange it into a bugs-by-developers matrix and save it to variable 'matrix'
+				//queries database for result
+				bp.singleServices(io.getDirectoryPath(), 2);
 				
 				endTime = System.nanoTime();
 			}else if(choice == 3)
 			{
-				io.inputData();
+				io.batchInput();
 				
 				startTime = System.nanoTime();
 				
-				da.generateDevsByDevs(io.getProduct(), io.getStartDate(), io.getEndDate());
+				//queries database for result
+				bp.singleServices(io.getDirectoryPath(), 3);
 				
 				endTime = System.nanoTime();
 			}else if(choice == 4)
 			{				
+				io.batchInput();
+				
 				startTime = System.nanoTime();
 				
-				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
-				da.generateCSV();
-				//output 'projectData' to a .csv file
+				//queries database for result
+				bp.singleServices(io.getDirectoryPath(), 4);
+				
 				endTime = System.nanoTime();
 			}else if(choice == 5)
 			{
-				io.inputData();
+				io.batchInput();
 				
 				startTime = System.nanoTime();
 				
-				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
-				da.generateBugModel(io.getProduct(), io.getStartDate(), io.getEndDate());
-				//output 'projectData' to a .csv file
+				//queries database for result
+				bp.singleServices(io.getDirectoryPath(), 5);
+				
 				endTime = System.nanoTime();
 			}else if(choice == 6)
 			{
-				io.inputData();
+				io.batchInput();
 				
 				startTime = System.nanoTime();
 				
-				//queries database for project data summary and rearrange it to a .csv file format and save it to variable 'ProjectData'
-				da.generateDevModel(io.getProduct(), io.getStartDate(), io.getEndDate());
-				//output 'projectData' to a .csv file
+				//queries database for result
+				bp.singleServices(io.getDirectoryPath(), 6);
+				
 				endTime = System.nanoTime();
 			}else if(choice == 7)
 			{
-				startTime = System.nanoTime();
 				io.batchInput();
+				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 1);
 				endTime = System.nanoTime();
 			}else if(choice == 8)
 			{
-				startTime = System.nanoTime();
 				io.batchInput();
+				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 2);
 				endTime = System.nanoTime();
 			}

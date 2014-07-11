@@ -203,14 +203,13 @@ public class BatchProcess {
 				da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+				rf.nwMatrix(dirName, productNames.get(i));
 			}else if(modelType.equals("developer"))
 			{
 				da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
-			
-			rf.nwMatrix(dirName, productNames.get(i));
 			
 			//System.out.println(variables);
 			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
@@ -338,5 +337,54 @@ public class BatchProcess {
 		}
 	}
 	
+	
+	public void singleServices(String s, int a) throws Exception
+	{
+		createDir(s);
+		
+		int prodCount = productNames.size();
+		DatabaseAccessor da = Controller.da;
+		IOFormatter io = new IOFormatter();
+		RFunctions rf = Controller.rf;
+		
+		
+		
+		for(int i = 0; i < prodCount; i++)
+		{
+			long timeStart = System.nanoTime();
+			System.out.println("STARTING: "+productNames.get(i));
+			switch(a)
+			{
+				case 1: da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+						rf.nwMatrix(dirName, productNames.get(i));
+						break;
+				case 2: da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+						break;
+				case 3: da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+						break;
+				case 4: da.generateCSV(productNames.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
+						break;
+				case 5: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+						break;
+				case 6: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+						break;
+				default:break;
+			}
+						
+			
+			long timeEnd = System.nanoTime();
+			System.out.println("");
+			System.out.println(productNames.get(i)+" ENDED");
+			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
+			System.out.println("");
+		}
+		
+	}
 
 }

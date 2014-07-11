@@ -132,12 +132,12 @@ public class IOFormatter
 		do
 		{
 			System.out.println("Available Services");
-			System.out.println("1. Generate Developers Network File in PAJEK Format");
-			System.out.println("2. Generate Bugs-By-Developer Matrix in CSV Format");
-			System.out.println("3. Generate Devs-By-Devs Matrix in CSV Format");
-			System.out.println("4. Generate Project Data Summary in CSV Format");
-			System.out.println("5. Generate Bug-Details in CSV Format");
-			System.out.println("6. Generate Dev-Details in CSV Format");
+			System.out.println("1. Generate Developers Network File in PAJEK Format and the Network Metrics for a Given Set of Products");
+			System.out.println("2. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products");
+			System.out.println("3. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products");
+			System.out.println("4. Generate Project Data Summary in CSV Format for a Given Set of Products");
+			System.out.println("5. Generate Bug-Details in CSV Format for a Given Set of Products");
+			System.out.println("6. Generate Dev-Details in CSV Format for a Given Set of Products");
 			System.out.println("7. Generate 1-6 for a Given Set of Products");
 			System.out.println("8. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
 			System.out.print  ("Please Enter Your Choice (1 to 8): ");
