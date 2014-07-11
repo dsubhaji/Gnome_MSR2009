@@ -140,7 +140,8 @@ public class IOFormatter
 			System.out.println("6. Generate Dev-Details in CSV Format for a Given Set of Products");
 			System.out.println("7. Generate 1-6 for a Given Set of Products");
 			System.out.println("8. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
-			System.out.print  ("Please Enter Your Choice (1 to 8): ");
+			System.out.println("9. Generate Correlations, EigenValues, and Perform Factor Analysis");
+			System.out.print  ("Please Enter Your Choice (1 to 9): ");
 			
 			try
 			{
@@ -154,7 +155,7 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>8));
+		} while((choice<1)||(choice>9));
 	}
 	
 	/*

@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -34,6 +35,8 @@ public class BatchProcess {
 	private ArrayList<String> varTransform	 = new ArrayList<String>();
 	private ArrayList<String> variables = new ArrayList<String>();
 	
+	private ArrayList<String> parameters = new ArrayList<String>();
+	
 	private String modelType = "";
 	
 	/*
@@ -51,11 +54,11 @@ public class BatchProcess {
 		
 		while ((nextLine = reader.readNext()) != null) 
 		{
-			if(nextLine[1].isEmpty()||nextLine[1].trim().isEmpty()||nextLine[1]==null)
+			if(nextLine[1].isEmpty()||nextLine[1].trim().isEmpty()||nextLine[1]==null||nextLine[1].trim().equals("none"))
 			{
 				nextLine[1] = "0000-00-00";
 			}
-			if(nextLine[2].isEmpty()||nextLine[2].trim().isEmpty()||nextLine[2]==null)
+			if(nextLine[2].isEmpty()||nextLine[2].trim().isEmpty()||nextLine[2]==null||nextLine[2].trim().equals("none"))
 			{
 				nextLine[2] = "9999-01-01";
 			}
@@ -91,14 +94,14 @@ public class BatchProcess {
 		}
 		if(i == 2)
 		{
-			CSVReader reader = new CSVReader(new FileReader(dirName+"/model-type.csv"));
+			CSVReader reader = new CSVReader(new FileReader(dirName+"/model-type.csv"), ',', '\"', 1);
 			
 			nextLine = reader.readNext();
 			modelType = nextLine[0].trim();
 			
 			isTrue1 = checkModelType(modelType);
 			
-			reader = new CSVReader(new FileReader(dirName+"/dependent.csv"));
+			reader = new CSVReader(new FileReader(dirName+"/dependent.csv"), ',', '\"', 1);
 			
 			nextLine = reader.readNext();
 			variables.add(nextLine[0].trim());
@@ -112,7 +115,7 @@ public class BatchProcess {
 			//dependentVar = nextLine[0].trim();
 			isTrue2 = checkVariables(variables.get(0), modelType);
 			
-			reader = new CSVReader(new FileReader(dirName+"/independent.csv"));
+			reader = new CSVReader(new FileReader(dirName+"/independent.csv"), ',', '\"', 1);
 			
 			while ((nextLine = reader.readNext()) != null)
 			{
@@ -138,11 +141,53 @@ public class BatchProcess {
 		return areTheyTrue;
 	}
 	
+	@SuppressWarnings("resource")
+	public boolean factorAnalysis(String s) throws Exception
+	{
+		String [] nextLine;
+		
+		CSVReader reader = new CSVReader(new FileReader(dirName+"/parameters.csv"), ',', '\"', 1);
+		
+		while ((nextLine = reader.readNext()) != null)
+		{
+			parameters.add(nextLine[1].trim());
+		}
+		
+		reader = new CSVReader(new FileReader(dirName+"/model-type.csv"), ',', '\"', 1);
+		
+		nextLine = reader.readNext();
+		modelType = nextLine[0].trim();
+		
+		boolean isTrue = false;
+		isTrue = checkModelType(modelType);
+		
+		reader = new CSVReader(new FileReader(dirName+"/variables.csv"), ',', '\"', 1);
+		
+		while ((nextLine = reader.readNext()) != null)
+		{
+			variables.add(nextLine[0].trim());
+			//independentVars.add(nextLine[0].trim());
+			if(nextLine[1].trim().isEmpty())
+			{
+				varTransform.add("none");
+			} else
+			{
+				varTransform.add(nextLine[1].trim());
+			}
+		}
+		
+		
+		isTrue = isTrue&&checkVariables(variables, modelType);
+		
+		return isTrue;
+		
+	}
+	
 	/* batchQueries(ArrayList<String>, ArrayList<String>, ArrayList<String)
 	 * Input: ArrayList of the product names, start and end dates listed on the csv file read in createDir()
 	 * Output: a bunch of files on the respective product directory
 	 */
-	public void batchQueries(ArrayList<String> productNames, ArrayList<String> startDate, ArrayList<String> endDate) throws Exception
+	public void batchQueries() throws Exception
 	{
 		int prodCount = productNames.size();
 		DatabaseAccessor da = Controller.da;
@@ -151,22 +196,22 @@ public class BatchProcess {
 		
 		for(int i = 0; i < prodCount; i++)
 		{
-			da.createPajek(productNames.get(i), startDate.get(i), endDate.get(i));
+			da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			
-			da.generateBugsByDev(productNames.get(i), startDate.get(i), endDate.get(i));
+			da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
 			
-			da.generateDevsByDevs(productNames.get(i), startDate.get(i), endDate.get(i));
+			da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
 			
 			da.generateCSV(productNames.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
 			
-			da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
+			da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 			
-			da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
+			da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			
 			rf.nwMatrix(dirName, productNames.get(i));
@@ -181,7 +226,7 @@ public class BatchProcess {
 	 * Input: ArrayList of the product names, start and end dates listed on the csv file read in createDir()
 	 * Output: Similar to batchQueries but only outputs linear regression, variables description and correlation
 	 */
-	public void descRegAndCor(ArrayList<String> productNames, ArrayList<String> startDate, ArrayList<String> endDate) throws Exception
+	public void descRegAndCor(int a) throws Exception
 	{
 		int prodCount = productNames.size();
 		DatabaseAccessor da = Controller.da;
@@ -195,25 +240,30 @@ public class BatchProcess {
 			File file = null;
 			System.out.println("STARTING: "+productNames.get(i));
 			
-			da.createPajek(productNames.get(i), startDate.get(i), endDate.get(i));
-			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+			//da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
+			//io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			
 			if(modelType.equals("bug"))
 			{
-				da.generateBugModel(productNames.get(i), startDate.get(i), endDate.get(i));
+				da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 				rf.nwMatrix(dirName, productNames.get(i));
 			}else if(modelType.equals("developer"))
 			{
-				da.generateDevModel(productNames.get(i), startDate.get(i), endDate.get(i));
+				da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
 			//System.out.println(variables);
-			rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
-			rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+			if(a == 1) 
+			{
+				rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
+				rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+			}
+			if(a == 2) rf.eigenVal(modelType, variables, varTransform, parameters, dirName, productNames.get(i));
+			
 			
 			long timeEnd = System.nanoTime();
 			System.out.println("");
@@ -320,21 +370,19 @@ public class BatchProcess {
 	public void batch(String s, int i) throws Exception
 	{
 		createDir(s);
-		if(checkVars(s, i))
+		switch(i)
 		{
-			switch(i)
-			{
-				case 1: batchQueries(productNames, startDates, endDates);
-						break;
-				case 2: descRegAndCor(productNames, startDates, endDates);
-						break;
-				default:break;
-			}
-			
-		} else
-		{
-			System.out.println("Illegal dependent variable, independent variables or model-type.");
+			case 1: if(checkVars(s, i)) batchQueries();
+					else System.out.println("Illegal dependent variable, independent variables or model-type.");
+					break;
+			case 2: if(checkVars(s, i)) descRegAndCor(1);
+					else System.out.println("Illegal dependent variable, independent variables or model-type.");
+					break;
+			case 3:	if(factorAnalysis(s)) descRegAndCor(2);
+					break;
+			default:break;	
 		}
+		
 	}
 	
 	
@@ -353,6 +401,7 @@ public class BatchProcess {
 		{
 			long timeStart = System.nanoTime();
 			System.out.println("STARTING: "+productNames.get(i));
+			
 			switch(a)
 			{
 				case 1: da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));

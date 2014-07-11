@@ -75,6 +75,7 @@ public class RFunctions
 	private ArrayList<String> transformedVars = new ArrayList<String>();
 	private ArrayList<String> transformedRVars= new ArrayList<String>();
 	private ArrayList<String> colNames 		  = new ArrayList<String>();
+	private boolean boo = false;
 	
 	public RFunctions()
 	{
@@ -306,7 +307,12 @@ public class RFunctions
 		//re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
 		if(boo == true)
 		{
-			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output-transformed.txt\")");
+			File theDir = new File(s+"/"+prodName.trim()+"/transformed");
+			File theDir2 = new File(s+"/"+prodName.trim()+"/non-transformed");
+			if (!theDir.exists()) theDir.mkdir();
+			if (!theDir2.exists()) theDir2.mkdir();
+			
+			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/transformed/"+prodName+"-"+model+"-model-output-transformed.txt\")");
 			
 			if(model.equals("developer"))
 			{
@@ -319,10 +325,12 @@ public class RFunctions
 			}
 			
 			
-			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
+			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-"+model+"-model-output.txt\")");
 		} else
 		{
-			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.txt\")");
+			File theDir2 = new File(s+"/"+prodName.trim()+"/non-transformed");
+			if (!theDir2.exists()) theDir2.mkdir();
+			re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-"+model+"-model-output.txt\")");
 		}
 		
 	}
@@ -336,7 +344,7 @@ public class RFunctions
 		
 		int noOfVar = variables.size();
 		
-		boolean boo = false;
+		boo = false;
 		
 		for(int i = 0; i < noOfVar; i++)
 		{
@@ -406,28 +414,167 @@ public class RFunctions
 		
 		if(boo == true)
 		{
-			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe-transformed.csv\")");
-			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations-transformed.csv\")");
-			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters-transformed.csv\")");
+			File theDir = new File(s+"/"+prodName.trim()+"/transformed");
+			File theDir2 = new File(s+"/"+prodName.trim()+"/non-transformed");
+			if (!theDir.exists()) theDir.mkdir();
+			if (!theDir2.exists()) theDir2.mkdir();
 			
-			re.eval("deets2 <- deets[ ,c("+indVars+")]");
-			re.eval("varDesc <- describe(deets2)");
-			re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-describe-transformed.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-correlations-transformed.csv\")");
+			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-model-parameters-transformed.csv\")");
 			
-			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
-			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
-			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
+			re.eval("deets3 <- deets[ ,c("+indVars+")]");
+			re.eval("varDesc2 <- describe(deets2)");
+			re.eval("varCor2  <- cor(deets2, use=\"pairwise.complete.obs\")");
+			
+			re.eval("write.csv(varDesc2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-describe.csv\")");
+			re.eval("write.csv(varCor2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-correlations.csv\")");
+			re.eval("write.csv(deets3, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-model-parameters.csv\")");
 			
 		}else
 		{
-			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe.csv\")");
-			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations.csv\")");
-			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters.csv\")");
+			File theDir = new File(s+"/"+prodName.trim()+"/non-transformed");
+			if (!theDir.exists()) theDir.mkdir();
 			
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-describe.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-correlations.csv\")");
+			re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-model-parameters.csv\")");
 		}
 		
 	}
 	
+	/*
+	 * 
+	 */
+	public void eigenVal(String model, ArrayList<String> variables, ArrayList<String> transform, ArrayList<String> parameters, String s, String prodName)
+	{	
+		transformVariables(variables, transform);
+		
+		int noOfVar = variables.size();
+		
+		boo = false;
+		
+		for(int i = 0; i < noOfVar; i++)
+		{
+			if(colNames.get(i).equals(variables.get(i).replace("-", ".")))
+			{
+				boo = boo||false;
+			} else
+			{
+				boo = boo||true;
+			}
+		}
+		
+		
+		String indVars = "\""+variables.get(0).replace("-", ".")+"\", ";
+		String transVars = "\""+transformedVars.get(0).replace("-", ".")+"\", ";
+		String collumn = "\""+colNames.get(0).replace("-", ".")+"\", ";
+		
+		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
+		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("if(\"psych\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"psych\")}");
+		re.eval("if(\"psych\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"nFactors\")}");
+		re.eval("library('blockmodeling')");
+		re.eval("library('igraph')");
+		re.eval("library('Matrix')");
+		re.eval("library('psych')");
+		re.eval("require('nFactors')");
+		
+		s=s.replaceAll("\\\\", "/");
+		
+		if(model.equals("developer"))
+		{
+			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+		} else if(model.equals("bug"))
+		{
+			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+		}
+		
+		for(int i = 1; i < noOfVar; i++)
+		{
+			if(i < noOfVar-1)
+			{
+				indVars = indVars + "\"" + variables.get(i).replace("-", ".") + "\", ";
+				transVars = transVars + "\"" + transformedVars.get(i) + "\", ";
+				collumn = collumn + "\"" + colNames.get(i) + "\", ";
+			}
+			if(i == noOfVar-1)
+			{
+				indVars = indVars + "\"" + variables.get(i).replace("-", ".") + "\"";
+				transVars = transVars + "\"" + transformedVars.get(i) + "\"";
+				collumn = collumn + "\"" + colNames.get(i) + "\"";
+			}
+		}
+		
+		for(int i = 0; i < noOfVar; i++)
+		{
+			re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
+			re.eval("deets[ , c(\""+colNames.get(i)+"\")][deets[ , c(\""+colNames.get(i)+"\")] == -Inf] <- 0.01");
+		}
+		
+		re.eval("deets2 <- deets[ ,c("+collumn+")]");
+		
+		re.eval("varDesc <- describe(deets2)");
+		re.eval("varCor  <- cor(deets2, use=\"pairwise.complete.obs\")");
+		
+		//re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/"+prodName+"-describe-transformed.csv\")");
+		//re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/"+prodName+"-correlations-transformed.csv\")");
+		//re.eval("write.csv(deets2, file=\""+s+"/"+prodName+"/"+prodName+"-model-parameters-transformed.csv\")");
+		
+		
+		
+		if(boo == true)
+		{
+			File theDir = new File(s+"/"+prodName.trim()+"/transformed");
+			File theDir2 = new File(s+"/"+prodName.trim()+"/non-transformed");
+			if (!theDir.exists()) theDir.mkdir();
+			if (!theDir2.exists()) theDir2.mkdir();
+			
+			re.eval("deets2.ev  <- eigen(varCor)");
+			re.eval("deets2.faresults  <- factanal(deets2, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\")");
+			
+			re.eval("write.csv(deets2.ev$values, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-eigenvalues-transformed.csv\")");
+			re.eval("write.csv(deets2.ev$vectors, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-eigenvectors-transformed.csv\")");
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-describe-transformed.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-correlations-transformed.csv\")");
+			re.eval("write.csv(capture.output(print(deets2.faresults, digits=3, cutoff=0, sort=FALSE)), file=\""+s+"/"+prodName+"/transformed/"+prodName+"-faresults-transformed.csv\")");
+			
+			//File theDir3 = new File(s+"/"+prodName+"/transformed/"+prodName+"-faresults-transformed.csv");
+			//if(!theDir3.exists())
+				//re.eval("capture.output(factanal(deets2, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\"), file=\""+s+"/"+prodName+"/transformed/"+prodName+"-factanal-error.txt\")");
+			
+			re.eval("deets3 <- deets[ ,c("+indVars+")]");
+			re.eval("varDesc2 <- describe(deets3)");
+			re.eval("varCor2  <- cor(deets3, use=\"pairwise.complete.obs\")");
+			
+			re.eval("deets3.ev  <- eigen(varCor2)");
+			re.eval("deets3.faresults  <- factanal(deets3, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\")");
+			
+			re.eval("write.csv(varDesc2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-describe.csv\")");
+			re.eval("write.csv(varCor2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-correlations.csv\")");
+			re.eval("write.csv(deets3.ev$values, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvalues.csv\")");
+			re.eval("write.csv(deets3.ev$vectors, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvectors.csv\")");
+			re.eval("write.csv(capture.output(print(deets3.faresults, digits=3, cutoff=0, sort=FALSE)), file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-faresults.csv\")");
+		}else
+		{
+			File theDir = new File(s+"/"+prodName.trim()+"/non-transformed");
+			if (!theDir.exists()) theDir.mkdir();
+			
+			re.eval("deets2.ev  <- eigen(varCor)");
+			re.eval("varCor.faresults  <- factanal(varCor, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\")");
+			
+			re.eval("write.csv(varCor.ev$values, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvalues.csv\")");
+			re.eval("write.csv(varCor.ev$vectors, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvectors.csv\")");
+			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-describe.csv\")");
+			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-correlations.csv\")");
+			re.eval("write.csv(capture.output(print(varCor.faresults, digits=3, cutoff=0, sort=FALSE)), file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-faresults.csv\")");
+			
+		}
+		
+		
+		
+	}
 	/*
 	 * Input: Two arraylists, the list of independent vars, and the transformation
 	 * Output: arraylist of the variables after it is transformed
@@ -488,6 +635,7 @@ public class RFunctions
 	 * Function: Create an REngine object so we can send R commands
 	 */
 	
+	@SuppressWarnings("static-access")
 	public void startRengine()
 	{
 		/*if (!Rengine.versionCheck()) {
@@ -498,7 +646,7 @@ public class RFunctions
 		tc = new TextConsole();
 		
 		re = new Rengine(args, false, null);
-		//re.DEBUG = 10;
+		//re.DEBUG = 100;
 		if (!re.waitForR()) 
 		{
 	        System.out.println("Cannot load R");

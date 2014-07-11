@@ -109,12 +109,18 @@ public class Controller {
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 2);
 				endTime = System.nanoTime();
+			}else if(choice == 9)
+			{
+				io.batchInput();
+				startTime = System.nanoTime();
+				bp.batch(io.getDirectoryPath(), 3);
+				endTime = System.nanoTime();
 			}
 			
 			
 			
 			//output 'matrix' to a .csv file and append product name to the file name
-			if((choice != 7)||(choice != 8))
+			if((choice != 7)||(choice != 8)||(choice != 9))
 			{
 				if(io.writeFile(da.getFileContent(), da.getFileName()))
 				{
