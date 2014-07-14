@@ -511,15 +511,16 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		RFunctions rf = Controller.rf;
+		//RFunctions rf = Controller.rf;
 		System.out.println("");
 		System.out.println("Calculating Degree and Betweenness of the Developers...");
 		createPajek(product, startDate, endDate);
 		
-		ArrayList<String> degNBetweenness = rf.rScript(fileContent, owner);
+		//ArrayList<String> degNBetweenness = rf.rScript(fileContent, owner);
 		
 		//Column Headers
-		matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
+		//matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
+		matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc");
 		matrix.append("\n");
 		for(int i = 0; i < bug_id.size(); i++)
 		{
@@ -600,9 +601,9 @@ public class DatabaseAccessor
 					matrix.append(ownerComArc.get(j));
 				}
 			}
-			matrix.append(", ");
+			//matrix.append(", ");
 			
-			matrix.append(degNBetweenness.get(i));
+			//matrix.append(degNBetweenness.get(i));
 			matrix.append("\n");
 		}
 
@@ -892,23 +893,22 @@ public class DatabaseAccessor
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		RFunctions rf = Controller.rf;
+		//RFunctions rf = Controller.rf;
 		System.out.println("");
 		System.out.println("Calculating Degree and Betweenness of the Developers...");
 		createPajek(product, startDate, endDate);
 		
-		ArrayList<String> degNBet = rf.rScript(fileContent, owners);
+		//ArrayList<String> degNBet = rf.rScript(fileContent, owners);
 		
 		//Column Headers
-		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
+		//matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span");
 		matrix.append("\n");
 		
 		String tempString = "0";
 		
 		for(int i = 0; i < owners.size(); i++)
 		{
-			
-			
 			matrix.append(owners.get(i) + ", ");
 			matrix.append(bugsOwned.get(i) + ", ");
 			matrix.append(bugsCommented.get(i) + ", ");
@@ -928,8 +928,8 @@ public class DatabaseAccessor
 			
 			matrix.append(medianElapsedTime.get(i) + ", ");
 			matrix.append(tempString + ", ");
-			matrix.append(medianInterestSpan.get(i) + ", ");
-			matrix.append(degNBet.get(i));
+			matrix.append(medianInterestSpan.get(i));
+			//matrix.append(degNBet.get(i));
 			matrix.append("\n");
 			tempString = "0";
 		}

@@ -19,8 +19,7 @@ public class BatchProcess {
 	private String legalBugVariables[] = {"owner", "elapsed-time", "component", "version", "rep-platform", "op-sys",
 			"bug-status", "resolution", "priority", "severity", "target-milestone", 
 			"duplicate", "activity-level", "number-of-comments", "number-of-comments-by-owner",
-			"number-of-commenters", "interest-span", "owner-workload", "owner-comment-arc", "degree", "betweenness", "clustcoeff",
-			"closeness", "eigencentrality", "pagerank"
+			"number-of-commenters", "interest-span", "owner-workload", "owner-comment-arc"
 			};
 	private String legalDevVariables[] = {"bugs-owned",
 			"bugs-commented", "comment-span", "comments-on-owned", "comments-on-nonowned", "noof-activities",
@@ -137,7 +136,7 @@ public class BatchProcess {
 			if((isTrue1&&isTrue2&&isTrue3) == true)
 				areTheyTrue = true;
 		}
-			
+		if(areTheyTrue == false) System.out.println("\nIllegal dependent variable, independent variables or model-type.");	
 		return areTheyTrue;
 	}
 	
@@ -179,6 +178,7 @@ public class BatchProcess {
 		
 		isTrue = isTrue&&checkVariables(variables, modelType);
 		
+		if(isTrue == false) System.out.println("\nIllegal variables or model-type.");
 		return isTrue;
 		
 	}
@@ -237,24 +237,7 @@ public class BatchProcess {
 		for(int i = 0; i < prodCount; i++)
 		{
 			long timeStart = System.nanoTime();
-			File file = null;
-			System.out.println("STARTING: "+productNames.get(i));
-			
-			//da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
-			//io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-			
-			if(modelType.equals("bug"))
-			{
-				da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-				rf.nwMatrix(dirName, productNames.get(i));
-			}else if(modelType.equals("developer"))
-			{
-				da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
-				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
-			}
+			System.out.println("\nSTARTING: "+productNames.get(i));
 			
 			//System.out.println(variables);
 			if(a == 1) 
@@ -269,10 +252,41 @@ public class BatchProcess {
 			System.out.println("");
 			System.out.println(productNames.get(i)+" ENDED");
 			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
-			System.out.println("");
-			
-			file.delete();
 		}
+	}
+	
+	public boolean checkSubFolder()
+	{
+		int prodCount = productNames.size();
+		File file = null;
+		File file2 = null;
+		boolean bool = true;
+		ArrayList<String> errMess = new ArrayList<String>();
+		
+		
+		for(int i = 0; i < prodCount; i++)
+		{
+			if(modelType.equals("bug"))
+			{
+				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+			}else if(modelType.equals("developer"))
+			{
+				file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+			}
+			file2 = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN-metrics.csv");
+			
+			if(file.exists()&&file2.exists())
+			{
+				bool = bool&&true;
+			} else
+			{
+				bool = bool&&false;
+				errMess.add(productNames.get(i));
+			}
+		}
+		
+		if(bool==false) System.out.println("\nMissing File(s) for: " + errMess);
+		return bool;
 	}
 	
 	/* checkModelType(String)
@@ -373,12 +387,10 @@ public class BatchProcess {
 		switch(i)
 		{
 			case 1: if(checkVars(s, i)) batchQueries();
-					else System.out.println("Illegal dependent variable, independent variables or model-type.");
 					break;
-			case 2: if(checkVars(s, i)) descRegAndCor(1);
-					else System.out.println("Illegal dependent variable, independent variables or model-type.");
+			case 2: if(checkVars(s, i)&&checkSubFolder()) descRegAndCor(1);
 					break;
-			case 3:	if(factorAnalysis(s)) descRegAndCor(2);
+			case 3:	if(factorAnalysis(s)&&checkSubFolder()) descRegAndCor(2);
 					break;
 			default:break;	
 		}
@@ -400,27 +412,49 @@ public class BatchProcess {
 		for(int i = 0; i < prodCount; i++)
 		{
 			long timeStart = System.nanoTime();
-			System.out.println("STARTING: "+productNames.get(i));
-			
+			System.out.println("\nSTARTING: "+productNames.get(i));
+			File file;
 			switch(a)
 			{
-				case 1: da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-						rf.nwMatrix(dirName, productNames.get(i));
+				/*
+				 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
+				 */
+				case 1: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+						if(!file.exists()) {da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
 						break;
-				case 2: da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+				/*
+				 * Case 2: Generate Network-Metrics file for the specified product from it's PAJEK file. Prints out an error message if no PAJEK file can be found. 
+				 */
+				case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+						if(!file.exists()) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
+						else rf.nwMatrix(dirName, productNames.get(i));
 						break;
-				case 3: da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+				/*
+				 * Case 3: Generate Bug-by-developer matrix for a given set of product, if file already exist, do nothing.
+				 */
+				case 3: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+						if(!file.exists()) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
 						break;
-				case 4: da.generateCSV(productNames.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
+				/*
+				 * Case 4: Generate Developer-by-developer matrix for a given set of product, if file already exist, do nothing.
+				 */
+				case 4: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+						if(!file.exists()) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
 						break;
-				case 5: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
+				/*
+				 * Case 5: Generate summary file for a given set of product, does nothing if file already exist		
+				 */
+				case 5: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
+						if(!file.exists()) {da.generateCSV(productNames.get(i));
+						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
+						break;
+				case 6: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 						break;
-				case 6: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+				case 7: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 						break;
 				default:break;
