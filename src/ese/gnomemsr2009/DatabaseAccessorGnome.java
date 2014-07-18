@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Locale;
 
 
-public class DatabaseAccessor 
+public class DatabaseAccessorGnome 
 {
 	Connection con;
 	ResultSet rs;
@@ -27,7 +27,7 @@ public class DatabaseAccessor
 	
 	private int num;
 
-	public DatabaseAccessor()
+	public DatabaseAccessorGnome()
 	{
 		fileContent = "";
 		fileName = "";
@@ -730,9 +730,7 @@ public class DatabaseAccessor
 		rs = s.executeQuery(
 				"select distinct(trim(' ' from replace(a.assigned_to, '\n', ''))), count(a.bug_id) " +
 				"from bugs a " +
-				"where assigned_to in " +
-				"(	select distinct(assigned_to) from bugs where trim(' ' from replace(product, '\n', '')) like '"+product+"'	) " +
-				"and trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
+				"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
 				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"group by assigned_to " +
@@ -1023,6 +1021,15 @@ public class DatabaseAccessor
 		
 		System.out.println("");
 		System.out.println("Building " + fileName);
+	}
+	
+	public void generateCommenterModel(String product, String startDate, String endDate) throws Exception
+	{
+		System.out.println("");
+		System.out.println("Finding the Distinct Commenters...");
+		
+		rs = s.executeQuery("");
+				
 	}
 	
 	public void closeConnection() throws Exception

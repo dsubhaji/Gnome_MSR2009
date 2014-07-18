@@ -190,7 +190,7 @@ public class BatchProcess {
 	public void batchQueries() throws Exception
 	{
 		int prodCount = productNames.size();
-		DatabaseAccessor da = Controller.da;
+		DatabaseAccessorGnome da = Controller.da;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
 		
@@ -229,7 +229,7 @@ public class BatchProcess {
 	public void descRegAndCor(int a) throws Exception
 	{
 		int prodCount = productNames.size();
-		DatabaseAccessor da = Controller.da;
+		DatabaseAccessorGnome da = Controller.da;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
 		
@@ -403,8 +403,8 @@ public class BatchProcess {
 		createDir(s);
 		
 		int prodCount = productNames.size();
-		DatabaseAccessor da = Controller.da;
-		DatabaseAccessorMSR daMSR = Controller.daMSR;
+		DatabaseAccessorGnome da = Controller.da;
+		DatabaseAccessorGithub daMSR = Controller.daMSR;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
 		

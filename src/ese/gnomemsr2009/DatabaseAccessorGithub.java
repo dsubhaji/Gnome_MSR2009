@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class DatabaseAccessorMSR 
+public class DatabaseAccessorGithub 
 {
 	private Connection con;
 	private ResultSet rs;
@@ -21,7 +21,7 @@ public class DatabaseAccessorMSR
 	private String fileContent;
 	private String fileName;
 	
-	public DatabaseAccessorMSR()
+	public DatabaseAccessorGithub()
 	{
 		fileContent = "";
 		fileName = "";

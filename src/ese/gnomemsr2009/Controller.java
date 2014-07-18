@@ -2,8 +2,8 @@ package ese.gnomemsr2009;
 
 public class Controller {
 
-	static DatabaseAccessor da = new DatabaseAccessor();
-	static DatabaseAccessorMSR daMSR = new DatabaseAccessorMSR();
+	static DatabaseAccessorGnome da = new DatabaseAccessorGnome();
+	static DatabaseAccessorGithub daMSR = new DatabaseAccessorGithub();
 	static IOFormatter io = new IOFormatter();
 	static BatchProcess bp = new BatchProcess();
 	static RFunctions rf = new RFunctions();
