@@ -32,80 +32,17 @@ public class Controller {
 			//2. Generate Bugs-By-Developer Matrix in CSV Format
 			//3. Generate Project Data Summary in CSV Format
 			
+			int multiplier = io.inputType();
+			
 			int choice = io.inputChoice();
 			
-			if(choice == 1)
-			{
-				//request user input for product name, start date and end date.
-				io.batchInput();
-				
-				startTime = System.nanoTime();
-				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 1);
-				
-				endTime = System.nanoTime();
-				
-				
-			}else if(choice == 2)
-			{
-				//request user input for product name, start date and end date.
-				io.batchInput();
-				
-				startTime = System.nanoTime();
-				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 2);
-				
-				endTime = System.nanoTime();
-			}else if(choice == 3)
+			if((choice >= 1)&&(choice <= 7))
 			{
 				io.batchInput();
 				
 				startTime = System.nanoTime();
 				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 3);
-				
-				endTime = System.nanoTime();
-			}else if(choice == 4)
-			{				
-				io.batchInput();
-				
-				startTime = System.nanoTime();
-				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 4);
-				
-				endTime = System.nanoTime();
-			}else if(choice == 5)
-			{
-				io.batchInput();
-				
-				startTime = System.nanoTime();
-				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 5);
-				
-				endTime = System.nanoTime();
-			}else if(choice == 6)
-			{
-				io.batchInput();
-				
-				startTime = System.nanoTime();
-				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 6);
-				
-				endTime = System.nanoTime();
-			}else if(choice == 7)
-			{
-				io.batchInput();
-				
-				startTime = System.nanoTime();
-				
-				//queries database for result
-				bp.singleServices(io.getDirectoryPath(), 7);
+				bp.singleServices(io.getDirectoryPath(), choice*multiplier);
 				
 				endTime = System.nanoTime();
 			}else if(choice == 8)

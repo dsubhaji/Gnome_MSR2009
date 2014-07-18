@@ -159,6 +159,44 @@ public class IOFormatter
 		} while((choice<1)||(choice>10));
 	}
 	
+	public int inputType()
+	{
+		int choice = 0;
+		
+		do
+		{
+			System.out.println("Choose:");
+			System.out.println("1. Include Developers Who Comments On At Least One Bug");
+			System.out.println("2. Only Include Bug Owners");
+			System.out.print  ("Please Enter Your Choice (1 or 2): ");
+			
+			try
+			{
+				choice = user_input.nextInt();
+			} catch(InputMismatchException e)
+			{
+				System.out.println("Error! Only Integers Are Accepted.");
+			}
+			
+			System.out.println("");
+			
+			if(choice==1)
+			{
+				choice = 1;
+			}
+			if(choice==2)
+			{
+				choice = 100;
+			}
+			
+			user_input.nextLine();
+			return choice;
+		} while((choice<1)||(choice>2));
+	}
+	
+	
+	
+	
 	/*
 	 * Method Name: writeFile
 	 * Input: File Name and It's Content

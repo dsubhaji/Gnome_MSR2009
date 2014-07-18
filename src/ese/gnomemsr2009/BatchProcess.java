@@ -421,13 +421,18 @@ public class BatchProcess {
 					/*
 					 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
 					 */
-					case 1: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-							if(true) {da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
-							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
-							break;
+					case 1: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+								if(true) {da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
+								break;
+					case 100:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-Owners-DCN.net");
+								if(true) {da.generateOwnersDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
+								break;
 					/*
 					 * Case 2: Generate Network-Metrics file for the specified product from it's PAJEK file. Prints out an error message if no PAJEK file can be found. 
 					 */
+					case 200: 
 					case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 							if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
 							rf.nwMatrix(dirName, productNames.get(i));
@@ -449,10 +454,12 @@ public class BatchProcess {
 					/*
 					 * Case 5: Generate summary file for a given set of product, does nothing if file already exist		
 					 */
+					case 500:
 					case 5: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
 							if(true) {da.generateCSV(productNames.get(i));
 							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
 							break;
+					case 600:
 					case 6: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 							break;
@@ -485,6 +492,11 @@ public class BatchProcess {
 						if(true) {daMSR.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
 						io.writeFile(daMSR.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
 						break;
+				case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+						//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
+						rf.nwMatrix(dirName, productNames.get(i));
+						break;
+				
 				default:break;
 			}
 						
