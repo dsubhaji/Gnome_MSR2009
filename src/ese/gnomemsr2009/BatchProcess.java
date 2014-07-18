@@ -434,7 +434,7 @@ public class BatchProcess {
 					 */
 					case 200: 
 					case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-							if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
+							//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
 							rf.nwMatrix(dirName, productNames.get(i));
 							break;
 					/*
@@ -463,7 +463,10 @@ public class BatchProcess {
 					case 6: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 							break;
-					case 7: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+					case 7:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+								break;
+					case 700: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 							break;
 					default:break;

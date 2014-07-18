@@ -282,6 +282,9 @@ public class RFunctions
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+			
+			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\"");
 			
 			for(int i = 0; i < noOfVar; i++)
@@ -380,6 +383,8 @@ public class RFunctions
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
 		} else if(model.equals("bug"))
 		{
@@ -492,10 +497,14 @@ public class RFunctions
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 		}
 		
 		for(int i = 1; i < noOfVar; i++)
@@ -656,7 +665,7 @@ public class RFunctions
 		tc = new TextConsole();
 		
 		re = new Rengine(args, false, null);
-		//re.DEBUG = 100;
+		re.DEBUG = 100;
 		if (!re.waitForR()) 
 		{
 	        System.out.println("Cannot load R");
