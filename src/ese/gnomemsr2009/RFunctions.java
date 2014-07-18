@@ -323,10 +323,14 @@ public class RFunctions
 			if(model.equals("developer"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+				re.eval("deets = deets[,!(names(deets) %in% drops)]");
 				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
 			} else if(model.equals("bug"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+				re.eval("deets = deets[,!(names(deets) %in% drops)]");
 				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
 			}
 			
