@@ -285,7 +285,7 @@ public class RFunctions
 			
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
-			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\"");
+			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
 			
 			for(int i = 0; i < noOfVar; i++)
 			{
@@ -393,6 +393,8 @@ public class RFunctions
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 		}
 		
 		for(int i = 1; i < noOfVar; i++)
