@@ -196,7 +196,7 @@ public class BatchProcess {
 		
 		for(int i = 0; i < prodCount; i++)
 		{
-			da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
+			da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			
 			//da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
@@ -404,12 +404,74 @@ public class BatchProcess {
 		
 		int prodCount = productNames.size();
 		DatabaseAccessor da = Controller.da;
+		DatabaseAccessorMSR daMSR = Controller.daMSR;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
 		
 		
-		
-		for(int i = 0; i < prodCount; i++)
+		if(da.getDBName().equalsIgnoreCase("sutd")||da.getDBName().equalsIgnoreCase("gnome_msr2009"))
+		{
+			for(int i = 0; i < prodCount; i++)
+			{
+				long timeStart = System.nanoTime();
+				System.out.println("\nSTARTING: "+productNames.get(i));
+				File file;
+				switch(a)
+				{
+					/*
+					 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
+					 */
+					case 1: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+							if(true) {da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
+							break;
+					/*
+					 * Case 2: Generate Network-Metrics file for the specified product from it's PAJEK file. Prints out an error message if no PAJEK file can be found. 
+					 */
+					case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+							if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
+							rf.nwMatrix(dirName, productNames.get(i));
+							break;
+					/*
+					 * Case 3: Generate Bug-by-developer matrix for a given set of product, if file already exist, do nothing.
+					 */
+					case 3: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+							if(true) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
+							break;
+					/*
+					 * Case 4: Generate Developer-by-developer matrix for a given set of product, if file already exist, do nothing.
+					 */
+					case 4: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+							if(true) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
+							break;
+					/*
+					 * Case 5: Generate summary file for a given set of product, does nothing if file already exist		
+					 */
+					case 5: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
+							if(true) {da.generateCSV(productNames.get(i));
+							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
+							break;
+					case 6: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+							break;
+					case 7: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+							break;
+					default:break;
+				}
+							
+				long timeEnd = System.nanoTime();
+				System.out.println("");
+				System.out.println(productNames.get(i)+" ENDED");
+				System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
+				System.out.println("");
+			}
+		}else if(da.getDBName().equalsIgnoreCase("github_msr2014"))
+		{
+			
+		}for(int i = 0; i < prodCount; i++)
 		{
 			long timeStart = System.nanoTime();
 			System.out.println("\nSTARTING: "+productNames.get(i));
@@ -420,54 +482,18 @@ public class BatchProcess {
 				 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
 				 */
 				case 1: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-						if(!file.exists()) {da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
-						break;
-				/*
-				 * Case 2: Generate Network-Metrics file for the specified product from it's PAJEK file. Prints out an error message if no PAJEK file can be found. 
-				 */
-				case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-						if(!file.exists()) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
-						else rf.nwMatrix(dirName, productNames.get(i));
-						break;
-				/*
-				 * Case 3: Generate Bug-by-developer matrix for a given set of product, if file already exist, do nothing.
-				 */
-				case 3: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
-						if(!file.exists()) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
-						break;
-				/*
-				 * Case 4: Generate Developer-by-developer matrix for a given set of product, if file already exist, do nothing.
-				 */
-				case 4: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
-						if(!file.exists()) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
-						break;
-				/*
-				 * Case 5: Generate summary file for a given set of product, does nothing if file already exist		
-				 */
-				case 5: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
-						if(!file.exists()) {da.generateCSV(productNames.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
-						break;
-				case 6: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-						break;
-				case 7: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+						if(true) {daMSR.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+						io.writeFile(daMSR.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
 						break;
 				default:break;
 			}
 						
-			
 			long timeEnd = System.nanoTime();
 			System.out.println("");
 			System.out.println(productNames.get(i)+" ENDED");
 			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
 			System.out.println("");
 		}
-		
 	}
 
 }

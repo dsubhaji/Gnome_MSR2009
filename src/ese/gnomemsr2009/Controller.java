@@ -3,6 +3,7 @@ package ese.gnomemsr2009;
 public class Controller {
 
 	static DatabaseAccessor da = new DatabaseAccessor();
+	static DatabaseAccessorMSR daMSR = new DatabaseAccessorMSR();
 	static IOFormatter io = new IOFormatter();
 	static BatchProcess bp = new BatchProcess();
 	static RFunctions rf = new RFunctions();
@@ -21,7 +22,7 @@ public class Controller {
 		System.out.println("");
 		System.out.println("Connecting to Database...");
 		
-		if(da.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass()))
+		if(da.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass())&&daMSR.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass()))
 		{
 			System.out.println("Connected...");
 			System.out.println("");

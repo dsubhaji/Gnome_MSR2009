@@ -23,7 +23,8 @@ public class DatabaseAccessor
 	
 	private String fileContent;
 	private String fileName;
-
+	private String dbName;
+	
 	private int num;
 
 	public DatabaseAccessor()
@@ -42,8 +43,15 @@ public class DatabaseAccessor
 		return fileName;
 	}
 	
+	public String getDBName()
+	{
+		return dbName;
+	}
+	
+	
 	public boolean openConnection(String databaseName, String mysqlUser, String password) throws Exception
 	{
+		dbName = databaseName;
 		Class.forName("com.mysql.jdbc.Driver"); //load mysql driver
 		try
 		{
@@ -59,7 +67,7 @@ public class DatabaseAccessor
 		return true;
 	}
 	
-	public void createPajek(String product, String startDate, String endDate) throws Exception
+	public void generateDCN(String product, String startDate, String endDate) throws Exception
 	{
 		ArrayList<String> developers = new ArrayList<String>();
 		ArrayList<String> developers2= new ArrayList<String>();
