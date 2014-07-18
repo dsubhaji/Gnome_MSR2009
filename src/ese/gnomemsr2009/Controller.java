@@ -143,8 +143,8 @@ public class Controller {
 				}
 			}*/
 			 
-			if((((endTime - startTime)/1000000000)/60) < 1) System.out.println("Total Time Elapsed: " + (((endTime - startTime)/1000000)) + " milliseconds");
-			else System.out.println("Total Time Elapsed: " + (((endTime - startTime)/1000000000)/60) + " minutes");
+			
+			System.out.println("Total Time Elapsed: " + (((endTime - startTime)/1000000000)/60) + " minutes");
 			//close connection
 			//da.closeConnection();
 			

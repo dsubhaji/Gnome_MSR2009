@@ -199,11 +199,11 @@ public class BatchProcess {
 			da.createPajek(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			
-			da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
-			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+			//da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+			//io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
 			
-			da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
-			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+			//da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+			//io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
 			
 			da.generateCSV(productNames.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");

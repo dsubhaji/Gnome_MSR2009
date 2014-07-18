@@ -139,7 +139,7 @@ public class IOFormatter
 			System.out.println("5. Generate Project Data Summary in CSV Format for a Given Set of Products");
 			System.out.println("6. Generate Bug-Details in CSV Format for a Given Set of Products");
 			System.out.println("7. Generate Dev-Details in CSV Format for a Given Set of Products");
-			System.out.println("8. Generate 1-6 for a Given Set of Products");
+			System.out.println("8. Generate 1, 2, 5, 6, 7 for a Given Set of Products");
 			System.out.println("9. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
 			System.out.println("10. Generate Correlations, EigenValues, and Perform Factor Analysis");
 			System.out.print  ("Please Enter Your Choice (1 to 9): ");

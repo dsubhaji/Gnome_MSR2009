@@ -512,12 +512,8 @@ public class DatabaseAccessor
 		StringBuilder matrix = new StringBuilder();
 		
 		//RFunctions rf = Controller.rf;
-		System.out.println("");
-		System.out.println("Calculating Degree and Betweenness of the Developers...");
-		createPajek(product, startDate, endDate);
 		
 		//ArrayList<String> degNBetweenness = rf.rScript(fileContent, owner);
-		
 		//Column Headers
 		//matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
 		matrix.append("bug_id, owner, elapsed-time, component, version, rep-platform, op-sys, bug-status, resolution, priority, severity, target-milestone, duplicate, activity-level, number-of-comments, number-of-commenters, interest-span, number-of-comments-by-owner, owner-workload, owner-comment-arc");
@@ -894,10 +890,6 @@ public class DatabaseAccessor
 		StringBuilder matrix = new StringBuilder();
 		
 		//RFunctions rf = Controller.rf;
-		System.out.println("");
-		System.out.println("Calculating Degree and Betweenness of the Developers...");
-		createPajek(product, startDate, endDate);
-		
 		//ArrayList<String> degNBet = rf.rScript(fileContent, owners);
 		
 		//Column Headers

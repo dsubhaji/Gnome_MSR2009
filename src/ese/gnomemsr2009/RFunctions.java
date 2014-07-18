@@ -539,7 +539,7 @@ public class RFunctions
 			if (!theDir2.exists()) theDir2.mkdir();
 			
 			re.eval("deets2.ev  <- eigen(varCor)");
-			re.eval("deets2.faresults  <- factanal(deets2, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\")");
+			re.eval("deets2.faresults  <- factanal(deets2, "+parameters.get(0)+", scores=c(\"Bartlett\"), rotation=\""+parameters.get(1)+"\")");
 			
 			re.eval("write.csv(deets2.ev$values, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-eigenvalues-transformed.csv\")");
 			re.eval("write.csv(deets2.ev$vectors, file=\""+s+"/"+prodName+"/transformed/"+prodName+"-eigenvectors-transformed.csv\")");
