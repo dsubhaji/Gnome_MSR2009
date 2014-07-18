@@ -142,7 +142,7 @@ public class IOFormatter
 			System.out.println("8. Generate 1, 2, 5, 6, 7 for a Given Set of Products");
 			System.out.println("9. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
 			System.out.println("10. Generate Correlations, EigenValues, and Perform Factor Analysis");
-			System.out.print  ("Please Enter Your Choice (1 to 9): ");
+			System.out.print  ("Please Enter Your Choice (1 to 10): ");
 			
 			try
 			{
