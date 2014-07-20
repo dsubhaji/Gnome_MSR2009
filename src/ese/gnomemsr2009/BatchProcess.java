@@ -480,34 +480,34 @@ public class BatchProcess {
 			}
 		}else if(da.getDBName().equalsIgnoreCase("github_msr2014"))
 		{
-			
-		}for(int i = 0; i < prodCount; i++)
-		{
-			long timeStart = System.nanoTime();
-			System.out.println("\nSTARTING: "+productNames.get(i));
-			File file;
-			switch(a)
+			for(int i = 0; i < prodCount; i++)
 			{
-				/*
-				 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
-				 */
-				case 1: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-						if(true) {daMSR.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
-						io.writeFile(daMSR.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
-						break;
-				case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-						//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
-						rf.nwMatrix(dirName, productNames.get(i));
-						break;
-				
-				default:break;
+				long timeStart = System.nanoTime();
+				System.out.println("\nSTARTING: "+productNames.get(i));
+				File file;
+				switch(a)
+				{
+					/*
+					 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
+					 */
+					case 1: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+							if(true) {daMSR.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(daMSR.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
+							break;
+					case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+							//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
+							rf.nwMatrix(dirName, productNames.get(i));
+							break;
+					
+					default:break;
+				}
+							
+				long timeEnd = System.nanoTime();
+				System.out.println("");
+				System.out.println(productNames.get(i)+" ENDED");
+				System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
+				System.out.println("");
 			}
-						
-			long timeEnd = System.nanoTime();
-			System.out.println("");
-			System.out.println(productNames.get(i)+" ENDED");
-			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
-			System.out.println("");
 		}
 	}
 
