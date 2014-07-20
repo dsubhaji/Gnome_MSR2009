@@ -720,8 +720,8 @@ public class DatabaseAccessorGnome
 		ArrayList<String> avgInterestSpan	 	= new ArrayList<String>();
 		ArrayList<String> medianInterestSpan	= new ArrayList<String>();
 		
-		ArrayList<Double> elapsedTime 			= new ArrayList<Double>();
-		ArrayList<Double> interestSpan 			= new ArrayList<Double>();
+		ArrayList<Float> elapsedTime 			= new ArrayList<Float>();
+		ArrayList<Float> interestSpan 			= new ArrayList<Float>();
 		
 		
 		System.out.println("");
@@ -930,12 +930,12 @@ public class DatabaseAccessorGnome
 			
 			while(rs.next())
 			{
-				elapsedTime.add(rs.getDouble("elapsed_time"));
+				elapsedTime.add(rs.getFloat("elapsed_time"));
 			}
 			
 			//find the median of the elapsed time
 			int mid = elapsedTime.size()/2; 
-			double median = elapsedTime.get(mid); 
+			float median = elapsedTime.get(mid); 
 			if (elapsedTime.size()%2 == 0) 
 			{ 
 				median = (median + elapsedTime.get(mid-1))/2; 
@@ -960,12 +960,12 @@ public class DatabaseAccessorGnome
 			
 			while(rs.next())
 			{
-				interestSpan.add(rs.getDouble("interest_span"));
+				interestSpan.add(rs.getFloat("interest_span"));
 			}
 			
 			//find the median of the interest span
 			int mid2 = interestSpan.size()/2; 
-			double median2 = interestSpan.get(mid2); 
+			float median2 = interestSpan.get(mid2); 
 			if (interestSpan.size()%2 == 0) 
 			{ 
 				median2 = (median2 + interestSpan.get(mid2-1))/2; 
