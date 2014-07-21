@@ -928,9 +928,18 @@ public class DatabaseAccessorGnome
 					"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
 					); //Query to find the distinct developers working on the bugs
 			
+			float elTime = 0.0f;
+			
 			while(rs.next())
 			{
-				elapsedTime.add(rs.getFloat("elapsed_time"));
+				elTime = elTime + rs.getFloat("elapsed_time");
+				
+				elapsedTime.add(elTime);
+			}
+			
+			if(elTime == 0.0f)
+			{
+				elapsedTime.add(elTime);
 			}
 			
 			//find the median of the elapsed time
@@ -957,12 +966,18 @@ public class DatabaseAccessorGnome
 					"group by b.bugid " +
 					"order by timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 asc " 
 					);
+			Float intSpan = 0.0f;
 			
 			while(rs.next())
 			{
-				interestSpan.add(rs.getFloat("interest_span"));
+				intSpan = intSpan + rs.getFloat("interest_span");
+				interestSpan.add(intSpan);
 			}
 			
+			if(intSpan == 0.0f)
+			{
+				interestSpan.add(intSpan);
+			}
 			//find the median of the interest span
 			int mid2 = interestSpan.size()/2; 
 			float median2 = interestSpan.get(mid2); 

@@ -283,6 +283,7 @@ public class RFunctions
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
+			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
 			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
@@ -326,6 +327,7 @@ public class RFunctions
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 				
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
 				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 				re.eval("deets = deets[,!(names(deets) %in% drops)]");
@@ -393,6 +395,7 @@ public class RFunctions
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
+			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
 			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
@@ -511,6 +514,7 @@ public class RFunctions
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
+			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
 			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
