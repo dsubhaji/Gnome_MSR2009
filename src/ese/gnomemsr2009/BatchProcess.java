@@ -196,7 +196,7 @@ public class BatchProcess {
 		
 		for(int i = 0; i < prodCount; i++)
 		{
-			da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+			da.generateOwnersDCN(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			
 			//da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
