@@ -233,6 +233,8 @@ public class BatchProcess {
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
 		
+		//File theDir = new File(dirName+"/results/");
+		//if (!theDir.exists()) theDir.mkdir();
 		
 		for(int i = 0; i < prodCount; i++)
 		{
