@@ -139,10 +139,11 @@ public class IOFormatter
 			System.out.println("5. Generate Project Data Summary in CSV Format for a Given Set of Products");
 			System.out.println("6. Generate Bug-Details in CSV Format for a Given Set of Products");
 			System.out.println("7. Generate Dev-Details in CSV Format for a Given Set of Products");
-			System.out.println("8. Generate 1, 2, 5, 6, 7 for a Given Set of Products");
-			System.out.println("9. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
-			System.out.println("10. Generate Correlations, EigenValues, and Perform Factor Analysis");
-			System.out.print  ("Please Enter Your Choice (1 to 10): ");
+			System.out.println("8. Generate Descriptive Statistics and Correlations for a Given Set of Products");
+			System.out.println("9. Generate 1, 2, 5, 6, 7 for a Given Set of Products");
+			System.out.println("10. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
+			System.out.println("11. Generate Correlations, EigenValues, and Perform Factor Analysis");
+			System.out.print  ("Please Enter Your Choice (1 to 11): ");
 			
 			try
 			{
@@ -156,7 +157,7 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>10));
+		} while((choice<1)||(choice>11));
 	}
 	
 	public int inputType()

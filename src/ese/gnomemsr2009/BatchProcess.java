@@ -471,6 +471,9 @@ public class BatchProcess {
 					case 700: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 							break;
+					case 800:
+					case 8:	if(checkVars(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+							break;
 					default:break;
 				}
 							

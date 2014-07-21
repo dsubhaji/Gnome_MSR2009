@@ -36,7 +36,7 @@ public class Controller {
 			
 			int choice = io.inputChoice();
 			
-			if((choice >= 1)&&(choice <= 7))
+			if((choice >= 1)&&(choice <= 8))
 			{
 				io.batchInput();
 				
@@ -45,19 +45,19 @@ public class Controller {
 				bp.singleServices(io.getDirectoryPath(), choice*multiplier);
 				
 				endTime = System.nanoTime();
-			}else if(choice == 8)
+			}else if(choice == 9)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 1);
 				endTime = System.nanoTime();
-			}else if(choice == 9)
+			}else if(choice == 10)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 2);
 				endTime = System.nanoTime();
-			}else if(choice == 10)
+			}else if(choice == 11)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
