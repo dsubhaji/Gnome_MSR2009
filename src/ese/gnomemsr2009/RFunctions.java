@@ -283,6 +283,7 @@ public class RFunctions
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
+			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
@@ -323,8 +324,12 @@ public class RFunctions
 			if(model.equals("developer"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+				
+				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 				re.eval("deets = deets[,!(names(deets) %in% drops)]");
+				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
 				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
 			} else if(model.equals("bug"))
 			{
@@ -387,6 +392,8 @@ public class RFunctions
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+			
+			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
@@ -503,12 +510,15 @@ public class RFunctions
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
 			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+			
+			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+			
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
 		}
@@ -572,7 +582,7 @@ public class RFunctions
 			re.eval("varCor2  <- cor(deets3, use=\"pairwise.complete.obs\")");
 			
 			re.eval("deets3.ev  <- eigen(varCor2)");
-			re.eval("deets3.faresults  <- factanal(deets3, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\")");
+			re.eval("deets3.faresults  <- factanal(deets3, "+parameters.get(0)+",scores=c(\"Bartlett\"), rotation=\""+parameters.get(1)+"\")");
 			
 			re.eval("write.csv(varDesc2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-describe.csv\")");
 			re.eval("write.csv(varCor2, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-correlations.csv\")");
@@ -587,10 +597,10 @@ public class RFunctions
 			if (!theDir.exists()) theDir.mkdir();
 			
 			re.eval("deets2.ev  <- eigen(varCor)");
-			re.eval("deets2.faresults  <- factanal(deets2, "+parameters.get(0)+", rotation=\""+parameters.get(1)+"\")");
+			re.eval("deets2.faresults  <- factanal(deets2, "+parameters.get(0)+", scores=c(\"Bartlett\"), rotation=\""+parameters.get(1)+"\")");
 			
-			re.eval("write.csv(deets.ev$values, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvalues.csv\")");
-			re.eval("write.csv(deets.ev$vectors, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvectors.csv\")");
+			re.eval("write.csv(deets2.ev$values, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvalues.csv\")");
+			re.eval("write.csv(deets2.ev$vectors, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-eigenvectors.csv\")");
 			re.eval("write.csv(varDesc, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-describe.csv\")");
 			re.eval("write.csv(varCor, file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-correlations.csv\")");
 			//re.eval("write.csv(capture.output(print(deets2.faresults, digits=3, cutoff=0, sort=FALSE)), file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-faresults.csv\")");
