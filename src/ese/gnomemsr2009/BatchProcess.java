@@ -449,8 +449,16 @@ public class BatchProcess {
 								if(true) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
 								break;
+					case 300:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+								if(true) {da.generateBugsByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
+								break;
 					case 4: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
 								if(true) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
+								break;
+					case 400:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+								if(true) {da.generateOwnersByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
 								break;
 					case 500:

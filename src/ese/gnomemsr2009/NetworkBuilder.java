@@ -118,6 +118,7 @@ public class NetworkBuilder
 		return matrix.toString();
 	}
 	
+	
 	public String devsByDevs(ArrayList<String> developers, ArrayList<String> developers2, ArrayList<String> developers3, ArrayList<Integer> edges)
 	{
 		StringBuilder matrix = new StringBuilder();
