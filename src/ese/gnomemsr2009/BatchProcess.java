@@ -141,16 +141,22 @@ public class BatchProcess {
 	}
 	
 	@SuppressWarnings("resource")
-	public boolean factorAnalysis(String s) throws Exception
+	public boolean factorAnalysis(String s, int i) throws Exception
 	{
 		String [] nextLine;
 		
-		CSVReader reader = new CSVReader(new FileReader(dirName+"/parameters.csv"), ',', '\"', 1);
+		CSVReader reader;
 		
-		while ((nextLine = reader.readNext()) != null)
+		if(i == 1)
 		{
-			parameters.add(nextLine[1].trim());
+			reader = new CSVReader(new FileReader(dirName+"/parameters.csv"), ',', '\"', 1);
+			
+			while ((nextLine = reader.readNext()) != null)
+			{
+				parameters.add(nextLine[1].trim());
+			}
 		}
+		
 		
 		reader = new CSVReader(new FileReader(dirName+"/model-type.csv"), ',', '\"', 1);
 		
@@ -392,7 +398,7 @@ public class BatchProcess {
 					break;
 			case 2: if(checkVars(s, i)&&checkSubFolder()) descRegAndCor(1);
 					break;
-			case 3:	if(factorAnalysis(s)&&checkSubFolder()) descRegAndCor(2);
+			case 3:	if(factorAnalysis(s, 1)&&checkSubFolder()) descRegAndCor(2);
 					break;
 			default:break;	
 		}
@@ -463,7 +469,7 @@ public class BatchProcess {
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
 					case 800:
-					case 8:		if(checkVars(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+					case 8:		if(factorAnalysis(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 								break;
 					default:	System.out.println("Not Implemented Yet!");
 								break;
