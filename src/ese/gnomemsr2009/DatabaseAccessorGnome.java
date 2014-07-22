@@ -720,9 +720,6 @@ public class DatabaseAccessorGnome
 		ArrayList<String> avgInterestSpan	 	= new ArrayList<String>();
 		ArrayList<String> medianInterestSpan	= new ArrayList<String>();
 		
-		ArrayList<Float> elapsedTime 			= new ArrayList<Float>();
-		ArrayList<Float> interestSpan 			= new ArrayList<Float>();
-		
 		
 		System.out.println("");
 		System.out.println("Finding the Number of Bugs Owned by Each Developers...");
@@ -789,6 +786,8 @@ public class DatabaseAccessorGnome
 		
 		for(int i = 0; i < owners.size(); i++)
 		{
+			
+			
 			rs = s.executeQuery(
 					"select who, count(bug_when) " +
 					"from activity " +
@@ -869,6 +868,8 @@ public class DatabaseAccessorGnome
 		 */
 		for(int i = 0; i < owners.size(); i++)
 		{
+			ArrayList<Float> elapsedTime 			= new ArrayList<Float>();
+			ArrayList<Float> interestSpan 			= new ArrayList<Float>();
 			//find the number of times the owner has commented on their own bugs
 			rs = s.executeQuery(
 					"select who, count(text) " +
@@ -1061,8 +1062,7 @@ public class DatabaseAccessorGnome
 		ArrayList<String> avgInterestSpan	 	= new ArrayList<String>();
 		ArrayList<String> medianInterestSpan	= new ArrayList<String>();
 		
-		ArrayList<Double> elapsedTime 			= new ArrayList<Double>();
-		ArrayList<Double> interestSpan 			= new ArrayList<Double>();
+		
 		
 		System.out.println("");
 		System.out.println("Finding the Distinct Commenters...");
@@ -1078,7 +1078,7 @@ public class DatabaseAccessorGnome
 		
 		while(rs.next())
 		{
-			commenters.add(rs.getString("who"));
+			commenters.add(rs.getString("who").trim());
 		}
 		
 		System.out.println("");
@@ -1225,6 +1225,8 @@ public class DatabaseAccessorGnome
 		 */
 		for(int i = 0; i < commenters.size(); i++)
 		{
+			ArrayList<Float> elapsedTime 			= new ArrayList<Float>();
+			ArrayList<Float> interestSpan 			= new ArrayList<Float>();
 			//find the number of times the owner has commented on their own bugs
 			rs = s.executeQuery(
 					"select who, count(text) " +
@@ -1284,32 +1286,29 @@ public class DatabaseAccessorGnome
 					"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
 					); //Query to find the distinct developers working on the bugs
 			
+			float elTime = 0.0f;
 			
 			while(rs.next())
 			{
-				elapsedTime.add(rs.getDouble("elapsed_time"));
+				elTime = elTime + rs.getFloat("elapsed_time");
+				
+				elapsedTime.add(elTime);
 			}
 			
+			if(elTime == 0.0f)
+			{
+				elapsedTime.add(elTime);
+			}
 			
 			//find the median of the elapsed time
-			double median = 0.00; 
-			
-			if(elapsedTime.size() != 0)
-			{
-				int mid = elapsedTime.size()/2;
-				median = elapsedTime.get(mid); 
-				if (elapsedTime.size()%2 == 0) 
-				{ 
-					median = (median + elapsedTime.get(mid-1))/2; 
-				}
-				medianElapsedTime.add(""+median);
+			int mid = elapsedTime.size()/2; 
+			float median = elapsedTime.get(mid); 
+			if (elapsedTime.size()%2 == 0) 
+			{ 
+				median = (median + elapsedTime.get(mid-1))/2; 
 			}
 			
-			
-			if(elapsedTime.size() == 0)
-			{
-				medianElapsedTime.add("0");
-			}
+			medianElapsedTime.add(""+median);
 				
 			
 			
@@ -1328,34 +1327,86 @@ public class DatabaseAccessorGnome
 					"order by timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 asc " 
 					);
 			
+			float intSpan = 0.0f;
+			
 			while(rs.next())
 			{
-				interestSpan.add(rs.getDouble("interest_span"));
+				intSpan = intSpan + rs.getFloat("interest_span");
+				interestSpan.add(intSpan);
 			}
 			
+			if(intSpan == 0.0f)
+			{
+				interestSpan.add(intSpan);
+			}
 			//find the median of the interest span
-			 
-			double median2 = 0.00;
-			
-			if(interestSpan.size()!=0)
-			{
-				int mid2 = interestSpan.size()/2;
-				median2 = interestSpan.get(mid2);
-				if (interestSpan.size()%2 == 0) 
-				{ 
-					median2 = (median2 + interestSpan.get(mid2-1))/2; 
-				}
-			
-				medianInterestSpan.add(""+median2);
+			int mid2 = interestSpan.size()/2; 
+			float median2 = interestSpan.get(mid2); 
+			if (interestSpan.size()%2 == 0) 
+			{ 
+				median2 = (median2 + interestSpan.get(mid2-1))/2; 
 			}
-			
-			if(interestSpan.size() == 0)
-			{
-				medianInterestSpan.add("0");
-			}
+		
+			medianInterestSpan.add(""+median2);
 			
 		}
 		
+		
+		StringBuilder matrix = new StringBuilder();
+		
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span");
+		matrix.append("\n");
+		
+		String tempString = "0";
+		String tempString2= "0";
+		for(int i = 0; i < commenters.size(); i++)
+		{
+			matrix.append(commenters.get(i).trim() + ", ");
+			for(int j = 0; j < owners.size(); j++)
+			{
+				if(owners.get(j).equalsIgnoreCase(commenters.get(i)))
+				{
+					matrix.append(bugsOwned.get(j) + ", ");
+				}else
+				{
+					matrix.append("0, ");
+				}
+			}
+			
+			matrix.append(bugsCommented.get(i) + ", ");
+			matrix.append(bugsCommentSpan.get(i) + ", ");
+			matrix.append(commentsOnOwned.get(i) + ", ");
+			matrix.append(commentsOffOwned.get(i) + ", ");
+			matrix.append(noOfActivities.get(i) + ", ");
+			
+			for(int j = 0; j < assignedTo.size(); j++)
+			{
+				if(commenters.get(i).equals(assignedTo.get(j)))
+				{
+					tempString = avgInterestSpan.get(j);
+				}
+			}
+			//matrix.append(avgElapsedTime.get(i) + ", ");
+			
+			for(int j = 0; j < owners2.size(); j++)
+			{
+				if(commenters.get(i).equals(owners2.get(j)))
+				{
+					tempString2 = avgElapsedTime.get(j);
+				}
+			}
+			matrix.append(tempString2 + ", ");
+			matrix.append(medianElapsedTime.get(i) + ", ");
+			matrix.append(tempString + ", ");
+			matrix.append(medianInterestSpan.get(i));
+			//matrix.append(degNBet.get(i));
+			matrix.append("\n");
+			tempString = "0";
+			tempString2= "0";
+		}
+		
+		fileName = product+"-("+startDate+")-("+endDate+")-Devs-Details.csv";
+		fileContent = matrix.toString();
 	}
 	
 	public void closeConnection() throws Exception

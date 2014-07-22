@@ -435,46 +435,38 @@ public class BatchProcess {
 					 * Case 2: Generate Network-Metrics file for the specified product from it's PAJEK file. Prints out an error message if no PAJEK file can be found. 
 					 */
 					case 200: 
-					case 2: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-							//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
-							rf.nwMatrix(dirName, productNames.get(i));
-							break;
-					/*
-					 * Case 3: Generate Bug-by-developer matrix for a given set of product, if file already exist, do nothing.
-					 */
-					case 3: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
-							if(true) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
-							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
-							break;
-					/*
-					 * Case 4: Generate Developer-by-developer matrix for a given set of product, if file already exist, do nothing.
-					 */
-					case 4: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
-							if(true) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
-							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
-							break;
-					/*
-					 * Case 5: Generate summary file for a given set of product, does nothing if file already exist		
-					 */
+					case 2: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
+								//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
+								rf.nwMatrix(dirName, productNames.get(i));
+								break;
+					case 3:		file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+								if(true) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
+								break;
+					case 4: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+								if(true) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
+								break;
 					case 500:
-					case 5: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
-							if(true) {da.generateCSV(productNames.get(i));
-							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
-							break;
+					case 5: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
+								if(true) {da.generateCSV(productNames.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
+								break;
 					case 600:
-					case 6: da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
-							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-							break;
-					case 7:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
+					case 6: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
+								break;
+					case 7:		da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
-					case 700: da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
-							io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
-							break;
+					case 700: 	da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
+								break;
 					case 800:
-					case 8:	if(checkVars(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
-							break;
-					default:break;
+					case 8:		if(checkVars(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+								break;
+					default:	System.out.println("Not Implemented Yet!");
+								break;
 				}
 							
 				long timeEnd = System.nanoTime();
@@ -504,7 +496,8 @@ public class BatchProcess {
 							rf.nwMatrix(dirName, productNames.get(i));
 							break;
 					
-					default:break;
+					default:System.out.println("Not Implemented Yet!");
+							break;
 				}
 							
 				long timeEnd = System.nanoTime();
