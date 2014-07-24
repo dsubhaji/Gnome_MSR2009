@@ -509,7 +509,14 @@ public class BatchProcess {
 							//if(true) System.out.println("Can't find PAJEK File for: "+productNames.get(i));
 							rf.nwMatrix(dirName, productNames.get(i));
 							break;
-					
+					case 3: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
+							if(true) {daMSR.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(daMSR.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
+							break;
+					case 4: file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
+							if(true) {daMSR.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+							io.writeFile(daMSR.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
+							break;
 					default:System.out.println("Not Implemented Yet!");
 							break;
 				}

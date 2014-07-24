@@ -128,4 +128,124 @@ public class DatabaseAccessorGithub
 		fileContent = nb.networkBuilder(developers, developers2, developers3, edges, num);
 		
 	}
+	
+	public void generateDevsByDevs(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> developers = new ArrayList<String>();
+		ArrayList<String> developers2= new ArrayList<String>();
+		ArrayList<String> developers3= new ArrayList<String>();
+		ArrayList<Integer> edges     = new ArrayList<Integer>();
+		
+		
+		System.out.println("");
+		System.out.println("Retrieving the Developer's E-Mail Addresses...");
+		
+		rs = s.executeQuery(
+				"select distinct(d.login) 'who'" +
+				"from pull_request_comments a, commits b, projects c, users d " +
+				"where a.commit_id = b.id " +
+				"and b.project_id = c.id " +
+				"and a.user_id = d.id " +
+				"and c.name = '"+product+"' " +
+				"and a.created_at between '"+startDate+"' and '"+endDate+"' ;" 
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			developers.add(rs.getString("who"));
+		}
+		
+		System.out.println("Building the Developer Communication Network...");
+		
+		rs = s.executeQuery(
+				"select a.user1, count(distinct(b.pid2)), b.user2 " +
+						"from (select a.pull_request_id 'pid1', b.login 'user1', a.commit_id 'cid1', a.created_at from pull_request_comments a, users b where a.user_id = b.id) a, (select a.pull_request_id 'pid2', b.login 'user2', a.commit_id 'cid2', a.created_at from pull_request_comments a, users b where a.user_id = b.id) b, commits c, projects d " +
+						"where user1 <> user2 " +
+						"and a.pid1 = b.pid2 " +
+						"and a.cid1 = c.id " +
+						"and c.project_id = d.id " +
+						"and d.name like '"+product+"' " +
+						"and a.created_at between '"+startDate+"' and '"+endDate+"' " +
+						"group by a.user1, b.user2 " +
+						"order by a.user1; "
+						//Query to find how many times a developer work with another developer on the bugs of a particular component
+				);
+		
+		while(rs.next())
+		{
+			developers2.add(rs.getString("a.user1"));
+			developers3.add(rs.getString("b.user2"));
+			edges.add((rs.getInt("count(distinct(b.pid2))")));
+		}
+		
+		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
+		fileName = "DevsByDevsMatrix-"+product+"-"+df.format(new Date())+".csv";
+		fileContent = nb.devsByDevs(developers, developers2, developers3, edges);
+		
+	}
+	
+	public void generateBugsByDev(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> distinctBug_id 			= new ArrayList<String>();
+		ArrayList<String> distinctDev_email 		= new ArrayList<String>();
+		ArrayList<String> bug_id 			= new ArrayList<String>();
+		ArrayList<String> dev_email 		= new ArrayList<String>();
+		ArrayList<Integer> numOfComments 	= new ArrayList<Integer>();
+		
+		System.out.println("\nExtracting Data from Database...");
+		
+		rs = s.executeQuery(
+							"select distinct(a.pull_request_id) 'id'" +
+							"from pull_request_comments a, commits b, projects c " +
+							"where a.commit_id = b.id " +
+							"and b.project_id = c.id " +
+							"and a.created_at between '"+startDate+"' and '"+endDate+"' " +
+							"and c.name = '"+product+"';"
+							);
+		
+		while(rs.next())
+		{
+			distinctBug_id.add(rs.getString("id"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(d.login) 'who'" +
+							"from pull_request_comments a, commits b, projects c, users d " +
+							"where a.commit_id = b.id " +
+							"and b.project_id = c.id " +
+							"and a.user_id = d.id " +
+							"and c.name = '"+product+"' " +
+							"and a.created_at between '"+startDate+"' and '"+endDate+"' ;" 
+							); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			distinctDev_email.add(rs.getString("who"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(a.pull_request_id) 'id', d.login, count(distinct(a.comment_id)) 'count' " +
+							"from pull_request_comments a, commits b, projects c, users d " +
+							"where a.commit_id = b.id " +
+							"and b.project_id = c.id " +
+							"and a.user_id = d.id " +
+							"and c.name = '"+product+"' " +
+							"and a.created_at between '"+startDate+"' and '"+endDate+"' " +
+							"group by d.login, a.pull_request_id; " 
+							);
+		
+		while(rs.next())
+		{
+			bug_id.add(rs.getString("id"));
+			dev_email.add(rs.getString("d.login"));
+			numOfComments.add(rs.getInt("count"));
+		}
+		
+		
+		
+		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
+		fileName = "BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv";
+		fileContent = nb.bugsByDevsGithub(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
+	}
+	
 }

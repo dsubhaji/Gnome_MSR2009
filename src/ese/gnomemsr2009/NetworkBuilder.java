@@ -156,5 +156,42 @@ public class NetworkBuilder
 		return matrix.toString();
 	}
 	
+	public String bugsByDevsGithub(ArrayList<String> distinctDev_email, ArrayList<String> distinctBug_id, ArrayList<String> dev_email, ArrayList<String> bug_id, ArrayList<Integer> numOfComments)
+	{
+		StringBuilder matrix = new StringBuilder();
+		
+		System.out.println("Building BugsByDevelopers Matrix...");
+		
+		matrix.append("pull_request_id, ");
+		
+		for(int i = 0; i < distinctDev_email.size(); i++)
+		{
+			matrix.append(distinctDev_email.get(i));
+			matrix.append(", ");
+		}
+		
+		for(int i = 0; i < distinctBug_id.size(); i++)
+		{
+			matrix.append("\n");
+			matrix.append(distinctBug_id.get(i));
+			matrix.append(", ");
+			
+			for(int j = 0; j < distinctDev_email.size(); j++)
+			{
+				for(int k = 0; k < dev_email.size(); k++)
+				{
+					if(	(bug_id.get(k).equals(distinctBug_id.get(i)))	&& (dev_email.get(k).equals(distinctDev_email.get(j))))
+					{
+						matrix.append(numOfComments.get(k).toString());
+						matrix.append(" ");
+					}
+				}
+				matrix.append(", ");
+			}
+		}
+		
+		return matrix.toString();
+	}
+	
 	
 }
