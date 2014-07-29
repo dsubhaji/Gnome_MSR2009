@@ -211,8 +211,8 @@ public class BatchProcess {
 			//da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
 			//io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
 			
-			da.generateCSV(productNames.get(i));
-			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
+			//da.generateCSV(productNames.get(i));
+			//io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
 			
 			da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
@@ -226,6 +226,9 @@ public class BatchProcess {
 			
 			//rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 		}
+		System.out.println("\nGenerating Product Summary.");
+		da.generateCSV(productNames);
+		io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 	}
 	
 	/* descRegAndCor(ArrayList<String>, ArrayList<String>, ArrayList<String)
@@ -400,6 +403,7 @@ public class BatchProcess {
 					break;
 			case 3:	if(factorAnalysis(s, 1)&&checkSubFolder()) descRegAndCor(2);
 					break;
+			case 4: 
 			default:break;	
 		}
 		
@@ -419,6 +423,7 @@ public class BatchProcess {
 		
 		if(da.getDBName().equalsIgnoreCase("sutd")||da.getDBName().equalsIgnoreCase("gnome_msr2009"))
 		{
+			if(a!=5&&a!=500)
 			for(int i = 0; i < prodCount; i++)
 			{
 				long timeStart = System.nanoTime();
@@ -462,10 +467,7 @@ public class BatchProcess {
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
 								break;
 					case 500:
-					case 5: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");
-								if(true) {da.generateCSV(productNames.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-summary.csv");}
-								break;
+					case 5: 	break;
 					case 600:
 					case 6: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
@@ -489,6 +491,14 @@ public class BatchProcess {
 				System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
 				System.out.println("");
 			}
+			
+			if(a==5||a==500)
+			{
+				System.out.println("\nGenerating Product Summary.");
+				da.generateCSV(productNames);
+				io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
+			}
+			
 		}else if(da.getDBName().equalsIgnoreCase("github_msr2014"))
 		{
 			for(int i = 0; i < prodCount; i++)

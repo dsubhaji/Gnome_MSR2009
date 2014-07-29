@@ -271,14 +271,25 @@ public class DatabaseAccessorGnome
 		fileContent = csv.toString();
 	}
 	
-	public void generateCSV(String productName) throws Exception
+	public void generateCSV(ArrayList<String> productName) throws Exception
 	{
+		int arrayLength = productName.size();
+		String inStatement = "";
+		for(int i = 0; i < arrayLength; i++)
+		{
+			if(i == 0)
+				inStatement = inStatement + "AND (trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"'";
+			if(i == arrayLength - 1)
+				inStatement = inStatement + " OR trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"') ";
+			else
+				inStatement = inStatement + " OR trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"'";
+		}
 		System.out.println("Extracting Data from Database...");
 		
 		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
 							+"from bugs a, comment b "
 							+"where a.bug_id = b.bugid "
-							+"and trim(' ' from replace(a.product, '\n', '')) like '"+productName+"'"
+							+ inStatement
 							+"group by a.product "
 							);
 		

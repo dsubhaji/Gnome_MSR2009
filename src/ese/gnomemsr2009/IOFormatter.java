@@ -70,7 +70,7 @@ public class IOFormatter
 	 */
 	public void inputConString()
 	{
-		System.out.print("Please Enter Database Name: ");
+		System.out.print("Please Enter Database Name(gnome_msr2009 or github_msr2014): ");
 		
 		dbN = user_input.nextLine();
 		

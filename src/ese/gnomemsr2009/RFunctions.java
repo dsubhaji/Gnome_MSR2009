@@ -256,10 +256,13 @@ public class RFunctions
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
 		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("if(\"seqinr\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"seqinr\")}");
+		re.eval("if(\"dplyr\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"dplyr\")}");
 		re.eval("library('blockmodeling')");
 		re.eval("library('igraph')");
 		re.eval("library('Matrix')");
-		
+		re.eval("library('seqinr')");
+		re.eval("library('dplyr')");
 		
 		s=s.replaceAll("\\\\", "/");
 		
@@ -298,6 +301,26 @@ public class RFunctions
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+			/*re.eval("devDeets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+			
+			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
+			*/
+			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+			re.eval("deets = deets[,!(names(deets) %in% drops)]");
+			/*re.eval("devDeets = deets[,!(names(deets) %in% drops)]");
+			
+			re.eval("colnames(devDeets)[colnames(devDeets) == 'developer'] = 'owner'");
+			re.eval("colnames(dcnMetrics)[colnames(dcnMetrics) == 'Developers'] = 'owner'");
+			
+			re.eval("dcnMetrics$owner = trimSpace(dcnMetrics$owner)");
+			re.eval("devDeets$owner = trimSpace(devDeets$owner)");
+			re.eval("deets$owner = trimSpace(deets$owner)");
+			
+			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by=\"owner\", all.x=TRUE)");
+			re.eval("deets = merge(deets, devDeets, by=\"owner\", all.x=TRUE)");
+			*/
 			for(int i = 0; i < noOfVar; i++)
 			{
 				re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
@@ -340,8 +363,27 @@ public class RFunctions
 			} else if(model.equals("bug"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
+				/*re.eval("devDeets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
+				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+				
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
+				*/
 				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 				re.eval("deets = deets[,!(names(deets) %in% drops)]");
+				/*re.eval("devDeets = deets[,!(names(deets) %in% drops)]");
+				
+				re.eval("colnames(devDeets)[colnames(devDeets) == 'developer'] = 'owner'");
+				re.eval("colnames(dcnMetrics)[colnames(dcnMetrics) == 'Developers'] = 'owner'");
+				
+				re.eval("deets$owner = trimSpace(deets$owner)");
+				re.eval("dcnMetrics$owner = trimSpace(dcnMetrics$owner)");
+				re.eval("devDeets$owner = trimSpace(devDeets$owner)");
+				
+				
+				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by=\"owner\", all.x=TRUE)");
+				re.eval("deets = merge(deets, devDeets, by=\"owner\", all.x=TRUE)");
+				*/
 				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
 			}
 			
