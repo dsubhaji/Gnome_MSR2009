@@ -15,8 +15,9 @@ import java.util.Locale;
 public class DatabaseAccessorGnome 
 {
 	Connection con;
-	ResultSet rs;
+	ResultSet rs, rs2;
 	Statement s ;
+	Statement s2;
 	
 	private NetworkBuilder nb = new NetworkBuilder();
 	
@@ -57,7 +58,7 @@ public class DatabaseAccessorGnome
 		{
 			con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/" + databaseName + "?user=" + mysqlUser + "&password=" + password); //set-up connection with database
 			s = con.createStatement(); //Statements to issue sql queries
-			
+			s2 = con.createStatement();
 		} catch (SQLException e) 
 		{
 			e.printStackTrace();
@@ -271,10 +272,31 @@ public class DatabaseAccessorGnome
 		fileContent = csv.toString();
 	}
 	
-	public void generateCSV(ArrayList<String> productName) throws Exception
+	public void generateCSV(ArrayList<String> productName, String dirName) throws Exception
 	{
+		ArrayList<String> elapsedDays 		= new ArrayList<String>();
+		ArrayList<String> elapsedHours 		= new ArrayList<String>();
+		ArrayList<String> elapsedMinutes	= new ArrayList<String>();
+		
+		ArrayList<String> firstComment		= new ArrayList<String>();
+		ArrayList<String> lastComment		= new ArrayList<String>();
+		
+		ArrayList<String> productName2 		= new ArrayList<String>();
+		ArrayList<String> numOfBugs 		= new ArrayList<String>();
+		ArrayList<String> numOfComments 	= new ArrayList<String>();
+		ArrayList<String> numOfDevs			= new ArrayList<String>();
+		ArrayList<String> numOfOwners		= new ArrayList<String>();
+		
+		ArrayList<String> medianElapsedTime	= new ArrayList<String>();
+		ArrayList<String> avgElapsedTime	= new ArrayList<String>();
+		ArrayList<String> everythingElse	= new ArrayList<String>();
+		//everythingElse includes cent.Degree, cent.Betweenness, cent.closeness, cent.EVcent, transitivity.global, assortativity, diameter, density, modularity, avg.PathLength, and avg.Degree
+		
 		int arrayLength = productName.size();
 		String inStatement = "";
+		
+		RFunctions rf = Controller.rf;
+		
 		for(int i = 0; i < arrayLength; i++)
 		{
 			if(i == 0)
@@ -284,25 +306,26 @@ public class DatabaseAccessorGnome
 			else
 				inStatement = inStatement + " OR trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"'";
 		}
-		System.out.println("Extracting Data from Database...");
 		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
+		System.out.println("\nExtracting Data from Database...");
+		
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))), count(distinct(a.assigned_to)) "
 							+"from bugs a, comment b "
 							+"where a.bug_id = b.bugid "
 							+ inStatement
 							+"group by a.product "
 							);
 		
-		StringBuilder csv = new StringBuilder();
-		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\"\n");
 		
-		System.out.println("Generating .CSV File");
 		while(rs.next())
 		{
-			csv.append("\""+rs.getString("(trim(' ' from replace(a.product, '\n', '')))")+"\", ");
-			csv.append(rs.getInt("count(distinct(b.bugid))") + ",");
-			csv.append(rs.getInt("count(b.bug_when)") + ", ");
-			csv.append(rs.getInt("count(distinct(b.who))")+ ", ");
+			String product = rs.getString("(trim(' ' from replace(a.product, '\n', '')))");
+			
+			productName2.add("\"" + product +"\"");
+			numOfBugs.add("" + rs.getInt("count(distinct(b.bugid))"));
+			numOfComments.add("" + rs.getInt("count(b.bug_when)"));
+			numOfDevs.add("" + rs.getInt("count(distinct(b.who))"));
+			numOfOwners.add("" + rs.getInt("count(distinct(a.assigned_to))"));
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
 			
 			String minDate = rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))");
@@ -311,18 +334,97 @@ public class DatabaseAccessorGnome
 			Date dateMin = sdf.parse(minDate);
 			Date dateMax = sdf.parse(maxDate);
 			
-			csv.append("\""+minDate+"\", ");
-			csv.append("\""+maxDate+"\", ");
+			firstComment.add("\""+minDate+"\"");
+			lastComment.add("\""+maxDate+"\"");
 			
 			float differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
-			float days = (((differenceInTime/1000)/3600)/24); //elapsed time in days
-			float hours = ((differenceInTime/1000)/3600); //elapsed time in hours
-			float minutes = ((differenceInTime/1000)/60); //elapsed time in minutes
+			elapsedDays.add("" + (float)(((differenceInTime/1000)/3600)/24)); //elapsed time in days
+			elapsedHours.add("" + (float)((differenceInTime/1000)/3600)); //elapsed time in hours
+			elapsedMinutes.add("" + (float)((differenceInTime/1000)/60)); //elapsed time in minutes
 			
-			csv.append(days+", ");
-			csv.append(hours+", ");
-			csv.append(minutes+"\n ");
+			System.out.println("\nCalculating Median Elapsed Time of: " + product + "\n");
 			
+			rs2 = s2.executeQuery(
+							"select timestampdiff(second, a.creation_ts, a.delta_ts)/3600 'elapsed_time' " +
+							"from bugs a " +
+							"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
+								);
+			
+			float elTime = 0.0f;
+			ArrayList<Float> elapsedTime 			= new ArrayList<Float>();
+			
+			while(rs2.next())
+			{
+				elTime = elTime + rs2.getFloat("elapsed_time");
+				
+				elapsedTime.add(elTime);
+			}
+			
+			if(elTime == 0.0f)
+			{
+				elapsedTime.add(elTime);
+			}
+			
+			//find the median of the elapsed time
+			int mid = elapsedTime.size()/2; 
+			float median = elapsedTime.get(mid); 
+			
+			if (elapsedTime.size()%2 == 0) 
+			{ 
+				median = (median + elapsedTime.get(mid-1))/2; 
+			}
+			
+			medianElapsedTime.add(""+median);
+			
+			System.out.println("\nCalculating Average Elapsed Time of: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+					"select a.assigned_to,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime " +
+					"from bugs a " +
+					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"group by a.assigned_to " +
+					"order by a.assigned_to; "
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs2.next())
+			{
+				avgElapsedTime.add(rs2.getString("avgElapsedTime"));
+			}
+			
+			System.out.println("\nCalculating Network Metrics of: " + product + "\n");
+			
+			everythingElse.add(rf.summaryMetrics(dirName, product));
+		}
+		
+		//StringBuilder start
+		StringBuilder csv = new StringBuilder();
+		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", "
+				+ "\"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\", "
+				+ "\"Number of Owners\", \"Degree\", \"Betweenness\", \"Closeness\", \"EVCent\", \"Transitivity(global)\", "
+				+ "\"Assortativity\", \"Diameter\", \"Density\", \"Modularity\", \"Avg. Path Length\", \"Avg. Degree\", "
+				+ "\"Avg. Elapsed Time\", \"Median Elapsed Time\"\n");
+		
+		System.out.println("Generating .CSV File");
+		
+		for(int i = 0; i < arrayLength; i++)
+		{
+			csv.append(productName2.get(i) + ", ");
+			csv.append(numOfBugs.get(i) + ", ");
+			csv.append(numOfComments.get(i) + ", ");
+			csv.append(numOfDevs.get(i) + ", ");
+			
+			csv.append(firstComment.get(i) + ", ");
+			csv.append(lastComment.get(i) + ", ");
+			csv.append(elapsedDays.get(i) + ", ");
+			csv.append(elapsedHours.get(i) + ", ");
+			csv.append(elapsedMinutes.get(i) + ", ");
+			
+			csv.append(numOfOwners.get(i) + ", ");
+			csv.append(everythingElse.get(i) + ", ");
+			
+			csv.append(avgElapsedTime.get(i) + ", ");
+			csv.append(medianElapsedTime.get(i) + "\n");
 		}
 		
 		fileName = "ProjectDataSummary.csv";

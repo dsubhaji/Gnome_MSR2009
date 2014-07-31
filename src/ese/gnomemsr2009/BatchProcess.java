@@ -227,7 +227,7 @@ public class BatchProcess {
 			//rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 		}
 		System.out.println("\nGenerating Product Summary.");
-		da.generateCSV(productNames);
+		da.generateCSV(productNames, dirName);
 		io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 	}
 	
@@ -495,7 +495,7 @@ public class BatchProcess {
 			if(a==5||a==500)
 			{
 				System.out.println("\nGenerating Product Summary.");
-				da.generateCSV(productNames);
+				da.generateCSV(productNames, dirName);
 				io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 			}
 			

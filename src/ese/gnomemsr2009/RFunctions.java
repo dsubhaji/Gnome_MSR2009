@@ -191,6 +191,80 @@ public class RFunctions
 		return degNBetweenness;
 	}
 	
+	/*
+	 * Input: Directory to product-names.csv
+	 * Output: network metrics to be appended to project summary
+	 */
+	public String summaryMetrics(String dirName, String productName)
+	{
+		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
+		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("library('blockmodeling')");
+		re.eval("library('igraph')");
+		re.eval("library('Matrix')");
+		
+		dirName = dirName.replaceAll("\\\\", "/");
+		
+		re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DCN.net\")");
+		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
+		
+		re.eval("cent.Degree = centralization.degree(dcnGraph)$centralization");
+		re.eval("cent.Betweenness = centralization.betweenness(dcnGraph)$centralization");
+		re.eval("cent.closeness = centralization.closeness(dcnGraph)$centralization");
+		re.eval("cent.EVcent = centralization.evcent(dcnGraph)$centralization");
+		re.eval("transitivity.global = transitivity(dcnGraph, type=c('global'))");
+		re.eval("assortativity = assortativity.degree(dcnGraph)");
+		re.eval("diameter = diameter(dcnGraph)");
+		re.eval("density = graph.density(dcnGraph, loop=TRUE)");
+		re.eval("modularity = modularity(walktrap.community(dcnGraph))");
+		re.eval("avg.PathLength = average.path.length(dcnGraph)");
+		re.eval("avg.Degree = (2 * ecount(dcnGraph))/vcount(dcnGraph)");
+		
+		re.eval("productSum = data.frame(cent.Degree, cent.Betweenness, cent.closeness, cent.EVcent, transitivity.global, assortativity, diameter, density, modularity, avg.PathLength, avg.Degree)");
+		
+		String b = "";
+		
+		REXP x = re.eval("productSum[, 1:11]");
+		RList vl = x.asList();
+		String[] k = vl.keys();
+		String[] m = new String[k.length];
+		
+		if (k!=null) {
+			int i=0; while (i<k.length) m[i] = "" + vl.at(k[i++]);
+		}	
+		
+		if (m!=null)
+		{
+			int i=0;
+			while(i<m.length)
+			{
+				String a = "";
+				float f = 0.0f;
+				
+				
+				a = m[i].substring(8, m[i].length()-2);
+				
+				if(a.isEmpty())
+					a = "0";
+				
+				f = Float.parseFloat(a);
+				
+				if(i==10)
+				{
+					b = b + f;
+				} else
+				{
+					b = b + f + ", ";
+				}
+				
+				i++;
+			}
+		}
+		
+		return b;
+		
+	}
 	
 	/*Input: Directory to csv files and product name
 	 *Output: network-metrics.csv for each product I.E Degree and betweenness
