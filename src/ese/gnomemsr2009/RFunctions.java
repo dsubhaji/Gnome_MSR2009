@@ -206,6 +206,18 @@ public class RFunctions
 		
 		dirName = dirName.replaceAll("\\\\", "/");
 		
+		re.eval("cent.Degree = 0");
+		re.eval("cent.Betweenness = 0");
+		re.eval("cent.closeness = 0");
+		re.eval("cent.EVcent = 0");
+		re.eval("transitivity.global = 0");
+		re.eval("assortativity = 0");
+		re.eval("diameter = 0");
+		re.eval("density = 0");
+		re.eval("modularity = 0");
+		re.eval("avg.PathLength = 0");
+		re.eval("avg.Degree = 0");
+		
 		re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DCN.net\")");
 		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
 		
@@ -220,6 +232,9 @@ public class RFunctions
 		re.eval("modularity = modularity(walktrap.community(dcnGraph))");
 		re.eval("avg.PathLength = average.path.length(dcnGraph)");
 		re.eval("avg.Degree = (2 * ecount(dcnGraph))/vcount(dcnGraph)");
+		
+		re.eval("rm(dcn)");
+		re.eval("rm(dcnGraph)");
 		
 		re.eval("productSum = data.frame(cent.Degree, cent.Betweenness, cent.closeness, cent.EVcent, transitivity.global, assortativity, diameter, density, modularity, avg.PathLength, avg.Degree)");
 		

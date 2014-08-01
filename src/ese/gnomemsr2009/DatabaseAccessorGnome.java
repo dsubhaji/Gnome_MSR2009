@@ -407,7 +407,7 @@ public class DatabaseAccessorGnome
 		
 		System.out.println("Generating .CSV File");
 		
-		for(int i = 0; i < arrayLength; i++)
+		for(int i = 0; i < productName2.size(); i++)
 		{
 			csv.append(productName2.get(i) + ", ");
 			csv.append(numOfBugs.get(i) + ", ");
