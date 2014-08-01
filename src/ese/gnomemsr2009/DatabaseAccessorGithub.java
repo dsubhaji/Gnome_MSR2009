@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 public class DatabaseAccessorGithub 
 {
@@ -248,4 +249,122 @@ public class DatabaseAccessorGithub
 		fileContent = nb.bugsByDevsGithub(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
 	}
 	
+	public void generateCSV(ArrayList<String> productName, String dirName) throws Exception
+	{
+		ArrayList<String> projectID 		= new ArrayList<String>();
+		ArrayList<String> parametersOne		= new ArrayList<String>();
+		//project name, url, language, time created, forked from, number of members and number of watchers
+		ArrayList<String> parametersTwo		= new ArrayList<String>();
+		//number of issues and number of comments on issues
+		ArrayList<String> parametersThree	= new ArrayList<String>();
+		//number of commits and number of comments of commits
+		ArrayList<String> parametersFour	= new ArrayList<String>();
+		//number of pull requests and number of comments on pull requests
+		int arrayLength = productName.size();
+		String inStatement = "";
+		
+		for(int i = 0; i < arrayLength; i++)
+		{
+			if(i == 0)
+				inStatement = inStatement + "WHERE a.name like '"+productName.get(i).trim()+"'";
+			if(i == arrayLength - 1)
+				inStatement = inStatement + " OR a.name like '"+productName.get(i).trim()+"' ";
+			else
+				inStatement = inStatement + " OR a.name like '"+productName.get(i).trim()+"'";
+		}
+		
+		System.out.println("\nExtracting Data from Database...");
+		
+		rs = s.executeQuery("select a.id, a.name, a.url, IFNULL(a.language, 'NA') 'language', a.created_at, IFNULL(a.forked_from, 'NA') 'forked_from', count(distinct(c.user_id)) 'no_of_members', count(b.user_id) 'no_of_watchers' "
+							+"from projects a "
+							+"LEFT JOIN watchers b ON a.id = b.repo_id "
+							+"LEFT JOIN project_members c ON c.repo_id = a.id "
+							+ inStatement
+							+"group by a.id "
+							+"order by a.id;"
+							);
+		
+		while(rs.next())
+		{
+			projectID.add(rs.getString("a.id"));
+			String parameters = rs.getString("a.name") + ", "
+					+ rs.getString("a.url") + ", "
+					+ rs.getString("language") + ", "
+					+ rs.getString("a.created_at") + ", "
+					+ rs.getString("forked_from") + ", "
+					+ rs.getString("no_of_members") + ", "
+					+ rs.getString("no_of_watchers") + ", ";
+			parametersOne.add(parameters);
+		}
+		
+		rs = s.executeQuery("select a.id, a.name, count(distinct(c.id)) 'no_of_issues', count(distinct(d.comment_id)) 'no_of_comments_on_issues' "
+				+"from projects a "
+				+"LEFT JOIN issues c ON c.repo_id = a.id "
+				+"LEFT JOIN issue_comments d ON c.id = d.issue_id "
+				+ inStatement
+				+"group by a.id "
+				+"order by a.id;"
+				);
+
+		while(rs.next())
+		{
+			String parameters = rs.getString("no_of_issues") + ", "
+					+ rs.getString("no_of_comments_on_issues") + ", ";
+			
+			parametersTwo.add(parameters);
+		}
+		
+		rs = s.executeQuery("select a.id, a.name, count(distinct(c.id)) 'no_of_commits', count(distinct(d.comment_id)) 'no_of_comments_on_commits' "
+				+"from projects a "
+				+"LEFT JOIN commits c ON c.project_id = a.id "
+				+"LEFT JOIN commit_comments d ON c.id = d.commit_id "
+				+ inStatement
+				+"group by a.id "
+				+"order by a.id;"
+				);
+
+		while(rs.next())
+		{
+			String parameters = rs.getString("no_of_commits") + ", "
+					+ rs.getString("no_of_comments_on_commits") + ", ";
+			
+			parametersThree.add(parameters);
+		}
+		
+		rs = s.executeQuery("select a.id, a.name, count(distinct(c.id)) 'no_of_pull_requests', count(distinct(d.comment_id)) 'no_of_comments_on_pull_requests' "
+				+"from projects a "
+				+"LEFT JOIN pull_requests c ON c.head_repo_id = a.id "
+				+"LEFT JOIN pull_request_comments d ON c.id = d.pull_request_id "
+				+ inStatement
+				+"group by a.id "
+				+"order by a.id;"
+				);
+
+		while(rs.next())
+		{
+			String parameters = rs.getString("no_of_pull_requests") + ", "
+					+ rs.getString("no_of_comments_on_pull_requests") + "";
+			
+			parametersFour.add(parameters);
+		}
+		StringBuilder csv = new StringBuilder();
+		csv.append("\"Project ID\", \"Project Name\", \"URL\", \"Language\", "
+				+ "\"Created At\", \"Forked From\", \"Number of Members\", \"Number of Watchers\", "
+				+ "\"Number of Issues\", \"Number of Comments on Issues\", "
+				+ "\"Number of Commits\", \"Number of Comments on Commits\", "
+				+ "\"Number of Pull Requests\", \"Number of Comments on Pull Requests\"\n");
+		
+		System.out.println("Generating .CSV File");
+		
+		for(int i = 0; i < projectID.size(); i++)
+		{
+			csv.append(projectID.get(i) + ", ");
+			csv.append(parametersOne.get(i));
+			csv.append(parametersTwo.get(i));
+			csv.append(parametersThree.get(i));
+			csv.append(parametersFour.get(i) + "\n");
+		}
+		
+		fileContent = csv.toString();
+	}
 }
