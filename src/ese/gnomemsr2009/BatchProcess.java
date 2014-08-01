@@ -24,7 +24,7 @@ public class BatchProcess {
 	private String legalDevVariables[] = {"bugs-owned",
 			"bugs-commented", "comment-span", "comments-on-owned", "comments-on-nonowned", "noof-activities",
 			"average-elapsed-time", "median-elapsed-time", "average-interest-span", "median-interest-span",
-			"degree", "betweenness", "clustcoeff", "closeness", "eigencentrality", "pagerank"
+			"dcn.degree", "dcn.betweenness", "dcn.clustcoeff", "dcn.closeness", "dcn.eigencentrality", "dcn.pagerank"
 			};
 	
 	private ArrayList<String> productNames = new ArrayList<String>();
@@ -307,7 +307,7 @@ public class BatchProcess {
 	 */
 	public boolean checkModelType(String s)
 	{
-		if(s.trim().equals("developer")||s.trim().equals("bug"))
+		if(s.trim().equalsIgnoreCase("developer")||s.trim().equalsIgnoreCase("bug"))
 		{
 			return true;
 		} else return false;

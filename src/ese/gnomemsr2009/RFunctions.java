@@ -314,7 +314,7 @@ public class RFunctions
 		re.eval("bnd = merge(bnd, Eigencentrality, by.x=\"Row.names\", by.y=\"row.names\")");
 		re.eval("bnd = merge(bnd, Pagerank, by.x=\"Row.names\", by.y=\"row.names\")");
 		
-		re.eval("colnames(bnd) <- c(\"Developers\", \"degree\", \"betweenness\", \"closeness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
+		re.eval("colnames(bnd) <- c(\"Developers\", \"dcn.degree\", \"dcn.betweenness\", \"dcn.closeness\", \"dcn.clustcoeff\", \"dcn.eigencentrality\", \"dcn.pagerank\")");
 		re.eval("write.csv(bnd, file=\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 	}
 	
