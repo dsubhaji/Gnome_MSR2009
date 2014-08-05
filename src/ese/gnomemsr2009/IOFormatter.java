@@ -134,7 +134,7 @@ public class IOFormatter
 			System.out.println("Available Services");
 			System.out.println("1. Generate Developer Communication Network (DCN) in PAJEK Format for a Given Set of Products");
 			System.out.println("2. Generate Developer Activity Network (DAN) in PAJEK Format for a Given Set of Products");
-			System.out.println("3. Generate the Network Metrics for a Given Set of Product and PAJEK Files");
+			System.out.println("3. Generate the DCN and/or DAN Metrics for a Given Set of Product and PAJEK Files");
 			System.out.println("4. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products");
 			System.out.println("5. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products");
 			System.out.println("6. Generate Project Data Summary in CSV Format for a Given Set of Products");

@@ -282,9 +282,9 @@ public class RFunctions
 	}
 	
 	/*Input: Directory to csv files and product name
-	 *Output: network-metrics.csv for each product I.E Degree and betweenness
+	 *Output: DCN-metrics.csv for each product I.E Degree and betweenness
 	 */
-	public void nwMatrix(String s, String prodName)
+	public void DCNMetrics(String s, String prodName)
 	{
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -316,6 +316,43 @@ public class RFunctions
 		
 		re.eval("colnames(bnd) <- c(\"Developers\", \"dcn.degree\", \"dcn.betweenness\", \"dcn.closeness\", \"dcn.clustcoeff\", \"dcn.eigencentrality\", \"dcn.pagerank\")");
 		re.eval("write.csv(bnd, file=\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+	}
+	
+	/*Input: Directory to csv files and product name
+	 *Output: DAN-metrics.csv for each product I.E Degree and betweenness
+	 */
+	public void DANMetrics(String s, String prodName)
+	{
+		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
+		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
+		re.eval("if(\"Matrix\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"Matrix\")}");
+		re.eval("library('blockmodeling')");
+		re.eval("library('igraph')");
+		re.eval("library('Matrix')");
+		
+		s=s.replaceAll("\\\\", "/");
+		
+		re.eval("dcn = loadnetwork(\""+s+"/"+prodName+"/"+prodName+"-DAN.net\")");
+		
+		re.eval("dcnGraphWeighted = graph.adjacency(dcn, mode=c(\"undirected\"), weighted=TRUE)");
+		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
+		re.eval("Degree = as.data.frame(degree(dcnGraph))");
+		re.eval("Betweenness = as.data.frame(betweenness(dcnGraph))");
+		
+		re.eval("Clustcoef = as.data.frame(transitivity(dcnGraph, type=c(\"local\")))");
+		re.eval("Closeness = as.data.frame(closeness(dcnGraph, mode=c(\"all\"), normalized=TRUE))");
+		re.eval("Eigencentrality = as.data.frame(evcent(dcnGraph)$vector)");
+		re.eval("Pagerank = as.data.frame(page.rank(dcnGraph, directed=FALSE)$vector)");
+		
+		re.eval("Closeness[, c(\"Clustcoef\")] = Clustcoef");
+		
+		re.eval("bnd = merge(Degree, Betweenness, by=\"row.names\")");
+		re.eval("bnd = merge(bnd, Closeness, by.x=\"Row.names\", by.y=\"row.names\")");
+		re.eval("bnd = merge(bnd, Eigencentrality, by.x=\"Row.names\", by.y=\"row.names\")");
+		re.eval("bnd = merge(bnd, Pagerank, by.x=\"Row.names\", by.y=\"row.names\")");
+		
+		re.eval("colnames(bnd) <- c(\"Developers\", \"dan.degree\", \"dan.betweenness\", \"dan.closeness\", \"dan.clustcoeff\", \"dan.eigencentrality\", \"dan.pagerank\")");
+		re.eval("write.csv(bnd, file=\""+s+"/"+prodName+"/"+prodName+"-DAN-metrics.csv\")");
 	}
 	
 	/* Input: Model type(Developer/bug), dependent and independent variable(s) and directory and product name

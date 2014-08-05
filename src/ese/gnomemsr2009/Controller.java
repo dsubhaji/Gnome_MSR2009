@@ -49,19 +49,19 @@ public class Controller {
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
-				bp.batch(io.getDirectoryPath(), 1);
+				bp.batch(io.getDirectoryPath(), 1*multiplier);
 				endTime = System.nanoTime();
 			}else if(choice == 11)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
-				bp.batch(io.getDirectoryPath(), 2);
+				bp.batch(io.getDirectoryPath(), 2*multiplier);
 				endTime = System.nanoTime();
 			}else if(choice == 12)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
-				bp.batch(io.getDirectoryPath(), 3);
+				bp.batch(io.getDirectoryPath(), 3*multiplier);
 				endTime = System.nanoTime();
 			}
 			
