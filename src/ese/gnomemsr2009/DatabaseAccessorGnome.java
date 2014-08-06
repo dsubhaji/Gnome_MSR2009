@@ -1564,6 +1564,7 @@ public class DatabaseAccessorGnome
 			tempString = "0";
 		}
 		
+		fileContent = matrix.toString();
 		System.out.println("");
 		System.out.println("Generating .CSV File.");
 	}

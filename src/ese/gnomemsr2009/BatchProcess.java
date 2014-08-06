@@ -24,7 +24,8 @@ public class BatchProcess {
 	private String legalDevVariables[] = {"bugs-owned",
 			"bugs-commented", "comment-span", "comments-on-owned", "comments-on-nonowned", "noof-activities",
 			"average-elapsed-time", "median-elapsed-time", "average-interest-span", "median-interest-span",
-			"dcn.degree", "dcn.betweenness", "dcn.clustcoeff", "dcn.closeness", "dcn.eigencentrality", "dcn.pagerank"
+			"dcn.degree", "dcn.betweenness", "dcn.clustcoeff", "dcn.closeness", "dcn.eigencentrality", "dcn.pagerank",
+			"dan.degree", "dan.betweenness", "dan.clustcoeff", "dan.closeness", "dan.eigencentrality", "dan.pagerank"
 			};
 	
 	private ArrayList<String> productNames = new ArrayList<String>();
@@ -133,6 +134,9 @@ public class BatchProcess {
 			
 			isTrue3 = checkVariables(variables, modelType);
 			
+			System.out.println("truth1: "+isTrue1);System.out.println("truth2: "+isTrue2);System.out.println("truth3: "+isTrue3);
+			
+			
 			if((isTrue1&&isTrue2&&isTrue3) == true)
 				areTheyTrue = true;
 		}
@@ -208,19 +212,20 @@ public class BatchProcess {
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 				da.generateOwnersDAN(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
+				da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			} else if (a==1)
 			{
 				da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 				da.generateDAN(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
+				da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
+				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
 			da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-			
-			da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
-			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			
 			File file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 			if(file.exists()) 
@@ -409,12 +414,12 @@ public class BatchProcess {
 		createDir(s);
 		switch(i)
 		{
-			case 100:	if(checkVars(s, i)) batchQueries(2);
+			case 100:	if(checkVars(s, 1)) batchQueries(2);
 						break;
-			case 1: 	if(checkVars(s, i)) batchQueries(1);
+			case 1: 	if(checkVars(s, 1)) batchQueries(1);
 						break;
 			case 200:
-			case 2: 	if(checkVars(s, i)&&checkSubFolder()) descRegAndCor(1);
+			case 2: 	if(checkVars(s, 2)&&checkSubFolder()) descRegAndCor(1);
 						break;
 			case 300:
 			case 3:		if(factorAnalysis(s, 1)&&checkSubFolder()) descRegAndCor(2);

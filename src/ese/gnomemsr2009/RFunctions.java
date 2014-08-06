@@ -410,13 +410,29 @@ public class RFunctions
 		if(model.equals("developer"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
-			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
-			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
-			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			
+			File networkFile;
+		
+			networkFile = new File(s+"/"+prodName+"/"+prodName+"-DCN.net");
+			if(networkFile.exists()) 
+			{
+				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
+				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			}
+			
+			networkFile = new File(s+"/"+prodName+"/"+prodName+"-DAN.net");
+			if(networkFile.exists()) 
+			{
+				re.eval("danMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DAN-metrics.csv\")");
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("danMetrics[is.na(danMetrics)] <- 0.01");
+				re.eval("deets = merge(deets, danMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			}
 			
 			for(int i = 0; i < noOfVar; i++)
 			{
@@ -427,26 +443,10 @@ public class RFunctions
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
-			/*re.eval("devDeets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
-			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
-			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
-			*/
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
-			/*re.eval("devDeets = deets[,!(names(deets) %in% drops)]");
 			
-			re.eval("colnames(devDeets)[colnames(devDeets) == 'developer'] = 'owner'");
-			re.eval("colnames(dcnMetrics)[colnames(dcnMetrics) == 'Developers'] = 'owner'");
-			
-			re.eval("dcnMetrics$owner = trimSpace(dcnMetrics$owner)");
-			re.eval("devDeets$owner = trimSpace(devDeets$owner)");
-			re.eval("deets$owner = trimSpace(deets$owner)");
-			
-			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by=\"owner\", all.x=TRUE)");
-			re.eval("deets = merge(deets, devDeets, by=\"owner\", all.x=TRUE)");
-			*/
 			for(int i = 0; i < noOfVar; i++)
 			{
 				re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
@@ -454,19 +454,9 @@ public class RFunctions
 			}
 			re.eval("m1 <- lm(`"+colNames.get(0)+"` ~ "+transVars+", data=deets)");
 		}
-		//re.eval("res<-c(paste(as.character(summary(m1)$call),collapse=\" \"), m1$coefficients[1], m1$coefficients[2], length(m1$model), summary(m1)$coefficients[2,2], summary(m1)$r.squared, summary(m1)$adj.r.squared, summary(m1)$fstatistic, pf(summary(m1)$fstatistic[1],summary(m1)$fstatistic[2],summary(m1)$fstatistic[3],lower.tail=FALSE))");
-		//re.eval("names(res)<-c(\"call\",\"intercept\",\"slope\",\"n\",\"slope.SE\",\"r.squared\",\"Adj. r.squared\", \"F-statistic\",\"numdf\",\"dendf\",\"p.value\") ");
-		//re.eval("sumM1 <- res");
 		
-		
-		//re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output-transformed.txt\")");
-		
-		//re.eval("write.csv(sumM1, file=\""+s+"/"+prodName+"/"+prodName+"-"+model+"-model-output.csv\")");
 		if(boo == true)
 		{
-			//File theDir = new File(s+"/"+prodName.trim()+"/transformed");
-			//File theDir2 = new File(s+"/"+prodName.trim()+"/non-transformed");
-			
 			File theDir3 = new File(s+"/results/transformed/regression");
 			if(!theDir3.exists()) theDir3.mkdirs();
 			File theDir4 = new File(s+"/results/non-transformed/regression");
@@ -478,43 +468,41 @@ public class RFunctions
 			if(model.equals("developer"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 				
-				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
-				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 				re.eval("deets = deets[,!(names(deets) %in% drops)]");
-				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+				
+				File networkFile;
+			
+				networkFile = new File(s+"/"+prodName+"/"+prodName+"-DCN.net");
+				if(networkFile.exists()) 
+				{
+					re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+					System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+					re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
+					re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+				}
+				
+				networkFile = new File(s+"/"+prodName+"/"+prodName+"-DAN.net");
+				if(networkFile.exists()) 
+				{
+					re.eval("danMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DAN-metrics.csv\")");
+					System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+					re.eval("danMetrics[is.na(danMetrics)] <- 0.01");
+					re.eval("deets = merge(deets, danMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+				}
+				
 				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
 			} else if(model.equals("bug"))
 			{
 				re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
-				/*re.eval("devDeets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 				
-				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
-				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
-				*/
 				re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 				re.eval("deets = deets[,!(names(deets) %in% drops)]");
-				/*re.eval("devDeets = deets[,!(names(deets) %in% drops)]");
 				
-				re.eval("colnames(devDeets)[colnames(devDeets) == 'developer'] = 'owner'");
-				re.eval("colnames(dcnMetrics)[colnames(dcnMetrics) == 'Developers'] = 'owner'");
-				
-				re.eval("deets$owner = trimSpace(deets$owner)");
-				re.eval("dcnMetrics$owner = trimSpace(dcnMetrics$owner)");
-				re.eval("devDeets$owner = trimSpace(devDeets$owner)");
-				
-				
-				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by=\"owner\", all.x=TRUE)");
-				re.eval("deets = merge(deets, devDeets, by=\"owner\", all.x=TRUE)");
-				*/
 				re.eval("m1 <- lm(`"+variables.get(0)+"` ~ "+indVars+", data=deets)");
 			}
 			
-			
-			//re.eval("capture.output(summary(m1), file=\""+s+"/"+prodName+"/non-transformed/"+prodName+"-"+model+"-model-output.txt\")");
 			re.eval("capture.output(summary(m1), file=\""+s+"/results/non-transformed/regression/"+prodName+"-"+model+"-model-output.txt\")");
 		} else
 		{
@@ -567,13 +555,29 @@ public class RFunctions
 		if(model.equals("developer"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
-			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
-			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
-			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			
+			File networkFile;
+		
+			networkFile = new File(s+"/"+prodName+"/"+prodName+"-DCN.net");
+			if(networkFile.exists()) 
+			{
+				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
+				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			}
+			
+			networkFile = new File(s+"/"+prodName+"/"+prodName+"-DAN.net");
+			if(networkFile.exists()) 
+			{
+				re.eval("danMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DAN-metrics.csv\")");
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("danMetrics[is.na(danMetrics)] <- 0.01");
+				re.eval("deets = merge(deets, danMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			}
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
@@ -659,8 +663,8 @@ public class RFunctions
 		
 	}
 	
-	/*
-	 * 
+	/* Input: Model type(Developer/bug), variables, parameters and directory and product name
+	 * Output: Factor analysis, eigen values and vectors, descriptives and correlations and correlation of the variables in csv
 	 */
 	public void eigenVal(String model, ArrayList<String> variables, ArrayList<String> transform, ArrayList<String> parameters, String s, String prodName)
 	{	
@@ -702,13 +706,35 @@ public class RFunctions
 		if(model.equals("developer"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-dev-details.csv\")");
-			re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
 			
-			System.out.println("\nChecking for NA Values and Changing Them to 0.01");
-			re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
 			re.eval("drops <- c(\"closeness\", \"degree\", \"betweenness\", \"clustcoeff\", \"eigencentrality\", \"pagerank\")");
 			re.eval("deets = deets[,!(names(deets) %in% drops)]");
-			re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			
+			File networkFile;
+		
+			networkFile = new File(s+"/"+prodName+"/"+prodName+"-DCN.net");
+			if(networkFile.exists()) 
+			{
+				re.eval("dcnMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DCN-metrics.csv\")");
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("dcnMetrics[is.na(dcnMetrics)] <- 0.01");
+				re.eval("deets = merge(deets, dcnMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			}
+			
+			networkFile = new File(s+"/"+prodName+"/"+prodName+"-DAN.net");
+			if(networkFile.exists()) 
+			{
+				re.eval("danMetrics = read.csv(\""+s+"/"+prodName+"/"+prodName+"-DAN-metrics.csv\")");
+				System.out.println("\nChecking for NA Values and Changing Them to 0.01");
+				re.eval("danMetrics[is.na(danMetrics)] <- 0.01");
+				re.eval("deets = merge(deets, danMetrics[ , 2:8], by.x=\"developer\", by.y=\"Developers\")");
+			}
+			
+			for(int i = 0; i < noOfVar; i++)
+			{
+				re.eval("deets[ , c(\""+colNames.get(i)+"\")] <- "+transformedRVars.get(i));
+				re.eval("deets[ , c(\""+colNames.get(i)+"\")][deets[ , c(\""+colNames.get(i)+"\")] == -Inf] <- 0.01");
+			}
 		} else if(model.equals("bug"))
 		{
 			re.eval("deets = read.csv(\""+s+"/"+prodName+"/"+prodName+"-bug-details.csv\")");
