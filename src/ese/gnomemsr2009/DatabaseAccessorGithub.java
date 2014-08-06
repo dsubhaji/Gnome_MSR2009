@@ -249,7 +249,7 @@ public class DatabaseAccessorGithub
 		fileContent = nb.bugsByDevsGithub(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
 	}
 	
-	public void generateCSV(ArrayList<String> productName, String dirName) throws Exception
+	public void projectSummary(ArrayList<String> productName, String dirName) throws Exception
 	{
 		ArrayList<String> projectID 		= new ArrayList<String>();
 		ArrayList<String> parametersOne		= new ArrayList<String>();

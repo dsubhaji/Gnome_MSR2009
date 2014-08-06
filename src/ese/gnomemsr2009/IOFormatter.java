@@ -135,15 +135,17 @@ public class IOFormatter
 			System.out.println("1. Generate Developer Communication Network (DCN) in PAJEK Format for a Given Set of Products");
 			System.out.println("2. Generate Developer Activity Network (DAN) in PAJEK Format for a Given Set of Products");
 			System.out.println("3. Generate the DCN and/or DAN Metrics for a Given Set of Product and PAJEK Files");
-			System.out.println("4. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products");
-			System.out.println("5. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products");
-			System.out.println("6. Generate Project Data Summary in CSV Format for a Given Set of Products");
-			System.out.println("7. Generate Bug-Details in CSV Format for a Given Set of Products");
-			System.out.println("8. Generate Dev-Details in CSV Format for a Given Set of Products");
-			System.out.println("9. Generate Descriptive Statistics and Correlations for a Given Set of Products");
-			System.out.println("10. Generate 1, 2, 5, 6, 7 for a Given Set of Products");
-			System.out.println("11. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
-			System.out.println("12. Generate Correlations, EigenValues, and Perform Factor Analysis");
+			System.out.println("4. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DCN)");
+			System.out.println("5. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DCN)");
+			System.out.println("6. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DAN)");
+			System.out.println("7. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DAN)");
+			System.out.println("8. Generate Project Data Summary in CSV Format for a Given Set of Products");
+			System.out.println("9. Generate Bug-Details in CSV Format for a Given Set of Products");
+			System.out.println("10. Generate Dev-Details in CSV Format for a Given Set of Products");
+			System.out.println("11. Generate Descriptive Statistics and Correlations for a Given Set of Products");
+			System.out.println("12. Generate 1, 2, 5, 6, 7 for a Given Set of Products");
+			System.out.println("13. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
+			System.out.println("14. Generate Correlations, EigenValues, and Perform Factor Analysis");
 			System.out.print  ("Please Enter Your Choice (1 to 11): ");
 			
 			try

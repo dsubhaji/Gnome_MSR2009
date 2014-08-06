@@ -239,7 +239,7 @@ public class BatchProcess {
 			else System.out.println("\nCan't find DAN File for: "+productNames.get(i));
 		}
 		System.out.println("\nGenerating Product Summary.");
-		da.generateCSV(productNames, dirName);
+		da.projectSummary(productNames, dirName);
 		io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 	}
 	
@@ -450,26 +450,18 @@ public class BatchProcess {
 					/*
 					 * Case 1: Generate PAJEK file for the specified product, if it already exist, do nothing.
 					 */
-					case 1: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-								if(true) {da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
+					case 1: 	da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 								break;
-					case 100:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-Owners-DCN.net");
-								if(true) {da.generateOwnersDCN(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");}
+					case 100:	da.generateOwnersDCN(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 								break;
-								
-					case 2: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
-								if(true) {da.generateDAN(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");}
+					case 2: 	da.generateDAN(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
 								break;
-					case 200:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-Owners-DAN.net");
-								if(true) {da.generateOwnersDAN(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");}
+					case 200:	da.generateOwnersDAN(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
 								break;
-					/*
-					 * Case 2: Generate Network-Metrics file for the specified product from it's PAJEK file. Prints out an error message if no PAJEK file can be found. 
-					 */
 					case 300: 
 					case 3: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 								if(file.exists()) 
@@ -486,36 +478,44 @@ public class BatchProcess {
 								}
 								else System.out.println("\nCan't find DAN File for: "+productNames.get(i));
 								break;
-					case 4:		file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
-								if(true) {da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
+					case 4:		da.generateBugsByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN-bug-by-devs.csv");
 								break;
-					case 400:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");
-								if(true) {da.generateBugsByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-by-devs.csv");}
+					case 400:	da.generateBugsByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN-bug-by-devs.csv");
 								break;
-					case 5: 	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
-								if(true) {da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
+					case 5: 	da.generateDevsByDevs(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN-dev-by-devs.csv");
 								break;
-					case 500:	file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");
-								if(true) {da.generateOwnersByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
-								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-by-devs.csv");}
+					case 500:	da.generateOwnersByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN-dev-by-devs.csv");
 								break;
-					case 600:
-					case 6: 	break;
-					case 700:
-					case 7: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
+					case 6:		da.generateActivityByDev(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN-bug-by-devs.csv");
+								break;
+					case 600:	da.generateActivityByOwners(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN-bug-by-devs.csv");
+								break;
+					case 7: 	da.generateDevsByDevsActivity(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN-dev-by-devs.csv");
+								break;
+					case 700:	da.generateOwnersByOwnersActivity(productNames.get(i), startDates.get(i), endDates.get(i));
+								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN-dev-by-devs.csv");
+								break;
+					case 800:
+					case 8: 	break;
+					case 900:
+					case 9: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 								break;
-					case 8:		da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
+					case 10:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
-					case 800: 	da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
+					case 1000: 	da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
-					case 900:
-					case 9:		if(factorAnalysis(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+					case 1100:
+					case 11:	if(factorAnalysis(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 								break;
 					default:	System.out.println("Not Implemented Yet!");
 								break;
@@ -531,7 +531,7 @@ public class BatchProcess {
 			if(a==6||a==600)
 			{
 				System.out.println("\nGenerating Product Summary.");
-				da.generateCSV(productNames, dirName);
+				da.projectSummary(productNames, dirName);
 				io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 			}
 			
@@ -583,7 +583,7 @@ public class BatchProcess {
 			if(a==6||a==600)
 			{
 				System.out.println("\nGenerating Product Summary.");
-				daMSR.generateCSV(productNames, dirName);
+				daMSR.projectSummary(productNames, dirName);
 				io.writeFile(daMSR.getFileContent(), dirName+"/project-summary.csv");
 			}
 		}

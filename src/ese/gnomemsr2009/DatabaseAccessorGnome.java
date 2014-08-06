@@ -135,11 +135,6 @@ public class DatabaseAccessorGnome
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
 		
-		
-		
-		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net";
 		fileContent = nb.networkBuilder(developers, developers2, developers3, edges, num);
 		
 	}
@@ -210,12 +205,7 @@ public class DatabaseAccessorGnome
 			developers3.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
-		
-		
-		
-		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net";
+
 		fileContent = nb.networkBuilder(developers, developers2, developers3, edges, num);
 		
 	}
@@ -293,11 +283,6 @@ public class DatabaseAccessorGnome
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
 		
-		
-		
-		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net";
 		fileContent = nb.networkBuilder(developers, developers2, developers3, edges, num);
 		
 	}
@@ -375,62 +360,11 @@ public class DatabaseAccessorGnome
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
 		
-		
-		
-		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "DCN-gnomemsr2009-"+product+"-"+df.format(new Date())+".net";
 		fileContent = nb.networkBuilder(developers, developers2, developers3, edges, num);
 		
 	}
 	
-	public void generateCSV() throws Exception
-	{
-		System.out.println("Extracting Data from Database...");
-		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))) "
-							+"from bugs a, comment b "
-							+"where a.bug_id = b.bugid "
-							+"group by a.product "
-							);
-		
-		StringBuilder csv = new StringBuilder();
-		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", \"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\"\n");
-		
-		System.out.println("Generating .CSV File");
-		while(rs.next())
-		{
-			csv.append("\""+rs.getString("(trim(' ' from replace(a.product, '\n', '')))")+"\", ");
-			csv.append(rs.getInt("count(distinct(b.bugid))") + ",");
-			csv.append(rs.getInt("count(b.bug_when)") + ", ");
-			csv.append(rs.getInt("count(distinct(b.who))")+ ", ");
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
-			
-			String minDate = rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))");
-			String maxDate = rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))");
-			
-			Date dateMin = sdf.parse(minDate);
-			Date dateMax = sdf.parse(maxDate);
-			
-			csv.append("\""+minDate+"\", ");
-			csv.append("\""+maxDate+"\", ");
-			
-			float differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
-			float days = (((differenceInTime/1000)/3600)/24); //elapsed time in days
-			float hours = ((differenceInTime/1000)/3600); //elapsed time in hours
-			float minutes = ((differenceInTime/1000)/60); //elapsed time in minutes
-			
-			csv.append(days+", ");
-			csv.append(hours+", ");
-			csv.append(minutes+"\n ");
-			
-		}
-		
-		fileName = "ProjectDataSummary.csv";
-		fileContent = csv.toString();
-	}
-	
-	public void generateCSV(ArrayList<String> productName, String dirName) throws Exception
+	public void projectSummary(ArrayList<String> productName, String dirName) throws Exception
 	{
 		ArrayList<String> elapsedDays 		= new ArrayList<String>();
 		ArrayList<String> elapsedHours 		= new ArrayList<String>();
@@ -585,7 +519,6 @@ public class DatabaseAccessorGnome
 			csv.append(medianElapsedTime.get(i) + "\n");
 		}
 		
-		fileName = "ProjectDataSummary.csv";
 		fileContent = csv.toString();
 	}
 	
@@ -644,10 +577,6 @@ public class DatabaseAccessorGnome
 			numOfComments.add(rs.getInt("count(b.bug_when)"));
 		}
 		
-		
-		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
-		fileName = "BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv";
 		fileContent = nb.bugsByDevs(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
 	}
 	
@@ -705,10 +634,120 @@ public class DatabaseAccessorGnome
 			numOfComments.add(rs.getInt("count(b.bug_when)"));
 		}
 		
+		fileContent = nb.bugsByDevs(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
+	}
+	
+	public void generateActivityByOwners(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> distinctBug_id 			= new ArrayList<String>();
+		ArrayList<String> distinctDev_email 		= new ArrayList<String>();
+		ArrayList<String> bug_id 			= new ArrayList<String>();
+		ArrayList<String> dev_email 		= new ArrayList<String>();
+		ArrayList<Integer> numOfComments 	= new ArrayList<Integer>();
 		
+		System.out.println("\nExtracting Data from Database...");
 		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss"); 
-		fileName = "BugsByDevelopersMatrix-"+product+"-"+df.format(new Date())+".csv";
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
+							"from bugs a, activity b "+
+							"where a.bug_id = b.bugid "+
+							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by bug_id;"	
+							);
+		
+		while(rs.next())
+		{
+			distinctBug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(trim(' ' from replace(assigned_to, '\n', ''))) \"who\" "+
+							"from bugs " +
+							"where (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from product) like '%"+product+"\n' " +
+							"order by who;"
+							);
+		
+		while(rs.next())
+		{
+			distinctDev_email.add(rs.getString("who"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(trim(' ' from replace(a.bug_id, '\n', ''))), trim(' ' from replace(b.who, '\n', '')), count(b.bug_when) "+
+							"from bugs a, activity b " +
+							"where a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"group by a.bug_id, b.who " +
+							"order by b.who, a.bug_id;"
+							);
+		
+		while(rs.next())
+		{
+			bug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+			dev_email.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
+			numOfComments.add(rs.getInt("count(b.bug_when)"));
+		}
+		
+		fileContent = nb.bugsByDevs(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
+	}
+	
+	public void generateActivityByDev(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> distinctBug_id 			= new ArrayList<String>();
+		ArrayList<String> distinctDev_email 		= new ArrayList<String>();
+		ArrayList<String> bug_id 			= new ArrayList<String>();
+		ArrayList<String> dev_email 		= new ArrayList<String>();
+		ArrayList<Integer> numOfComments 	= new ArrayList<Integer>();
+		
+		System.out.println("\nExtracting Data from Database...");
+		
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
+							"from bugs a, activity b "+
+							"where a.bug_id = b.bugid "+
+							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by bug_id;"	
+							);
+		
+		while(rs.next())
+		{
+			distinctBug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(trim(' ' from replace(b.who, '\n', ''))) " +
+							"from bugs a, activity b " +
+							"where a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by b.who;"
+							);
+		
+		while(rs.next())
+		{
+			distinctDev_email.add(rs.getString("(trim(' ' from replace(b.who, '\n', '')))"));
+		}
+		
+		rs = s.executeQuery(
+							"select distinct(trim(' ' from replace(a.bug_id, '\n', ''))), trim(' ' from replace(b.who, '\n', '')), count(b.bug_when) "+
+							"from bugs a, activity b " +
+							"where a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
+							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"group by a.bug_id, b.who " +
+							"order by b.who, a.bug_id;"
+							);
+		
+		while(rs.next())
+		{
+			bug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+			dev_email.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
+			numOfComments.add(rs.getInt("count(b.bug_when)"));
+		}
+		
 		fileContent = nb.bugsByDevs(distinctDev_email, distinctBug_id, dev_email, bug_id, numOfComments);
 	}
 	
@@ -763,9 +802,7 @@ public class DatabaseAccessorGnome
 			developers3.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
-		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "DevsByDevsMatrix-"+product+"-"+df.format(new Date())+".csv";
+	
 		fileContent = nb.devsByDevs(developers, developers2, developers3, edges);
 		
 	}
@@ -822,10 +859,119 @@ public class DatabaseAccessorGnome
 			edges.add((rs.getInt("count(distinct(a.bugid))")));
 		}
 		
-		DateFormat df = new SimpleDateFormat("YYYYMMdd-HHmmss");
-		fileName = "DevsByDevsMatrix-"+product+"-"+df.format(new Date())+".csv";
 		fileContent = nb.devsByDevs(developers, developers2, developers3, edges);
 		
+	}
+	
+	public void generateDevsByDevsActivity(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> developers = new ArrayList<String>();
+		ArrayList<String> developers2= new ArrayList<String>();
+		ArrayList<String> developers3= new ArrayList<String>();
+		ArrayList<Integer> edges     = new ArrayList<Integer>();
+		
+		
+		System.out.println("");
+		System.out.println("Retrieving the Developer's E-Mail Addresses...");
+		
+		rs = s.executeQuery(
+				"select distinct(trim(' ' from replace(b.who, '\n', ''))) \"who\""+
+				"from bugs c, activity b " +
+				"where c.bug_id = b.bugid " +
+				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s')) between '"+startDate+"' and '"+endDate+"' "  +
+				"and trim(' ' from c.product) like '%"+product+"\n' " +
+				"order by who;"
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			developers.add(rs.getString("who"));
+		}
+		
+		System.out.println("Building the Developer Communication Network...");
+		
+		rs = s.executeQuery(
+				"select trim(' ' from replace(a.who, '\n', '')), count(distinct(a.bugid)), trim(' ' from replace(b.who, '\n', '')) " +
+						"from activity a, activity b " +
+						"where a.bugid IN " +
+						"(" +
+							"select b.bugid " +
+							"from bugs c, activity b " +
+							"where c.bug_id = b.bugid " +
+							"and trim(' ' from c.product) like '%"+product+"\n' "+
+						") " +
+						"and a.who <> b.who " +
+						"and a.bugid = b.bugid "+
+						"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+						"group by a.who, b.who " +
+						"order by trim(' ' from replace(a.who, '\n', ''));"
+						//Query to find how many times a developer work with another developer on the bugs of a particular component
+				);
+		
+		while(rs.next())
+		{
+			developers2.add(rs.getString("trim(' ' from replace(a.who, '\n', ''))"));
+			developers3.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
+			edges.add((rs.getInt("count(distinct(a.bugid))")));
+		}
+		
+		fileContent = nb.devsByDevs(developers, developers2, developers3, edges);
+		
+	}
+	
+	public void generateOwnersByOwnersActivity(String product, String startDate, String endDate) throws Exception
+	{
+		ArrayList<String> developers = new ArrayList<String>();
+		ArrayList<String> developers2= new ArrayList<String>();
+		ArrayList<String> developers3= new ArrayList<String>();
+		ArrayList<Integer> edges     = new ArrayList<Integer>();
+		
+		
+		System.out.println("");
+		System.out.println("Retrieving the Developer's E-Mail Addresses...");
+		
+		rs = s.executeQuery(
+				"select distinct(trim(' ' from replace(assigned_to, '\n', ''))) \"who\" "+
+				"from bugs " +
+				"where (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from product) like '%"+product+"\n' " +
+				"order by who;"
+				); //Query to find the distinct developers working on the bugs
+		
+		while(rs.next())
+		{
+			developers.add(rs.getString("who"));
+		}
+		
+		System.out.println("Building the Developer Communication Network...");
+		
+		rs = s.executeQuery(
+				"select trim(' ' from replace(a.who, '\n', '')), count(distinct(a.bugid)), trim(' ' from replace(b.who, '\n', '')) " +
+						"from activity a, activity b " +
+						"where a.bugid IN " +
+						"(" +
+							"select b.bugid " +
+							"from bugs c, activity b " +
+							"where c.bug_id = b.bugid " +
+							"and trim(' ' from c.product) like '%"+product+"\n' "+
+						") " +
+						"and a.who <> b.who " +
+						"and a.bugid = b.bugid "+
+						"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+						"group by a.who, b.who " +
+						"order by trim(' ' from replace(a.who, '\n', ''));"
+						//Query to find how many times a developer work with another developer on the bugs of a particular component
+				);
+		
+		while(rs.next())
+		{
+			developers2.add(rs.getString("trim(' ' from replace(a.who, '\n', ''))"));
+			developers3.add(rs.getString("trim(' ' from replace(b.who, '\n', ''))"));
+			edges.add((rs.getInt("count(distinct(a.bugid))")));
+		}
+		
+		fileContent = nb.devsByDevs(developers, developers2, developers3, edges);
 	}
 	
 	
@@ -1084,9 +1230,6 @@ public class DatabaseAccessorGnome
 			matrix.append("\n");
 		}
 
-		
-		fileName = product+"-("+startDate+")-("+endDate+")-Bugs-Details.csv";
-		fileContent = matrix.toString();
 		System.out.println("");
 		System.out.println("Generating .CSV File");
 	}
@@ -1421,13 +1564,8 @@ public class DatabaseAccessorGnome
 			tempString = "0";
 		}
 		
-		
-		
-		fileName = product+"-("+startDate+")-("+endDate+")-Devs-Details.csv";
-		fileContent = matrix.toString();
-		
 		System.out.println("");
-		System.out.println("Building " + fileName);
+		System.out.println("Generating .CSV File.");
 	}
 	
 	public void generateCommenterModel(String product, String startDate, String endDate) throws Exception
@@ -1796,7 +1934,6 @@ public class DatabaseAccessorGnome
 			tempString2= "0";
 		}
 		
-		fileName = product+"-("+startDate+")-("+endDate+")-Devs-Details.csv";
 		fileContent = matrix.toString();
 	}
 	

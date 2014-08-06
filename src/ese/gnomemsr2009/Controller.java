@@ -36,7 +36,7 @@ public class Controller {
 			
 			int choice = io.inputChoice();
 			
-			if((choice >= 1)&&(choice <= 9))
+			if((choice >= 1)&&(choice <= 11))
 			{
 				io.batchInput();
 				
@@ -45,48 +45,27 @@ public class Controller {
 				bp.singleServices(io.getDirectoryPath(), choice*multiplier);
 				
 				endTime = System.nanoTime();
-			}else if(choice == 10)
+			}else if(choice == 12)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 1*multiplier);
 				endTime = System.nanoTime();
-			}else if(choice == 11)
+			}else if(choice == 13)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 2*multiplier);
 				endTime = System.nanoTime();
-			}else if(choice == 12)
+			}else if(choice == 14)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 3*multiplier);
 				endTime = System.nanoTime();
 			}
-			
-			
-			
-			//output 'matrix' to a .csv file and append product name to the file name
-			/*if((choice != 7)||(choice != 8)||(choice != 9))
-			{
-				if(io.writeFile(da.getFileContent(), da.getFileName()))
-				{
-					System.out.println("");
-					System.out.println("File Generated");
-				}else
-				{
-					System.out.println("");
-					System.out.println("COULD NOT WRITE!");
-				}
-			}*/
 			 
-			
 			System.out.println("Total Time Elapsed: " + (((endTime - startTime)/1000000000)/60) + " minutes");
-			//close connection
-			//da.closeConnection();
-			
-			
 		}
 		else
 		{
