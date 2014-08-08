@@ -444,7 +444,7 @@ public class BatchProcess {
 		
 		if(da.getDBName().equalsIgnoreCase("sutd")||da.getDBName().equalsIgnoreCase("gnome_msr2009"))
 		{
-			if(a!=5&&a!=500)
+			if(a!=8&&a!=800)
 			for(int i = 0; i < prodCount; i++)
 			{
 				long timeStart = System.nanoTime();
@@ -533,7 +533,7 @@ public class BatchProcess {
 				System.out.println("");
 			}
 			
-			if(a==6||a==600)
+			if(a==8||a==800)
 			{
 				System.out.println("\nGenerating Product Summary.");
 				da.projectSummary(productNames, dirName);
@@ -585,7 +585,7 @@ public class BatchProcess {
 				System.out.println("");
 			}
 			
-			if(a==6||a==600)
+			if(a==8||a==800)
 			{
 				System.out.println("\nGenerating Product Summary.");
 				daMSR.projectSummary(productNames, dirName);

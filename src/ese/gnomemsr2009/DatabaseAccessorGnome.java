@@ -566,6 +566,7 @@ public class DatabaseAccessorGnome
 							"from bugs a, comment b "+
 							"where a.bug_id = b.bugid "+
 							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"order by bug_id;"	
 							);
@@ -581,6 +582,7 @@ public class DatabaseAccessorGnome
 							"where (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"and trim(' ' from product) like '%"+product+"\n' " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by who;"
 							);
 		
@@ -595,6 +597,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid " +
 							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"group by a.bug_id, b.who " +
 							"order by b.who, a.bug_id;"
 							);
@@ -624,6 +627,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid "+
 							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by bug_id;"	
 							);
 		
@@ -638,6 +642,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid " +
 							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by b.who;"
 							);
 		
@@ -652,6 +657,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid " +
 							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"group by a.bug_id, b.who " +
 							"order by b.who, a.bug_id;"
 							);
@@ -681,6 +687,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid "+
 							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by bug_id;"	
 							);
 		
@@ -695,6 +702,7 @@ public class DatabaseAccessorGnome
 							"where (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"and trim(' ' from product) like '%"+product+"\n' " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by who;"
 							);
 		
@@ -709,6 +717,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid " +
 							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"group by a.bug_id, b.who " +
 							"order by b.who, a.bug_id;"
 							);
@@ -738,6 +747,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid "+
 							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by bug_id;"	
 							);
 		
@@ -752,6 +762,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid " +
 							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
 							"order by b.who;"
 							);
 		
@@ -766,6 +777,7 @@ public class DatabaseAccessorGnome
 							"where a.bug_id = b.bugid " +
 							"and trim(' ' from replace(a.product, '\n', '')) = '"+product+"' " +
 							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 							"group by a.bug_id, b.who " +
 							"order by b.who, a.bug_id;"
 							);
@@ -797,6 +809,7 @@ public class DatabaseAccessorGnome
 				"where c.bug_id = b.bugid " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s')) between '"+startDate+"' and '"+endDate+"' "  +
 				"and trim(' ' from product) like '%"+product+"\n' " +
+				"and trim(' ' from replace(c.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"order by who;"
 				); //Query to find the distinct developers working on the bugs
 		
@@ -816,6 +829,7 @@ public class DatabaseAccessorGnome
 							"from bugs c, comment b " +
 							"where c.bug_id = b.bugid " +
 							"and trim(' ' from c.product) like '%"+product+"\n' "+
+							"and trim(' ' from replace(c.bug_status, '\\n', '')) like 'RESOLVED' "+
 						") " +
 						"and a.who <> b.who " +
 						"and a.bugid = b.bugid "+
@@ -853,6 +867,7 @@ public class DatabaseAccessorGnome
 				"where (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and trim(' ' from product) like '%"+product+"\n' " +
+				"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
 				"order by who;"
 				); //Query to find the distinct developers working on the bugs
 		
@@ -872,6 +887,7 @@ public class DatabaseAccessorGnome
 							"from bugs c, comment b " +
 							"where c.bug_id = b.bugid " +
 							"and trim(' ' from c.product) like '%"+product+"\n' "+
+							"and trim(' ' from replace(c.bug_status, '\\n', '')) like 'RESOLVED' "+
 						") " +
 						"and a.who <> b.who " +
 						"and a.bugid = b.bugid "+
@@ -909,6 +925,7 @@ public class DatabaseAccessorGnome
 				"where c.bug_id = b.bugid " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s')) between '"+startDate+"' and '"+endDate+"' "  +
 				"and trim(' ' from c.product) like '%"+product+"\n' " +
+				"and trim(' ' from replace(c.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"order by who;"
 				); //Query to find the distinct developers working on the bugs
 		
@@ -928,6 +945,7 @@ public class DatabaseAccessorGnome
 							"from bugs c, activity b " +
 							"where c.bug_id = b.bugid " +
 							"and trim(' ' from c.product) like '%"+product+"\n' "+
+							"and trim(' ' from replace(c.bug_status, '\\n', '')) like 'RESOLVED' "+
 						") " +
 						"and a.who <> b.who " +
 						"and a.bugid = b.bugid "+
@@ -965,6 +983,7 @@ public class DatabaseAccessorGnome
 				"where (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and trim(' ' from product) like '%"+product+"\n' " +
+				"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
 				"order by who;"
 				); //Query to find the distinct developers working on the bugs
 		
@@ -984,6 +1003,7 @@ public class DatabaseAccessorGnome
 							"from bugs c, activity b " +
 							"where c.bug_id = b.bugid " +
 							"and trim(' ' from c.product) like '%"+product+"\n' "+
+							"and trim(' ' from replace(c.bug_status, '\\n', '')) like 'RESOLVED' "+
 						") " +
 						"and a.who <> b.who " +
 						"and a.bugid = b.bugid "+
