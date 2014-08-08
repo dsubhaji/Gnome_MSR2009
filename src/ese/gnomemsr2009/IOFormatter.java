@@ -170,8 +170,8 @@ public class IOFormatter
 		do
 		{
 			System.out.println("Choose:");
-			System.out.println("1. Include Developers Who Comments On At Least One Bug");
-			System.out.println("2. Only Include Bug Owners");
+			System.out.println("1. Include Developers Who Comment on at Least One Bug in RESOLVED Status.");
+			System.out.println("2. Include Developers who Own at Least One Bug in RESOLVED Status and Comment on at Least One Bug in RESOLVED Status.");
 			System.out.print  ("Please Enter Your Choice (1 or 2): ");
 			
 			try
