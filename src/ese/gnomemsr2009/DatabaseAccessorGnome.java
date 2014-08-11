@@ -1050,6 +1050,7 @@ public class DatabaseAccessorGnome
 				"where trim(' ' from replace(a.product, '\n', '')) like \""+product+"\" " +
 				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"group by a.bug_id " +
 				"order by a.bug_id asc;"
 				); //Query to find the distinct developers working on the bugs
@@ -1079,6 +1080,7 @@ public class DatabaseAccessorGnome
 				"where a.bug_id = c.bugid " +
 				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"and c.bugid in " +
 				"( select bug_id from bugs where trim(' ' from replace(a.product, '\n', '')) like \"" + product + "\"  )" +
 				"group by a.bug_id " +
@@ -1099,6 +1101,7 @@ public class DatabaseAccessorGnome
 				"where a.bug_id = b.bugid " +
 				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"and b.bugid in " +
 				"(	select bug_id from bugs where trim(' ' from replace(a.product, '\n', '')) like \"" + product + "\"	)" +
 				"group by b.bugid " +
@@ -1119,9 +1122,9 @@ public class DatabaseAccessorGnome
 				"select count(text), trim(' ' from replace(who, '\n', '')), bugid " +
 				"from comment " +
 				"where bugid in "+
-				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like \"" + product + "\"	) " +
+				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '" + product + "' and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' ) " +
 				"and trim(' ' from replace(who, '\n', '')) in " +
-				"( select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like \"" + product + "\" ) " +
+				"( select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like '" + product + "' and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' ) " +
 				"and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +	
 				"group by bugid, who " +
 				"order by bugid;"
@@ -1140,6 +1143,7 @@ public class DatabaseAccessorGnome
 				"where trim(' ' from replace(product, '\n', '')) like \"" + product + "\" " +
 				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
 				"group by assigned_to;"
 				);
 		
@@ -1153,9 +1157,9 @@ public class DatabaseAccessorGnome
 				"select count(distinct(b.bugid)), trim(' ' from replace(b.who, '\n', '')) " +
 				"from comment b " +
 				"where b.bugid in " + 
-				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like \"" + product + "\"	) " +
+				"(	select bug_id from bugs where trim(' ' from replace(product, '\n', '')) like '" + product + "' and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' ) " +
 				"and trim(' ' from replace(b.who, '\n', '')) in " + 
-				"(	select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like \"" + product + "\"	) " +
+				"( select trim(' ' from replace(assigned_to, '\n', '')) from bugs where trim(' ' from replace(product, '\n', '')) like '" + product + "' and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' ) " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"group by who "
 				);
@@ -1198,7 +1202,7 @@ public class DatabaseAccessorGnome
 				if(bug_id.get(i).equals(bug_id2.get(j)))
 				{
 					matrix.append(activityLevel.get(j));
-				}	
+				}
 			}
 			matrix.append(", ");
 			
@@ -1260,7 +1264,8 @@ public class DatabaseAccessorGnome
 			//matrix.append(degNBetweenness.get(i));
 			matrix.append("\n");
 		}
-
+		
+		fileContent = matrix.toString();
 		System.out.println("");
 		System.out.println("Generating .CSV File");
 	}

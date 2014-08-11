@@ -41,8 +41,8 @@ public class Controller {
 			
 			if(io.getDBN().equalsIgnoreCase("sutd")||io.getDBN().equalsIgnoreCase("gnome_msr2009"))
 			{
-				choice = io.inputChoiceGnome();
 				multiplier = io.inputType();
+				choice = io.inputChoiceGnome();
 			}
 			if(io.getDBN().equalsIgnoreCase("github_msr2014"))
 				choice = io.inputChoiceGithub();
