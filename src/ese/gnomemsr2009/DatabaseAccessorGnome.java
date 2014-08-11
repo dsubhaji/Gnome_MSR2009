@@ -225,19 +225,15 @@ public class DatabaseAccessorGnome
 		
 		
 		System.out.println("");
-		System.out.println("Calculating the Total Number of Distinct Developers...");
+		System.out.println("Calculating the Total Number of Distinct Owners...");
 
 		rs = s.executeQuery(
-				"select count(distinct(who)) 'vertices' "
-						+  "from comment "
-						+  "where trim(' ' from replace(who, '\\n', '')) IN "
-						+  "(select distinct(trim(' ' from replace(assigned_to, '\\n', ''))) "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
-						+  "and bugid in "
-						+  "(select bug_id "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
+				"select count(distinct(assigned_to)) 'vertices' "
+						+  "from bugs "
+						+  "where trim(' ' from replace(product, '\\n', '')) like '" + product + "' "
+						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED'; "
+						+  "and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
+						+  "and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"'); " 
 				); //ResultSet gets Query results. Query to find out the total number of distinct developers commenting on the bugs of a specific product
 		
 		while(rs.next())
@@ -248,17 +244,12 @@ public class DatabaseAccessorGnome
 		System.out.println("Retrieving the Developer's E-Mail Addresses...");
 		
 		rs = s.executeQuery(
-				"select distinct(who) 'who' "
-						+  "from comment "
-						+  "where trim(' ' from replace(who, '\\n', '')) IN "
-						+  "(select distinct(trim(' ' from replace(assigned_to, '\\n', ''))) "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
-						+  "and bugid in "
-						+  "(select bug_id "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
-						+  "order by who;"
+				"select distinct(assigned_to) 'who' "
+						+  "from bugs "
+						+  "where trim(' ' from replace(product, '\\n', '')) like '" + product + "' "
+						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "
+						+  "and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
+						+  "and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"'); " 
 				); //Query to find the distinct developers working on the bugs
 		
 		while(rs.next())
@@ -317,16 +308,12 @@ public class DatabaseAccessorGnome
 		
 		
 		rs = s.executeQuery(
-				"select count(distinct(who)) 'vertices' "
-						+  "from comment "
-						+  "where trim(' ' from replace(who, '\\n', '')) IN "
-						+  "(select distinct(trim(' ' from replace(assigned_to, '\\n', ''))) "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
-						+  "and bugid in "
-						+  "(select bug_id "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
+				"select count(distinct(assigned_to)) 'vertices' "
+						+  "from bugs "
+						+  "where trim(' ' from replace(product, '\\n', '')) like '" + product + "' "
+						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED'; "
+						+  "and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
+						+  "and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"'); "
 				); //ResultSet gets Query results. Query to find out the total number of distinct developers commenting on the bugs of a specific product
 		
 		while(rs.next())
@@ -337,17 +324,12 @@ public class DatabaseAccessorGnome
 		System.out.println("Retrieving the Developer's E-Mail Addresses...");
 		
 		rs = s.executeQuery(
-				"select distinct(who) 'who' "
-						+  "from comment "
-						+  "where trim(' ' from replace(who, '\\n', '')) IN "
-						+  "(select distinct(trim(' ' from replace(assigned_to, '\\n', ''))) "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
-						+  "and bugid in "
-						+  "(select bug_id "
-						+  "from bugs where trim(' ' from replace(product, '\\n', '')) like '" + product + "'"
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED') "
-						+  "order by who;"
+				"select distinct(assigned_to) 'who' "
+						+  "from bugs "
+						+  "where trim(' ' from replace(product, '\\n', '')) like '" + product + "' "
+						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "
+						+  "and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
+						+  "and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"'); " 
 				); //Query to find the distinct developers working on the bugs
 		
 		while(rs.next())
@@ -562,12 +544,12 @@ public class DatabaseAccessorGnome
 		
 		System.out.println("\nExtracting Data from Database...");
 		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
-							"from bugs a, comment b "+
-							"where a.bug_id = b.bugid "+
-							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
-							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
-							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+		rs = s.executeQuery("select distinct(trim(' ' from replace(bug_id, '\n', ''))) " +
+							"from bugs "+
+							"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
+							"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " + 
+							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"order by bug_id;"	
 							);
 		
@@ -622,12 +604,12 @@ public class DatabaseAccessorGnome
 		
 		System.out.println("\nExtracting Data from Database...");
 		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
-							"from bugs a, comment b "+
-							"where a.bug_id = b.bugid "+
-							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
-							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
-							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
+		rs = s.executeQuery("select distinct(trim(' ' from replace(bug_id, '\n', ''))) " +
+							"from bugs "+
+							"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
+							"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " + 
+							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 							"order by bug_id;"	
 							);
 		
@@ -682,13 +664,13 @@ public class DatabaseAccessorGnome
 		
 		System.out.println("\nExtracting Data from Database...");
 		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
-							"from bugs a, activity b "+
-							"where a.bug_id = b.bugid "+
-							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
-							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
-							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
-							"order by bug_id;"	
+		rs = s.executeQuery("select distinct(trim(' ' from replace(bug_id, '\n', ''))) " +
+							"from bugs "+
+							"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
+							"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " + 
+							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by bug_id;"		
 							);
 		
 		while(rs.next())
@@ -742,13 +724,13 @@ public class DatabaseAccessorGnome
 		
 		System.out.println("\nExtracting Data from Database...");
 		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.bug_id, '\n', ''))) " +
-							"from bugs a, activity b "+
-							"where a.bug_id = b.bugid "+
-							"and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
-							"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
-							"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
-							"order by bug_id;"	
+		rs = s.executeQuery("select distinct(trim(' ' from replace(bug_id, '\n', ''))) " +
+							"from bugs "+
+							"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
+							"and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "+
+							"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " + 
+							"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+							"order by bug_id;"		
 							);
 		
 		while(rs.next())
@@ -798,7 +780,7 @@ public class DatabaseAccessorGnome
 		ArrayList<String> developers2= new ArrayList<String>();
 		ArrayList<String> developers3= new ArrayList<String>();
 		ArrayList<Integer> edges     = new ArrayList<Integer>();
-		
+			
 		
 		System.out.println("");
 		System.out.println("Retrieving the Developer's E-Mail Addresses...");
