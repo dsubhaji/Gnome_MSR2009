@@ -125,13 +125,13 @@ public class IOFormatter
 		user_input.close();
 	}
 	
-	public int inputChoice()
+	public int inputChoiceGnome()
 	{
 		int choice = 0;
 		
 		do
 		{
-			System.out.println("Available Services");
+			System.out.println("Available Services for Gnome Data Set");
 			System.out.println("1. Generate Developer Communication Network (DCN) in PAJEK Format for a Given Set of Products");
 			System.out.println("2. Generate Developer Activity Network (DAN) in PAJEK Format for a Given Set of Products");
 			System.out.println("3. Generate the DCN and/or DAN Metrics for a Given Set of Product and PAJEK Files");
@@ -160,7 +160,48 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>11));
+		} while((choice<1)||(choice>14));
+	}
+	
+	public int inputChoiceGithub()
+	{
+		int choice = 0;
+		
+		boolean loop = true;
+		do
+		{
+			System.out.println("Available Services for Github Data Set");
+			System.out.println("1. Generate Developer Communication Network (DCN) in PAJEK Format for a Given Set of Products");
+			System.out.println("2. Generate the DCN and/or DAN Metrics for a Given Set of Product and PAJEK Files");
+			System.out.println("3. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DCN)");
+			System.out.println("4. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DCN)");
+			System.out.println("5. Generate Project Data Summary in CSV Format for a Given Set of Products");
+			System.out.print  ("Please Enter Your Choice (1 to 5): ");
+			
+			try
+			{
+				choice = user_input.nextInt();
+			} catch(InputMismatchException e)
+			{
+				System.out.println("Error! Only Integers Are Accepted.");
+			}
+			
+			System.out.println("");
+			
+			user_input.nextLine();
+		} while((choice<1)||(choice>5));
+		
+		switch(choice)
+		{
+		case 1: choice = 1; break;
+		case 2: choice = 3; break;
+		case 3: choice = 4; break;
+		case 4: choice = 5; break;
+		case 5: choice = 8; break;
+		default:System.out.println("This Shouldn't Happen"); break;
+		}
+		
+		return choice;
 	}
 	
 	public int inputType()

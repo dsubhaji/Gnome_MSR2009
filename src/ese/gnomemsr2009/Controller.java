@@ -22,7 +22,10 @@ public class Controller {
 		System.out.println("");
 		System.out.println("Connecting to Database...");
 		
-		if(da.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass())&&daMSR.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass()))
+		boolean isGnome = da.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass());
+		boolean isGithub= daMSR.openConnection(io.getDBN(), io.getMysqlUserName(), io.getMysqlPass());
+		
+		if(isGnome&&isGithub)
 		{
 			System.out.println("Connected...");
 			System.out.println("");
@@ -32,9 +35,17 @@ public class Controller {
 			//2. Generate Bugs-By-Developer Matrix in CSV Format
 			//3. Generate Project Data Summary in CSV Format
 			
-			int multiplier = io.inputType();
+			int multiplier = 1;
 			
-			int choice = io.inputChoice();
+			int choice = 0;
+			
+			if(io.getDBN().equalsIgnoreCase("sutd")||io.getDBN().equalsIgnoreCase("gnome_msr2009"))
+			{
+				choice = io.inputChoiceGnome();
+				multiplier = io.inputType();
+			}
+			if(io.getDBN().equalsIgnoreCase("github_msr2014"))
+				choice = io.inputChoiceGithub();
 			
 			if((choice >= 1)&&(choice <= 11))
 			{
