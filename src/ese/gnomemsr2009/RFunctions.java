@@ -92,7 +92,7 @@ public class RFunctions
 		textToAppend = s;
 	}
 	
-	public ArrayList<String> rScript(String fileContent, ArrayList<String> devEmail) throws Exception
+	public ArrayList<String> nwParameters(String dirName, String productName, ArrayList<String> devEmail, boolean danOrDCN) throws Exception
 	{
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -101,21 +101,25 @@ public class RFunctions
 		re.eval("library('igraph')");
 		re.eval("library('Matrix')"); 
 		
-		ArrayList<String> degNBetweenness = new ArrayList<String>();
-		IOFormatter io = new IOFormatter();
+		dirName = dirName.replaceAll("\\\\", "/");
+		ArrayList<String> networkParameters = new ArrayList<String>();
 		
+		if(danOrDCN) re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DCN.net\")");
+		if(!danOrDCN) re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DAN.net\")");
 		
-		String pajek = fileContent;
-		String fN = "tempFile.net";
+		re.eval("dcnGraphWeighted = 0");
+		re.eval("dcnGraph         = 0");
+		re.eval("Degree = 0");
+		re.eval("Betweenness = 0");
+		re.eval("Clustcoef = 0");
+		re.eval("Closeness = 0");
+		re.eval("Eigencentrality = 0");
+		re.eval("Pagerank = 0");
 		
-		io.writeFile(pajek, fN);
-		
-		re.eval("dcn = loadnetwork(\"tempFile.net\")");
 		re.eval("dcnGraphWeighted = graph.adjacency(dcn, mode=c(\"undirected\"), weighted=TRUE)");
 		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
 		re.eval("Degree = as.data.frame(degree(dcnGraph))");
 		re.eval("Betweenness = as.data.frame(betweenness(dcnGraph))");
-		
 		re.eval("Clustcoef = as.data.frame(transitivity(dcnGraph, type=c(\"local\"), isolates=c(\"zero\")))");
 		re.eval("Closeness = as.data.frame(closeness(dcnGraph, mode=c(\"all\"), normalized=TRUE))");
 		re.eval("Eigencentrality = as.data.frame(evcent(dcnGraph)$vector)");
@@ -132,7 +136,8 @@ public class RFunctions
 		
 		for(int j = 0; j < devEmail.size(); j++)
 		{
-			re.eval("devInf <- subset(bnd, bnd$Developers == '"+devEmail.get(j)+"')");
+			re.eval("devInf <- data.frame(a=0, b=0, c=0, d=0, e=0, f=0, g=0)");
+			re.eval("if(Pagerank != 0) devInf <- subset(bnd, bnd$Developers == '"+devEmail.get(j)+"')");
 		
 			//re.eval("devInf <- subset(bnd, bnd$Developers == '"+devEmail+"')");
 			//re.eval("write.csv(bnd, file=\"db-metrics.csv\")");
@@ -175,20 +180,12 @@ public class RFunctions
 					i++;
 				}
 			}
-			degNBetweenness.add(b);
+			networkParameters.add(b);
 		}
 		
-		File file = new File("tempFile.net");
-		File file2= new File("tempFile2.csv");
 		
 		
-		//textToAppend = b;
-		
-		
-		file.delete();
-		file2.delete();
-		//re.end();
-		return degNBetweenness;
+		return networkParameters;
 	}
 	
 	/*
