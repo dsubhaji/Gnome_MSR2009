@@ -23,7 +23,7 @@ public class BatchProcess {
 			};
 	private String legalDevVariables[] = {"bugs-owned",
 			"bugs-commented", "comment-span", "comments-on-owned", "comments-on-nonowned", "noof-activities",
-			"average-elapsed-time", "median-elapsed-time", "average-interest-span", "median-interest-span",
+			"average-elapsed-time", "median-elapsed-time", "average-interest-span", "median-interest-span", "congruence",
 			"dcn.degree", "dcn.betweenness", "dcn.clustcoeff", "dcn.closeness", "dcn.eigencentrality", "dcn.pagerank",
 			"dan.degree", "dan.betweenness", "dan.clustcoeff", "dan.closeness", "dan.eigencentrality", "dan.pagerank"
 			};

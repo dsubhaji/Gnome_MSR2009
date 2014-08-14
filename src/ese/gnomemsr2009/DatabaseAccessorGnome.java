@@ -483,11 +483,11 @@ public class DatabaseAccessorGnome
 			System.out.println("\nCalculating Average Elapsed Time of: " + product + "\n");
 			
 			rs2 = s2.executeQuery(
-					"select a.assigned_to,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime " +
+					"select a.product,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime " +
 					"from bugs a " +
 					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
-					"group by a.assigned_to " +
-					"order by a.assigned_to; "
+					"group by a.product " +
+					"order by a.product; "
 					); //Query to find the distinct developers working on the bugs
 			
 			while(rs2.next())
@@ -502,7 +502,7 @@ public class DatabaseAccessorGnome
 		
 		//StringBuilder start
 		StringBuilder csv = new StringBuilder();
-		csv.append("\"Name of Component\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", "
+		csv.append("\"Name of Product\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", "
 				+ "\"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\", "
 				+ "\"Number of Owners\", \"Degree\", \"Betweenness\", \"Closeness\", \"EVCent\", \"Transitivity(global)\", "
 				+ "\"Assortativity\", \"Diameter\", \"Density\", \"Modularity\", \"Avg. Path Length\", \"Avg. Degree\", "
@@ -1483,7 +1483,7 @@ public class DatabaseAccessorGnome
 		rs = s.executeQuery(
 				"select a.assigned_to,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime " +
 				"from bugs a " +
-				"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+				"where trim(' ' from replace(a.product, '\\n', '')) like '"+product+"' " +
 				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
@@ -2183,14 +2183,5 @@ public class DatabaseAccessorGnome
 		}
 		
 		fileContent = matrix.toString();
-	}
-	
-	public void closeConnection() throws Exception
-	{
-		rs.close(); //close connections
-		s.close();
-		con.close();
-	}
-
-
+	}	
 }
