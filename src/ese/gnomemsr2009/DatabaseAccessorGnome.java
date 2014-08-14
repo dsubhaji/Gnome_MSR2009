@@ -231,7 +231,7 @@ public class DatabaseAccessorGnome
 				"select count(distinct(assigned_to)) 'vertices' "
 						+  "from bugs "
 						+  "where trim(' ' from replace(product, '\\n', '')) like '" + product + "' "
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED'; "
+						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "
 						+  "and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
 						+  "and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"'); " 
 				); //ResultSet gets Query results. Query to find out the total number of distinct developers commenting on the bugs of a specific product
@@ -311,7 +311,7 @@ public class DatabaseAccessorGnome
 				"select count(distinct(assigned_to)) 'vertices' "
 						+  "from bugs "
 						+  "where trim(' ' from replace(product, '\\n', '')) like '" + product + "' "
-						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED'; "
+						+  "and trim(' ' from replace(bug_status, '\\n', '')) like 'RESOLVED' "
 						+  "and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
 						+  "and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"'); "
 				); //ResultSet gets Query results. Query to find out the total number of distinct developers commenting on the bugs of a specific product
@@ -1270,7 +1270,7 @@ public class DatabaseAccessorGnome
 		System.out.println("Generating .CSV File");
 	}
 	
-	public void generateDevModel(String product, String startDate, String endDate) throws Exception
+	public void generateOwnersModel(String product, String startDate, String endDate, String dirName) throws Exception
 	{
 		ArrayList<String> owners		 		= new ArrayList<String>();
 		ArrayList<String> bugsOwned		 		= new ArrayList<String>();
@@ -1290,24 +1290,115 @@ public class DatabaseAccessorGnome
 		ArrayList<String> avgInterestSpan	 	= new ArrayList<String>();
 		ArrayList<String> medianInterestSpan	= new ArrayList<String>();
 		
+		ArrayList<String> congruency			= new ArrayList<String>();
 		
 		System.out.println("");
 		System.out.println("Finding the Number of Bugs Owned by Each Developers...");
 		
+		
 		rs = s.executeQuery(
 				"select distinct(trim(' ' from replace(a.assigned_to, '\n', ''))), count(a.bug_id) " +
 				"from bugs a " +
-				"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
-				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
-				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"group by assigned_to " +
 				"order by assigned_to;"
 				); //Query to find the distinct developers working on the bugs
 		
 		while(rs.next())
 		{
-			owners.add(rs.getString("(trim(' ' from replace(a.assigned_to, '\n', '')))"));
+			String owner = rs.getString("(trim(' ' from replace(a.assigned_to, '\n', '')))");
+			owners.add(owner);
 			bugsOwned.add(rs.getString("count(a.bug_id)"));
+			
+			ArrayList<String> developersSetDCN = new ArrayList<String>(); 
+			ArrayList<String> developersSetDAN = new ArrayList<String>();
+			
+			rs2 = s2.executeQuery(
+					"select trim(' ' from replace(a.who, '\n', '')),  trim(' ' from replace(b.who, '\n', '')) 'who' "
+					+ "from comment a, comment b, bugs c "
+					+ "where a.who <> b.who "
+					+ "and a.bugid = b.bugid "
+					+ "and a.bugid = c.bug_id "
+					+ "and trim(' ' from replace(c.product, '\n', '')) like '"+product+"' "
+					+ "and trim(' ' from replace(c.bug_status, '\n', '')) like 'RESOLVED' "
+					+ "and trim(' ' from replace(a.who, '\n', '')) like '"+owner+"' "
+					+ "and trim(' ' from replace(b.who, '\n', '')) IN "
+					+ "(select distinct(trim(' ' from replace(assigned_to, '\n', ''))) from bugs where trim(' ' from replace(product, '\n', '')) like 'gnome-vfs') "
+					+ "group by a.who, b.who "
+					+ "order by a.who;");
+			
+			while(rs2.next())
+			{
+				developersSetDCN.add(rs2.getString("who"));
+			}
+			
+			rs2 = s2.executeQuery(
+					"select trim(' ' from replace(a.who, '\n', '')),  trim(' ' from replace(b.who, '\n', '')) 'who' "
+					+ "from activity a, activity b, bugs c "
+					+ "where a.who <> b.who "
+					+ "and a.bugid = b.bugid "
+					+ "and a.bugid = c.bug_id "
+					+ "and trim(' ' from replace(c.product, '\n', '')) like '"+product+"' "
+					+ "and trim(' ' from replace(c.bug_status, '\n', '')) like 'RESOLVED' "
+					+ "and trim(' ' from replace(a.who, '\n', '')) like '"+owner+"' "
+					+ "and trim(' ' from replace(b.who, '\n', '')) IN "
+					+ "(select distinct(trim(' ' from replace(assigned_to, '\n', ''))) from bugs where trim(' ' from replace(product, '\n', '')) like 'gnome-vfs') "
+					+ "group by a.who, b.who "
+					+ "order by a.who;");
+			
+			while(rs2.next())
+			{
+				developersSetDAN.add(rs2.getString("who"));
+			}
+			
+			if(!(developersSetDCN.isEmpty()&&developersSetDAN.isEmpty()))
+			{
+				float unionCardinality = 0;
+				float intersectionCardinality = 0;
+				
+				for(int countDCN = 0; countDCN < developersSetDCN.size(); countDCN++)
+				{
+					for(int countDAN = 0; countDAN < developersSetDAN.size(); countDAN++)
+					{
+						if(developersSetDCN.get(countDCN).equals(developersSetDAN.get(countDAN)))
+						{
+							intersectionCardinality = intersectionCardinality + 1;
+						}
+					}
+				}
+				
+				for(int countDCN = 0; countDCN < developersSetDCN.size(); countDCN++)
+				{
+					unionCardinality = unionCardinality + 1;
+				}
+				
+				for(int countDAN = 0; countDAN < developersSetDAN.size(); countDAN++)
+				{
+					int comparator = 0;
+					for(int countDCN = 0; countDCN < developersSetDCN.size(); countDCN++)
+					{
+						if(developersSetDCN.get(countDCN).equals(developersSetDAN.get(countDAN)))
+						{
+							comparator = comparator + 1;
+						}
+					}
+					
+					if(comparator == 0)
+					{
+						unionCardinality = unionCardinality + 1;
+					}
+				}
+				
+				float congruence = intersectionCardinality/unionCardinality;
+				
+				congruency.add(congruence + "");
+			} else
+			{
+				congruency.add("0");
+			}
 		}
 		
 		System.out.println("Calculating the Number of Comments and the Timespan by the Developers...");
@@ -1395,6 +1486,7 @@ public class DatabaseAccessorGnome
 				"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
 				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"group by a.assigned_to " +
 				"order by a.assigned_to; "
 				); //Query to find the distinct developers working on the bugs
@@ -1416,6 +1508,7 @@ public class DatabaseAccessorGnome
 				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 				"and b.bugid in " +
 				"(	select bug_id from bugs where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' 	) " +
 				"group by b.bugid " +
@@ -1496,6 +1589,7 @@ public class DatabaseAccessorGnome
 					"and a.assigned_to like '%" +owners.get(i) + "%' " +
 					"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 					"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 					"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
 					); //Query to find the distinct developers working on the bugs
 			
@@ -1533,6 +1627,7 @@ public class DatabaseAccessorGnome
 					"AND a.assigned_to like '%" +owners.get(i) + "%' " +
 					"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 					"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "+
 					"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 					"group by b.bugid " +
 					"order by timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 asc " 
@@ -1563,12 +1658,18 @@ public class DatabaseAccessorGnome
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		//RFunctions rf = Controller.rf;
-		//ArrayList<String> degNBet = rf.rScript(fileContent, owners);
+		/*RFunctions rf = Controller.rf;
+		ArrayList<String> dcnParameters = rf.nwParameters(dirName, product, owners, true);
+		
+		ArrayList<String> danParameters = rf.nwParameters(dirName, product, owners, true);*/
 		
 		//Column Headers
 		//matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
-		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span");
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, "
+				+ "comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, "
+				+ "average-interest-span, median-interest-span, congruence");
+				//+ "dcn.degree, dcn.betweenness, dcn.clustcoeff, dcn.eigencentrality, dcn.closeness, dcn.pagerank, "
+				//+ "dan.degree, dan.betweenness, dan.clustcoeff, dan.eigencentrality, dan.closeness, dan.pagerank");
 		matrix.append("\n");
 		
 		String tempString = "0";
@@ -1594,8 +1695,10 @@ public class DatabaseAccessorGnome
 			
 			matrix.append(medianElapsedTime.get(i) + ", ");
 			matrix.append(tempString + ", ");
-			matrix.append(medianInterestSpan.get(i));
-			//matrix.append(degNBet.get(i));
+			matrix.append(medianInterestSpan.get(i) + ", ");
+			matrix.append(congruency.get(i));
+			//matrix.append(dcnParameters.get(i) + ", ");
+			//matrix.append(danParameters.get(i));
 			matrix.append("\n");
 			tempString = "0";
 		}
@@ -1605,7 +1708,7 @@ public class DatabaseAccessorGnome
 		System.out.println("Generating .CSV File.");
 	}
 	
-	public void generateCommenterModel(String product, String startDate, String endDate) throws Exception
+	public void generateCommenterModel(String product, String startDate, String endDate, String dirName) throws Exception
 	{
 		ArrayList<String> commenters 			= new ArrayList<String>();
 		ArrayList<String> owners2		 		= new ArrayList<String>();
@@ -1628,7 +1731,7 @@ public class DatabaseAccessorGnome
 		ArrayList<String> avgInterestSpan	 	= new ArrayList<String>();
 		ArrayList<String> medianInterestSpan	= new ArrayList<String>();
 		
-		
+		ArrayList<String> congruency 			= new ArrayList<String>();
 		
 		System.out.println("");
 		System.out.println("Finding the Distinct Commenters...");
@@ -1638,13 +1741,102 @@ public class DatabaseAccessorGnome
 				+ "from bugs a, comment b "
 				+ "where a.bug_id = b.bugid "
 				+ "and trim(' ' from replace(a.product, '\n', '')) like '"+product+"' "
-				+ "and (STR_TO_DATE(bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
+				+ "and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " 
+				+ "and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' "
 				+ "order by assigned_to;"
 				);
 		
 		while(rs.next())
 		{
-			commenters.add(rs.getString("who").trim());
+			String commenter = rs.getString("who").trim();
+			commenters.add(commenter);
+			
+			ArrayList<String> developersSetDCN = new ArrayList<String>(); 
+			ArrayList<String> developersSetDAN = new ArrayList<String>();
+			
+			rs2 = s2.executeQuery(
+					"select trim(' ' from replace(a.who, '\n', '')),  trim(' ' from replace(b.who, '\n', '')) 'who' "
+					+ "from comment a, comment b, bugs c "
+					+ "where a.who <> b.who "
+					+ "and a.bugid = b.bugid "
+					+ "and a.bugid = c.bug_id "
+					+ "and trim(' ' from replace(c.product, '\n', '')) like '"+product+"' "
+					+ "and trim(' ' from replace(c.bug_status, '\n', '')) like 'RESOLVED' "
+					+ "and trim(' ' from replace(a.who, '\n', '')) like '"+commenter+"' "
+					+ "and trim(' ' from replace(b.who, '\n', '')) IN "
+					+ "(select distinct(trim(' ' from replace(assigned_to, '\n', ''))) from bugs where trim(' ' from replace(product, '\n', '')) like 'gnome-vfs') "
+					+ "group by a.who, b.who "
+					+ "order by a.who;");
+			
+			while(rs2.next())
+			{
+				developersSetDCN.add(rs2.getString("who"));
+			}
+			
+			rs2 = s2.executeQuery(
+					"select trim(' ' from replace(a.who, '\n', '')),  trim(' ' from replace(b.who, '\n', '')) 'who' "
+					+ "from activity a, activity b, bugs c "
+					+ "where a.who <> b.who "
+					+ "and a.bugid = b.bugid "
+					+ "and a.bugid = c.bug_id "
+					+ "and trim(' ' from replace(c.product, '\n', '')) like '"+product+"' "
+					+ "and trim(' ' from replace(c.bug_status, '\n', '')) like 'RESOLVED' "
+					+ "and trim(' ' from replace(a.who, '\n', '')) like '"+commenter+"' "
+					+ "and trim(' ' from replace(b.who, '\n', '')) IN "
+					+ "(select distinct(trim(' ' from replace(assigned_to, '\n', ''))) from bugs where trim(' ' from replace(product, '\n', '')) like 'gnome-vfs') "
+					+ "group by a.who, b.who "
+					+ "order by a.who;");
+			
+			while(rs2.next())
+			{
+				developersSetDAN.add(rs2.getString("who"));
+			}
+			
+			if(!(developersSetDCN.isEmpty()&&developersSetDAN.isEmpty()))
+			{
+				float unionCardinality = 0;
+				float intersectionCardinality = 0;
+				
+				for(int countDCN = 0; countDCN < developersSetDCN.size(); countDCN++)
+				{
+					for(int countDAN = 0; countDAN < developersSetDAN.size(); countDAN++)
+					{
+						if(developersSetDCN.get(countDCN).equals(developersSetDAN.get(countDAN)))
+						{
+							intersectionCardinality = intersectionCardinality + 1;
+						}
+					}
+				}
+				
+				for(int countDCN = 0; countDCN < developersSetDCN.size(); countDCN++)
+				{
+					unionCardinality = unionCardinality + 1;
+				}
+				
+				for(int countDAN = 0; countDAN < developersSetDAN.size(); countDAN++)
+				{
+					int comparator = 0;
+					for(int countDCN = 0; countDCN < developersSetDCN.size(); countDCN++)
+					{
+						if(developersSetDCN.get(countDCN).equals(developersSetDAN.get(countDAN)))
+						{
+							comparator = comparator + 1;
+						}
+					}
+					
+					if(comparator == 0)
+					{
+						unionCardinality = unionCardinality + 1;
+					}
+				}
+				
+				float congruence = intersectionCardinality/unionCardinality;
+				
+				congruency.add(congruence + "");
+			} else
+			{
+				congruency.add("0");
+			}
 		}
 		
 		System.out.println("");
@@ -1656,6 +1848,7 @@ public class DatabaseAccessorGnome
 				"where trim(' ' from replace(product, '\n', '')) like '"+product+"' " +
 				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' " +
 				"group by assigned_to " +
 				"order by assigned_to;"
 				); //Query to find the distinct developers working on the bugs
@@ -1748,13 +1941,15 @@ public class DatabaseAccessorGnome
 				"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
 				"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' " +
 				"group by a.assigned_to " +
 				"order by a.assigned_to; "
 				); //Query to find the distinct developers working on the bugs
 		
 		while(rs.next())
 		{
-			owners2.add(rs.getString("a.assigned_to"));
+			String owner = rs.getString("a.assigned_to");
+			owners.add(owner);
 			avgElapsedTime.add(rs.getString("avgElapsedTime"));
 		}
 		
@@ -1769,6 +1964,7 @@ public class DatabaseAccessorGnome
 				"and (STR_TO_DATE(creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 				"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+				"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' " +
 				"and b.bugid in " +
 				"(	select bug_id from bugs where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' 	) " +
 				"group by b.bugid " +
@@ -1849,6 +2045,7 @@ public class DatabaseAccessorGnome
 					"and a.assigned_to like '%" +commenters.get(i) + "%' " +
 					"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 					"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' " +
 					"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
 					); //Query to find the distinct developers working on the bugs
 			
@@ -1889,6 +2086,7 @@ public class DatabaseAccessorGnome
 					"and (STR_TO_DATE(a.creation_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 					"and (STR_TO_DATE(a.delta_ts, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
 					"and (STR_TO_DATE(b.bug_when, '%Y-%m-%d %H:%i:%s') between '"+startDate+"' and '"+endDate+"') " +
+					"and trim(' ' from replace(a.bug_status, '\\n', '')) like 'RESOLVED' " +
 					"group by b.bugid " +
 					"order by timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 asc " 
 					);
@@ -1917,11 +2115,21 @@ public class DatabaseAccessorGnome
 			
 		}
 		
+		/*RFunctions rf = Controller.rf;
+		ArrayList<String> dcnParameters = rf.nwParameters(dirName, product, owners, true);
+		
+		ArrayList<String> danParameters = rf.nwParameters(dirName, product, owners, true);*/
+		
 		
 		StringBuilder matrix = new StringBuilder();
 		
-		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span");
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, "
+				+ "comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, "
+				+ "average-interest-span, median-interest-span, congruence");
+				//+ "dcn.degree, dcn.betweenness, dcn.clustcoeff, dcn.eigencentrality, dcn.closeness, dcn.pagerank, "
+				//+ "dan.degree, dan.betweenness, dan.clustcoeff, dan.eigencentrality, dan.closeness, dan.pagerank");
 		matrix.append("\n");
+		
 		
 		String tempString = "0";
 		String tempString2= "0";
@@ -1964,8 +2172,11 @@ public class DatabaseAccessorGnome
 			matrix.append(tempString2 + ", ");
 			matrix.append(medianElapsedTime.get(i) + ", ");
 			matrix.append(tempString + ", ");
-			matrix.append(medianInterestSpan.get(i));
-			//matrix.append(degNBet.get(i));
+			matrix.append(medianInterestSpan.get(i) + ", ");
+			matrix.append(congruency.get(i));
+			//matrix.append(dcnParameters.get(i) + ", ");
+			//matrix.append(danParameters.get(i));
+			
 			matrix.append("\n");
 			tempString = "0";
 			tempString2= "0";
