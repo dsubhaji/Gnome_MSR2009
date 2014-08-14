@@ -212,7 +212,7 @@ public class BatchProcess {
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 				da.generateOwnersDAN(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
-				da.generateOwnersModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
+				da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			} else if (a==1)
 			{
@@ -220,7 +220,7 @@ public class BatchProcess {
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
 				da.generateDAN(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
-				da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
+				da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
 				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 			}
 			
@@ -513,10 +513,10 @@ public class BatchProcess {
 					case 9: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 								break;
-					case 10:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
+					case 10:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
-					case 1000: 	da.generateOwnersModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
+					case 1000: 	da.generateDevModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
 					case 1100:
