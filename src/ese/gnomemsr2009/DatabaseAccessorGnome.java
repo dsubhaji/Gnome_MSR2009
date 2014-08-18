@@ -397,6 +397,8 @@ public class DatabaseAccessorGnome
 		ArrayList<String> medianPriority	= new ArrayList<String>();
 		ArrayList<String> medianElapsedTime	= new ArrayList<String>();
 		ArrayList<String> avgElapsedTime	= new ArrayList<String>();
+		ArrayList<String> allBugStatus		= new ArrayList<String>();
+		
 		ArrayList<String> everythingElse	= new ArrayList<String>();
 		//everythingElse includes cent.Degree, cent.Betweenness, cent.closeness, cent.EVcent, transitivity.global, assortativity, diameter, density, modularity, avg.PathLength, and avg.Degree
 		
@@ -427,13 +429,56 @@ public class DatabaseAccessorGnome
 		while(rs.next())
 		{
 			String product = rs.getString("(trim(' ' from replace(a.product, '\n', '')))");
-			int numberOfBugs = rs.getInt("count(distinct(b.bugid))");
-			
 			productName2.add("\"" + product +"\"");
-			numOfBugs.add("" + numberOfBugs);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
+			String allStatus = "";
+			int resolvedBugs = 0;
+			int totalBug = 0;
+			for(int i = 0; i < 8; i++)
+			{
+				String bugStatus = "";
+				
+				switch(i)
+				{
+				case 0: bugStatus = "assigned"; break;
+				case 1: bugStatus = "closed"; break;
+				case 2: bugStatus = "needinfo"; break;
+				case 3: bugStatus = "new"; break;
+				case 4: bugStatus = "reopened"; break;
+				case 5: bugStatus = "unconfirmed"; break;
+				case 6: bugStatus = "verified"; break;
+				case 7: bugStatus = "resolved"; break;
+				default: break;
+				}
+				
+				rs2 = s2.executeQuery(
+						"select product, count(bug_id) "
+						+ "from bugs "
+						+ "where trim(' ' from replace(product, '\n', '')) like '"+product+"' "
+						+ "and trim(' ' from replace(bug_status, '\n', '')) like '"+bugStatus+"' "
+						+ "group by product "
+						); //Query to find the distinct developers working on the bugs
+				
+				String curStatus = "";
+				while(rs2.next())
+				{
+					curStatus = rs2.getString("count(bug_id)");
+				}
+				
+				if(curStatus.isEmpty()) curStatus = "0";
+				if(i == 7) 
+				{
+					allStatus = allStatus + curStatus;
+					resolvedBugs = Integer.parseInt(curStatus);
+				}
+				else allStatus = allStatus + curStatus + ", ";
+				
+				totalBug = totalBug + Integer.parseInt(curStatus);
+			}
 			
+			allBugStatus.add(allStatus);
+			numOfBugs.add("" + totalBug);
 			System.out.println("\nFinding First and Last Comment of: " + product + "\n");
 			
 			rs2 = s2.executeQuery(
@@ -706,7 +751,7 @@ public class DatabaseAccessorGnome
 				int commentsOnResolved = rs2.getInt("noOfComments");
 				resolvedCommenters.add(rs2.getString("noOfCommenters"));
 				resolvedComments.add("" + commentsOnResolved);
-				avgResolvedComments.add("" + (float)commentsOnResolved/numberOfBugs);
+				avgResolvedComments.add("" + (float)commentsOnResolved/resolvedBugs);
 			}
 			
 			System.out.println("\nCalculating the Average Comment Span of Resolved Bugs in: " + product + "\n");
@@ -746,7 +791,7 @@ public class DatabaseAccessorGnome
 				int activitiesOnResolved = rs2.getInt("noOfActivities");
 				//resolvedCommenters.add(rs2.getString("noOfCommenters"));
 				resolvedActivities.add("" + activitiesOnResolved);
-				avgResolvedActivities.add("" + (float)activitiesOnResolved/numberOfBugs);
+				avgResolvedActivities.add("" + (float)activitiesOnResolved/resolvedBugs);
 			}
 			
 			System.out.println("\nCalculating Network Metrics of: " + product + "\n");
@@ -756,7 +801,9 @@ public class DatabaseAccessorGnome
 		
 		//StringBuilder start
 		StringBuilder csv = new StringBuilder();
-		csv.append("product-name, noof-bugs-total, avg-elapsed-time-resolved, median-elapsed-time-resolved, "
+		csv.append("product-name, noof-bugs-total, "
+				+ "noof-bugs-assigned, noof-bugs-closed, noof-bugs-needinfo, noof-bugs-new, noof-bugs-reopened, noof-bugs-unconfirmed, noof-bugs-verified, noof-bugs-resolved, "
+				+ "avg-elapsed-time-resolved, median-elapsed-time-resolved, "
 				+ "noof-developers-owning-resolved, noof-developers-commenting-resolved, noof-comments-resolved, avg-comments-resolved, "
 				+ "median-comments-resolved, avg-comment-span-resolved, median-comment-span-resolved, first-comment-ts-resolved, last-comment-ts-resolved, "
 				+ "elapsed-time-hours-resolved, noof-activities-resolved, avg-activities-resolved, median-activities-resolved, product-age-resolved, "
@@ -772,6 +819,7 @@ public class DatabaseAccessorGnome
 		{
 			csv.append(productName2.get(i) + ", ");
 			csv.append(numOfBugs.get(i) + ", ");
+			csv.append(allBugStatus.get(i) + ", ");
 			csv.append(avgElapsedTime.get(i) + ", ");
 			csv.append(medianElapsedTime.get(i) + ", ");
 			csv.append(resolvedOwners.get(i) + ", ");
