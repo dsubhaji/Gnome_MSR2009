@@ -377,34 +377,38 @@ public class DatabaseAccessorGnome
 	
 	public void projectSummary(ArrayList<String> productName, String dirName) throws Exception
 	{
-		ArrayList<String> elapsedDays 		= new ArrayList<String>();
 		ArrayList<String> elapsedHours 		= new ArrayList<String>();
-		ArrayList<String> elapsedMinutes	= new ArrayList<String>();
-		
 		ArrayList<String> firstComment		= new ArrayList<String>();
 		ArrayList<String> lastComment		= new ArrayList<String>();
-		
+		ArrayList<String> resolvedAge		= new ArrayList<String>();
 		ArrayList<String> productName2 		= new ArrayList<String>();
 		ArrayList<String> numOfBugs 		= new ArrayList<String>();
-		ArrayList<String> numOfComments 	= new ArrayList<String>();
-		ArrayList<String> numOfDevs			= new ArrayList<String>();
-		ArrayList<String> numOfOwners		= new ArrayList<String>();
-		
+		ArrayList<String> resolvedOwners    = new ArrayList<String>();
+		ArrayList<String> resolvedCommenters= new ArrayList<String>();
+		ArrayList<String> resolvedComments  = new ArrayList<String>();
+		ArrayList<String> avgResolvedComments	= new ArrayList<String>();
+		ArrayList<String> medianResolvedComments= new ArrayList<String>();
+		ArrayList<String> medianResolvedActivity= new ArrayList<String>();
+		ArrayList<String> medianCommentSpan	= new ArrayList<String>();
+		ArrayList<String> avgCommentSpan	= new ArrayList<String>();
+		ArrayList<String> avgPriority	= new ArrayList<String>();
+		ArrayList<String> resolvedActivities	= new ArrayList<String>();
+		ArrayList<String> avgResolvedActivities	= new ArrayList<String>();
+		ArrayList<String> medianPriority	= new ArrayList<String>();
 		ArrayList<String> medianElapsedTime	= new ArrayList<String>();
 		ArrayList<String> avgElapsedTime	= new ArrayList<String>();
 		ArrayList<String> everythingElse	= new ArrayList<String>();
 		//everythingElse includes cent.Degree, cent.Betweenness, cent.closeness, cent.EVcent, transitivity.global, assortativity, diameter, density, modularity, avg.PathLength, and avg.Degree
 		
-		int arrayLength = productName.size();
 		String inStatement = "";
 		
 		RFunctions rf = Controller.rf;
 		
-		for(int i = 0; i < arrayLength; i++)
+		for(int i = 0; i < productName.size(); i++)
 		{
 			if(i == 0)
 				inStatement = inStatement + "AND (trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"'";
-			if(i == arrayLength - 1)
+			if(i == productName.size() - 1)
 				inStatement = inStatement + " OR trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"') ";
 			else
 				inStatement = inStatement + " OR trim(' ' from replace(a.product, '\n', '')) like '"+productName.get(i).trim()+"'";
@@ -412,7 +416,7 @@ public class DatabaseAccessorGnome
 		
 		System.out.println("\nExtracting Data from Database...");
 		
-		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)), count(b.bug_when), count(distinct(b.who)), MIN(trim(' ' from replace(b.bug_when, '\n', ''))), MAX(trim(' ' from replace(b.bug_when, '\n', ''))), count(distinct(a.assigned_to)) "
+		rs = s.executeQuery("select distinct(trim(' ' from replace(a.product, '\n', ''))), count(distinct(b.bugid)) "
 							+"from bugs a, comment b "
 							+"where a.bug_id = b.bugid "
 							+ inStatement
@@ -423,27 +427,50 @@ public class DatabaseAccessorGnome
 		while(rs.next())
 		{
 			String product = rs.getString("(trim(' ' from replace(a.product, '\n', '')))");
+			int numberOfBugs = rs.getInt("count(distinct(b.bugid))");
 			
 			productName2.add("\"" + product +"\"");
-			numOfBugs.add("" + rs.getInt("count(distinct(b.bugid))"));
-			numOfComments.add("" + rs.getInt("count(b.bug_when)"));
-			numOfDevs.add("" + rs.getInt("count(distinct(b.who))"));
-			numOfOwners.add("" + rs.getInt("count(distinct(a.assigned_to))"));
+			numOfBugs.add("" + numberOfBugs);
+			
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
 			
-			String minDate = rs.getString("MIN(trim(' ' from replace(b.bug_when, '\n', '')))");
-			String maxDate = rs.getString("MAX(trim(' ' from replace(b.bug_when, '\n', '')))");
+			System.out.println("\nFinding First and Last Comment of: " + product + "\n");
 			
-			Date dateMin = sdf.parse(minDate);
-			Date dateMax = sdf.parse(maxDate);
+			rs2 = s2.executeQuery(
+					"select MIN(b.bug_when), MAX(b.bug_when), MIN(a.creation_ts), MAX(a.creation_ts) " +
+					"from bugs a, comment b " +
+					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"and trim(' ' from replace(a.bug_status, '\n', '')) like 'resolved' " +
+					"and a.bug_id = b.bugid " +
+					"group by a.product; "
+					); //Query to find the distinct developers working on the bugs
 			
-			firstComment.add("\""+minDate+"\"");
-			lastComment.add("\""+maxDate+"\"");
+			while(rs2.next())
+			{
+				String minDate = rs2.getString("MIN(b.bug_when)").trim();
+				String maxDate = rs2.getString("MAX(b.bug_when)").trim();
+				
+				Date dateMin = sdf.parse(minDate);
+				Date dateMax = sdf.parse(maxDate);
+				
+				firstComment.add("\""+minDate+"\"");
+				lastComment.add("\""+maxDate+"\"");
+				
+				float differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
+				
+				elapsedHours.add("" + (float)((differenceInTime/1000)/3600)); //elapsed time in hours
+				
+				minDate = rs2.getString("MIN(a.creation_ts)").trim();
+				maxDate = rs2.getString("MAX(a.creation_ts)").trim();
+				
+				dateMin = sdf.parse(minDate);
+				dateMax = sdf.parse(maxDate);
+				
+				differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
+				
+				resolvedAge.add("" + (float)((differenceInTime/1000)/3600));
+			}
 			
-			float differenceInTime = dateMax.getTime() - dateMin.getTime(); //elapsed time in millisecond
-			elapsedDays.add("" + (float)(((differenceInTime/1000)/3600)/24)); //elapsed time in days
-			elapsedHours.add("" + (float)((differenceInTime/1000)/3600)); //elapsed time in hours
-			elapsedMinutes.add("" + (float)((differenceInTime/1000)/60)); //elapsed time in minutes
 			
 			System.out.println("\nCalculating Median Elapsed Time of: " + product + "\n");
 			
@@ -451,6 +478,7 @@ public class DatabaseAccessorGnome
 							"select timestampdiff(second, a.creation_ts, a.delta_ts)/3600 'elapsed_time' " +
 							"from bugs a " +
 							"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
 							"order by timestampdiff(second, a.creation_ts, a.delta_ts)/3600; "
 								);
 			
@@ -459,8 +487,7 @@ public class DatabaseAccessorGnome
 			
 			while(rs2.next())
 			{
-				elTime = elTime + rs2.getFloat("elapsed_time");
-				
+				elTime = rs2.getFloat("elapsed_time");
 				elapsedTime.add(elTime);
 			}
 			
@@ -480,12 +507,162 @@ public class DatabaseAccessorGnome
 			
 			medianElapsedTime.add(""+median);
 			
+			System.out.println("\nCalculating Median Resolved Activities of: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+							"select a.bug_id, count(b.who) " +
+							"from bugs a, activity b " +
+							"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
+							"group by a.bug_id "
+						);
+	
+			float activities = 0.0f;
+			ArrayList<Float> activityList = new ArrayList<Float>();
+			
+			while(rs2.next())
+			{
+				activities = rs2.getFloat("count(b.who)");
+				
+				activityList.add(activities);
+			}
+			
+			if(activities == 0.0f)
+			{
+				activityList.add(activities);
+			}
+			
+			//find the median of the elapsed time
+			mid = activityList.size()/2; 
+			median = activityList.get(mid); 
+			
+			if (activityList.size()%2 == 0) 
+			{ 
+				median = (median + activityList.get(mid-1))/2; 
+			}
+			
+			medianResolvedActivity.add(""+median);
+			
+			System.out.println("\nCalculating Median Priority of: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+					"select REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(trim(' ' from replace(priority, '\n', '')), 'Low', 1), 'Normal', 2), 'High', 3), 'Urgent', 4), 'Immediate', 5) as priority "
+					+ "from bugs "
+					+ "where trim(' ' from replace(product, '\n', '')) like '"+product+"' "
+					+ "and trim(' ' from replace(bug_status, '\n', '')) like 'resolved'; "
+						);
+	
+			float priority = 0.0f;
+			ArrayList<Float> priorityList = new ArrayList<Float>();
+			
+			while(rs2.next())
+			{
+				priority = rs2.getFloat("priority");
+				priorityList.add(priority);
+			}
+			
+			if(priority == 0.0f)
+			{
+				priorityList.add(priority);
+			}
+			
+			//find the median of the elapsed time
+			mid = priorityList.size()/2; 
+			median = priorityList.get(mid); 
+			
+			if (priorityList.size()%2 == 0) 
+			{ 
+				median = (median + priorityList.get(mid-1))/2; 
+			}
+			
+			medianPriority.add(""+median);
+
+			
+			System.out.println("\nCalculating Median Resolved Comments of: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+							"select a.bug_id, count(b.who) " +
+							"from bugs a, comment b " +
+							"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+							"and a.bug_id = b.bugid " +
+							"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
+							"group by a.bug_id "
+								);
+			
+			float comments = 0.0f;
+			ArrayList<Float> commentsArray		= new ArrayList<Float>();
+			
+			while(rs2.next())
+			{
+				comments = rs2.getFloat("count(b.who)");
+				
+				commentsArray.add(comments);
+			}
+			
+			if(comments == 0.0f)
+			{
+				commentsArray.add(comments);
+			}
+			
+			//find the median of the elapsed time
+			mid = commentsArray.size()/2; 
+			median = commentsArray.get(mid); 
+			
+			if (commentsArray.size()%2 == 0) 
+			{ 
+				median = (median + commentsArray.get(mid-1))/2; 
+			}
+			
+			medianResolvedComments.add(""+median);
+			
+			System.out.println("\nCalculating Median Resolved Comments of: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+							"select a.comment_span "
+							+ "from ( "
+							+ "select b.who, timestampdiff(second, MIN(bug_when), MAX(bug_when))/3600 AS comment_span " 
+							+ "from bugs a, comment b " 
+							+ "where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' "
+							+ "and trim(' ' from replace(a.bug_status, '\n', '')) like 'resolved' "
+							+ "and a.bug_id = b.bugid " 
+							+ "group by who "  
+							+ "order by who) a "
+								);
+			
+			float commentSpan = 0.0f;
+			ArrayList<Float> commentSpanArray		= new ArrayList<Float>();
+			
+			while(rs2.next())
+			{
+				commentSpan = rs2.getFloat("a.comment_span");
+				commentSpanArray.add(commentSpan);
+			}
+			
+			if(commentSpan == 0.0f)
+			{
+				commentSpanArray.add(commentSpan);
+			}
+			
+			//find the median of the elapsed time
+			mid = commentSpanArray.size()/2; 
+			median = commentSpanArray.get(mid); 
+			
+			if (commentSpanArray.size()%2 == 0) 
+			{ 
+				median = (median + commentSpanArray.get(mid-1))/2; 
+			}
+			
+			medianCommentSpan.add(""+median);
+			
+			
 			System.out.println("\nCalculating Average Elapsed Time of: " + product + "\n");
 			
 			rs2 = s2.executeQuery(
-					"select a.product,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime " +
+					"select a.product,  avg(timestampdiff(second, a.creation_ts, a.delta_ts)/3600) as avgElapsedTime, avg(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(trim(' ' from replace(priority, '\n', '')), 'Low', 1), 'Normal', 2), 'High', 3), 'Urgent', 4), 'Immediate', 5)) as avgPriority " +
 					"from bugs a " +
 					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
 					"group by a.product " +
 					"order by a.product; "
 					); //Query to find the distinct developers working on the bugs
@@ -493,20 +670,101 @@ public class DatabaseAccessorGnome
 			while(rs2.next())
 			{
 				avgElapsedTime.add(rs2.getString("avgElapsedTime"));
+				avgPriority.add(rs2.getString("avgPriority"));
+			}
+			
+			System.out.println("\nCalculating the Number of Owners with Resolved Bugs in: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+					"select a.product,  count(distinct(a.assigned_to)) as noOfOwners " +
+					"from bugs a " +
+					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
+					"group by a.product " +
+					"order by a.product; "
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs2.next())
+			{
+				resolvedOwners.add(rs2.getString("noOfOwners"));
+			}
+			
+			System.out.println("\nCalculating the Number of Commenters on Resolved Bugs in: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+					"select a.product,  count(distinct(b.who)) as noOfCommenters, count(b.bug_when) as noOfComments " +
+					"from bugs a, comment b " +
+					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
+					"and a.bug_id = b.bugid " +
+					"group by a.product " +
+					"order by a.product; "
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs2.next())
+			{
+				int commentsOnResolved = rs2.getInt("noOfComments");
+				resolvedCommenters.add(rs2.getString("noOfCommenters"));
+				resolvedComments.add("" + commentsOnResolved);
+				avgResolvedComments.add("" + (float)commentsOnResolved/numberOfBugs);
+			}
+			
+			System.out.println("\nCalculating the Average Comment Span of Resolved Bugs in: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+					"select avg(a.comment_span) "
+					+ "from ( "
+					+ "select b.who, timestampdiff(second, MIN(bug_when), MAX(bug_when))/3600 AS comment_span " 
+					+ "from bugs a, comment b " 
+					+ "where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' "
+					+ "and trim(' ' from replace(a.bug_status, '\n', '')) like 'resolved' "
+					+ "and a.bug_id = b.bugid " 
+					+ "group by who "  
+					+ "order by who) a; "
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs2.next())
+			{
+				avgCommentSpan.add(rs2.getString("avg(a.comment_span)"));
+			}
+			
+			
+			System.out.println("\nCalculating the Number of Activities on Resolved Bugs in: " + product + "\n");
+			
+			rs2 = s2.executeQuery(
+					"select a.product,  count(distinct(b.who)) as noOfCommenters, count(b.bug_when) as noOfActivities " +
+					"from bugs a, activity b " +
+					"where trim(' ' from replace(a.product, '\n', '')) like '"+product+"' " +
+					"and trim(' ' from replace(a.bug_status, '\n', '')) like 'RESOLVED' " +
+					"and a.bug_id = b.bugid " +
+					"group by a.product " +
+					"order by a.product; "
+					); //Query to find the distinct developers working on the bugs
+			
+			while(rs2.next())
+			{
+				int activitiesOnResolved = rs2.getInt("noOfActivities");
+				//resolvedCommenters.add(rs2.getString("noOfCommenters"));
+				resolvedActivities.add("" + activitiesOnResolved);
+				avgResolvedActivities.add("" + (float)activitiesOnResolved/numberOfBugs);
 			}
 			
 			System.out.println("\nCalculating Network Metrics of: " + product + "\n");
 			
-			everythingElse.add(rf.summaryMetrics(dirName, product));
+			everythingElse.add(rf.summaryMetrics(dirName, product, true) + ", " + rf.summaryMetrics(dirName, product, false));
 		}
 		
 		//StringBuilder start
 		StringBuilder csv = new StringBuilder();
-		csv.append("\"Name of Product\", \"Number of Bugs\", \"Total Number of Comments\", \"No. Of Distinct Developers\", "
-				+ "\"Date of First Comment\", \"Date of Last Comment\", \"Time Elapsed(Days)\", \"Time Elapsed(Hours)\", \"Time Elapsed(Minutes)\", "
-				+ "\"Number of Owners\", \"Degree\", \"Betweenness\", \"Closeness\", \"EVCent\", \"Transitivity(global)\", "
-				+ "\"Assortativity\", \"Diameter\", \"Density\", \"Modularity\", \"Avg. Path Length\", \"Avg. Degree\", "
-				+ "\"Avg. Elapsed Time\", \"Median Elapsed Time\"\n");
+		csv.append("product-name, noof-bugs-total, avg-elapsed-time-resolved, median-elapsed-time-resolved, "
+				+ "noof-developers-owning-resolved, noof-developers-commenting-resolved, noof-comments-resolved, avg-comments-resolved, "
+				+ "median-comments-resolved, avg-comment-span-resolved, median-comment-span-resolved, first-comment-ts-resolved, last-comment-ts-resolved, "
+				+ "elapsed-time-hours-resolved, noof-activities-resolved, avg-activities-resolved, median-activities-resolved, product-age-resolved, "
+				+ "avg-bug-priority-resolved, median-bug-priority-resolved, "
+				+ "dcn-degree-centralization, dcn-betweenness-centralization, dcn-closeness, dcn-evcent, dcn-transitivity-global, "
+				+ "dcn-assortativity, dcn-diameter, dcn-density, dcn-modularity, dcn-avg-path-length, dcn-avg-degree, "
+				+ "dan-degree-centralization, dan-betweenness-centralization, dan-closeness, dan-evcent, dan-transitivity-global, "
+				+ "dan-assortativity, dan-diameter, dan-density, dan-modularity, dan-avg-path-length, dan-avg-degree\n");
 		
 		System.out.println("Generating .CSV File");
 		
@@ -514,20 +772,25 @@ public class DatabaseAccessorGnome
 		{
 			csv.append(productName2.get(i) + ", ");
 			csv.append(numOfBugs.get(i) + ", ");
-			csv.append(numOfComments.get(i) + ", ");
-			csv.append(numOfDevs.get(i) + ", ");
-			
+			csv.append(avgElapsedTime.get(i) + ", ");
+			csv.append(medianElapsedTime.get(i) + ", ");
+			csv.append(resolvedOwners.get(i) + ", ");
+			csv.append(resolvedCommenters.get(i) + ", ");
+			csv.append(resolvedComments.get(i) + ", ");
+			csv.append(avgResolvedComments.get(i) + ", ");
+			csv.append(medianResolvedComments.get(i) + ", ");
+			csv.append(avgCommentSpan.get(i) + ", ");
+			csv.append(medianCommentSpan.get(i) + ", ");
 			csv.append(firstComment.get(i) + ", ");
 			csv.append(lastComment.get(i) + ", ");
-			csv.append(elapsedDays.get(i) + ", ");
 			csv.append(elapsedHours.get(i) + ", ");
-			csv.append(elapsedMinutes.get(i) + ", ");
-			
-			csv.append(numOfOwners.get(i) + ", ");
-			csv.append(everythingElse.get(i) + ", ");
-			
-			csv.append(avgElapsedTime.get(i) + ", ");
-			csv.append(medianElapsedTime.get(i) + "\n");
+			csv.append(resolvedActivities.get(i) + ", ");
+			csv.append(avgResolvedActivities.get(i) + ", ");
+			csv.append(medianResolvedActivity.get(i) + ", ");
+			csv.append(resolvedAge.get(i) + ", ");
+			csv.append(avgPriority.get(i) + ", ");
+			csv.append(medianPriority.get(i) + ", ");
+			csv.append(everythingElse.get(i) + "\n");
 		}
 		
 		fileContent = csv.toString();

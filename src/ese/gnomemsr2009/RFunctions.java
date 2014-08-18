@@ -192,7 +192,7 @@ public class RFunctions
 	 * Input: Directory to product-names.csv
 	 * Output: network metrics to be appended to project summary
 	 */
-	public String summaryMetrics(String dirName, String productName)
+	public String summaryMetrics(String dirName, String productName, boolean dcnOrDAN)
 	{
 		re.eval("if(\"blockmodeling\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"blockmodeling\")}");
 		re.eval("if(\"igraph\" %in% rownames(installed.packages()) == FALSE) {install.packages(\"igraph\")}");
@@ -214,8 +214,8 @@ public class RFunctions
 		re.eval("modularity = 0");
 		re.eval("avg.PathLength = 0");
 		re.eval("avg.Degree = 0");
-		
-		re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DCN.net\")");
+		if(dcnOrDAN) re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DCN.net\")");
+		else if(!dcnOrDAN) if(dcnOrDAN) re.eval("dcn = loadnetwork(\""+dirName+"/"+productName+"/"+productName+"-DAN.net\")");
 		re.eval("dcnGraph         = graph.adjacency(dcn, mode=c(\"undirected\"))");
 		
 		re.eval("cent.Degree = centralization.degree(dcnGraph)$centralization");
