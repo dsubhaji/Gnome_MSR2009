@@ -1,5 +1,7 @@
 package ese.gnomemsr2009;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,6 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 
 public class DatabaseAccessorGnome 
@@ -429,7 +433,7 @@ public class DatabaseAccessorGnome
 		while(rs.next())
 		{
 			String product = rs.getString("(trim(' ' from replace(a.product, '\n', '')))");
-			productName2.add("\"" + product +"\"");
+			productName2.add(product);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d H:mm:ss", Locale.ENGLISH);
 			String allStatus = "";
@@ -807,7 +811,7 @@ public class DatabaseAccessorGnome
 				+ "noof-developers-owning-resolved, noof-developers-commenting-resolved, noof-comments-resolved, avg-comments-resolved, "
 				+ "median-comments-resolved, avg-comment-span-resolved, median-comment-span-resolved, first-comment-ts-resolved, last-comment-ts-resolved, "
 				+ "elapsed-time-hours-resolved, noof-activities-resolved, avg-activities-resolved, median-activities-resolved, product-age-resolved, "
-				+ "avg-bug-priority-resolved, median-bug-priority-resolved, "
+				+ "avg-bug-priority-resolved, median-bug-priority-resolved, socio-tech-congruence, "
 				+ "dcn-degree-centralization, dcn-betweenness-centralization, dcn-closeness, dcn-evcent, dcn-transitivity-global, "
 				+ "dcn-assortativity, dcn-diameter, dcn-density, dcn-modularity, dcn-avg-path-length, dcn-avg-degree, "
 				+ "dan-degree-centralization, dan-betweenness-centralization, dan-closeness, dan-evcent, dan-transitivity-global, "
@@ -838,6 +842,7 @@ public class DatabaseAccessorGnome
 			csv.append(resolvedAge.get(i) + ", ");
 			csv.append(avgPriority.get(i) + ", ");
 			csv.append(medianPriority.get(i) + ", ");
+			csv.append(socioTechCongruence(dirName, productName2.get(i)) + ", ");
 			csv.append(everythingElse.get(i) + "\n");
 		}
 		
@@ -2494,5 +2499,74 @@ public class DatabaseAccessorGnome
 		}
 		
 		fileContent = matrix.toString();
-	}	
+	}
+	
+	public float socioTechCongruence(String directoryName, String productName) throws IOException 
+	{
+		ArrayList<Boolean> dcnMatrix = new ArrayList<Boolean>();
+		ArrayList<Boolean> danMatrix = new ArrayList<Boolean>();
+		
+		int dandcnIntersection 	= 0;
+		int danTrue 			= 0;
+		
+		String [] nextLine;
+		
+		directoryName = directoryName.replaceAll("\\\\", "/");
+		CSVReader reader = new CSVReader(new FileReader(directoryName + "/" + productName + "/" + productName + "-DCN-dev-by-devs.csv"), ',', '\"', 1);
+		
+		while ((nextLine = reader.readNext()) != null) 
+		{
+			for(int rowLength = 1; rowLength < nextLine.length; rowLength++) 
+			{
+				
+				if(nextLine[rowLength].trim().isEmpty()) nextLine[rowLength] = "0";
+				
+				if(Integer.parseInt(nextLine[rowLength].trim())==0) 
+				{
+					dcnMatrix.add(false);
+				} else {
+					dcnMatrix.add(true);
+				}
+			}
+		}
+		
+		reader = new CSVReader(new FileReader(directoryName + "/" + productName + "/" + productName + "-DAN-dev-by-devs.csv"), ',', '\"', 1);
+		
+		while ((nextLine = reader.readNext()) != null) 
+		{
+			for(int rowLength = 1; rowLength < nextLine.length; rowLength++) 
+			{
+				
+				if(nextLine[rowLength].trim().isEmpty()) nextLine[rowLength] = "0";
+				
+				if(Integer.parseInt(nextLine[rowLength].trim())==0) 
+				{
+					danMatrix.add(false);
+				} else {
+					danMatrix.add(true);
+				}
+			}
+		}
+		
+		for(int i = 0; i < danMatrix.size(); i++) 
+		{
+			if(danMatrix.get(i)) 
+			{
+				danTrue++;
+			}
+			try 
+			{
+				if(danMatrix.get(i)||dcnMatrix.get(i)) 
+				{
+					dandcnIntersection++;
+				}
+			} catch (Exception e) 
+			{
+				System.out.println("ERROR: Vertex Length Mismatch!");
+				return Float.NaN;
+			}
+		}
+		
+		return (float)dandcnIntersection/danTrue;
+	}
 }
