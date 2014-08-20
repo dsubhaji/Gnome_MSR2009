@@ -1,5 +1,6 @@
 package ese.gnomemsr2009;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -379,7 +380,7 @@ public class DatabaseAccessorGnome
 		
 	}
 	
-	public void projectSummary(ArrayList<String> productName, String dirName) throws Exception
+	public void projectSummary(ArrayList<String> productName, String dirName, boolean congruenceOrNot) throws Exception
 	{
 		ArrayList<String> elapsedHours 		= new ArrayList<String>();
 		ArrayList<String> firstComment		= new ArrayList<String>();
@@ -811,11 +812,13 @@ public class DatabaseAccessorGnome
 				+ "noof-developers-owning-resolved, noof-developers-commenting-resolved, noof-comments-resolved, avg-comments-resolved, "
 				+ "median-comments-resolved, avg-comment-span-resolved, median-comment-span-resolved, first-comment-ts-resolved, last-comment-ts-resolved, "
 				+ "elapsed-time-hours-resolved, noof-activities-resolved, avg-activities-resolved, median-activities-resolved, product-age-resolved, "
-				+ "avg-bug-priority-resolved, median-bug-priority-resolved, socio-tech-congruence, "
-				+ "dcn-degree-centralization, dcn-betweenness-centralization, dcn-closeness, dcn-evcent, dcn-transitivity-global, "
+				+ "avg-bug-priority-resolved, median-bug-priority-resolved, ");
+		if(congruenceOrNot) csv.append("socio-tech-congruence, ");	
+		csv.append("dcn-degree-centralization, dcn-betweenness-centralization, dcn-closeness, dcn-evcent, dcn-transitivity-global, "
 				+ "dcn-assortativity, dcn-diameter, dcn-density, dcn-modularity, dcn-avg-path-length, dcn-avg-degree, "
 				+ "dan-degree-centralization, dan-betweenness-centralization, dan-closeness, dan-evcent, dan-transitivity-global, "
 				+ "dan-assortativity, dan-diameter, dan-density, dan-modularity, dan-avg-path-length, dan-avg-degree\n");
+				
 		
 		System.out.println("Generating .CSV File");
 		
@@ -842,7 +845,7 @@ public class DatabaseAccessorGnome
 			csv.append(resolvedAge.get(i) + ", ");
 			csv.append(avgPriority.get(i) + ", ");
 			csv.append(medianPriority.get(i) + ", ");
-			csv.append(socioTechCongruence(dirName, productName2.get(i)) + ", ");
+			if(congruenceOrNot) csv.append(socioTechCongruence(dirName, productName2.get(i)) + ", ");
 			csv.append(everythingElse.get(i) + "\n");
 		}
 		
@@ -2506,6 +2509,11 @@ public class DatabaseAccessorGnome
 		ArrayList<Boolean> dcnMatrix = new ArrayList<Boolean>();
 		ArrayList<Boolean> danMatrix = new ArrayList<Boolean>();
 		
+		File dcnFile = new File(directoryName+"/"+productName+"/"+productName+"-DCN-dev-by-devs.csv");
+		File danFile = new File(directoryName+"/"+productName+"/"+productName+"-DAN-dev-by-devs.csv");
+		if(!dcnFile.exists()||!danFile.exists())
+			return Float.NaN;
+		
 		int dandcnIntersection 	= 0;
 		int danTrue 			= 0;
 		
@@ -2566,6 +2574,10 @@ public class DatabaseAccessorGnome
 				return Float.NaN;
 			}
 		}
+		
+		float congruence = 0;
+		if(danTrue == 0) congruence = 0;
+		else congruence = (float)dandcnIntersection/danTrue;
 		
 		return (float)dandcnIntersection/danTrue;
 	}

@@ -47,7 +47,7 @@ public class Controller {
 			if(io.getDBN().equalsIgnoreCase("github_msr2014"))
 				choice = io.inputChoiceGithub();
 			
-			if((choice >= 1)&&(choice <= 11))
+			if((choice >= 1)&&(choice <= 12))
 			{
 				io.batchInput();
 				
@@ -56,19 +56,19 @@ public class Controller {
 				bp.singleServices(io.getDirectoryPath(), choice*multiplier);
 				
 				endTime = System.nanoTime();
-			}else if(choice == 12)
+			}else if(choice == 13)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 1*multiplier);
 				endTime = System.nanoTime();
-			}else if(choice == 13)
+			}else if(choice == 14)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();
 				bp.batch(io.getDirectoryPath(), 2*multiplier);
 				endTime = System.nanoTime();
-			}else if(choice == 14)
+			}else if(choice == 15)
 			{
 				io.batchInput();
 				startTime = System.nanoTime();

@@ -132,20 +132,21 @@ public class IOFormatter
 		do
 		{
 			System.out.println("Available Services for Gnome Data Set");
-			System.out.println("1. Generate Developer Communication Network (DCN) in PAJEK Format for a Given Set of Products");
-			System.out.println("2. Generate Developer Activity Network (DAN) in PAJEK Format for a Given Set of Products");
-			System.out.println("3. Generate the DCN and/or DAN Metrics for a Given Set of Product and PAJEK Files");
-			System.out.println("4. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DCN)");
-			System.out.println("5. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DCN)");
-			System.out.println("6. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DAN)");
-			System.out.println("7. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DAN)");
-			System.out.println("8. Generate Project Data Summary in CSV Format for a Given Set of Products");
-			System.out.println("9. Generate Bug-Details in CSV Format for a Given Set of Products");
-			System.out.println("10. Generate Dev-Details in CSV Format for a Given Set of Products");
-			System.out.println("11. Generate Descriptive Statistics and Correlations for a Given Set of Products");
-			System.out.println("12. Generate 1, 2, 3, 8, 9, 10 for a Given Set of Products");
-			System.out.println("13. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products");
-			System.out.println("14. Generate Correlations, EigenValues, and Perform Factor Analysis");
+			System.out.println("1. Generate Developer Communication Network (DCN) in PAJEK Format for a Given Set of Products (product-names.csv)");
+			System.out.println("2. Generate Developer Activity Network (DAN) in PAJEK Format for a Given Set of Products (product-names.csv)");
+			System.out.println("3. Generate the DCN and/or DAN Metrics for a Given Set of Product and PAJEK Files (product-names.csv)");
+			System.out.println("4. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DCN) (product-names.csv)");
+			System.out.println("5. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DCN) (product-names.csv)");
+			System.out.println("6. Generate Bugs-By-Developer Matrix in CSV Format for a Given Set of Products (DAN) (product-names.csv)");
+			System.out.println("7. Generate Devs-By-Devs Matrix in CSV Format for a Given Set of Products (DAN) (product-names.csv)");
+			System.out.println("8. Generate Project Data Summary in CSV Format for a Given Set of Products (product-names.csv, and PAJEK for DCN and DAN)");
+			System.out.println("9. Generate Project Data Summary in CSV Format for a Given Set of Products With Socio-Tech-Congruence (product-names.csv, and PAJEK and dev-by-dev matrix for DCN and DAN)");
+			System.out.println("10. Generate Bug-Details in CSV Format for a Given Set of Products (product-names.csv)");
+			System.out.println("11. Generate Dev-Details in CSV Format for a Given Set of Products (product-names.csv)");
+			System.out.println("12. Generate Descriptive Statistics and Correlations for a Given Set of Products (product-names.csv, and PAJEK for DCN and DAN)");
+			System.out.println("13. Generate 1, 2, 3, 8, 10, 11 for a Given Set of Products (product-names.csv)");
+			System.out.println("14. Generate Descriptive Statistics, Correlations and Regression Output for a Given Set of Products (product-names.csv, dependent.csv, independent.csv and model-type.csv)");
+			System.out.println("15. Generate Correlations, EigenValues, and Perform Factor Analysis (product-names.csv, variables.csv, parameters.csv and model-type.csv)");
 			System.out.print  ("Please Enter Your Choice (1 to 11): ");
 			
 			try
@@ -160,7 +161,7 @@ public class IOFormatter
 			
 			user_input.nextLine();
 			return choice;
-		} while((choice<1)||(choice>14));
+		} while((choice<1)||(choice>15));
 	}
 	
 	public int inputChoiceGithub()

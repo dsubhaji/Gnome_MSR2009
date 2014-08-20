@@ -244,7 +244,7 @@ public class BatchProcess {
 			else System.out.println("\nCan't find DAN File for: "+productNames.get(i));
 		}
 		System.out.println("\nGenerating Product Summary.");
-		da.projectSummary(productNames, dirName);
+		da.projectSummary(productNames, dirName, false);
 		io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 	}
 	
@@ -444,7 +444,7 @@ public class BatchProcess {
 		
 		if(da.getDBName().equalsIgnoreCase("sutd")||da.getDBName().equalsIgnoreCase("gnome_msr2009"))
 		{
-			if(a!=8&&a!=800)
+			if(a!=8&&a!=800&&a!=9&&a!=900)
 			for(int i = 0; i < prodCount; i++)
 			{
 				long timeStart = System.nanoTime();
@@ -510,17 +510,19 @@ public class BatchProcess {
 					case 800:
 					case 8: 	break;
 					case 900:
-					case 9: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
+					case 9:		break;
+					case 1000:
+					case 10: 	da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
 								break;
-					case 10:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
+					case 11:	da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
-					case 1000: 	da.generateOwnersModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
+					case 1100: 	da.generateOwnersModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
 								io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
 								break;
-					case 1100:
-					case 11:	if(factorAnalysis(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
+					case 1200:
+					case 12:	if(factorAnalysis(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 								break;
 					default:	System.out.println("Not Implemented Yet!");
 								break;
@@ -536,7 +538,13 @@ public class BatchProcess {
 			if(a==8||a==800)
 			{
 				System.out.println("\nGenerating Product Summary.");
-				da.projectSummary(productNames, dirName);
+				da.projectSummary(productNames, dirName, false);
+				io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
+			}
+			if(a==9||a==900)
+			{
+				System.out.println("\nGenerating Product Summary.");
+				da.projectSummary(productNames, dirName, true);
 				io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
 			}
 			
