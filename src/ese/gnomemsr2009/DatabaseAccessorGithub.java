@@ -16,7 +16,6 @@ public class DatabaseAccessorGithub
 	private Connection con;
 	private ResultSet rs;
 	private Statement s ;
-	
 	private NetworkBuilder nb = new NetworkBuilder();
 	
 	private String fileContent;

@@ -2,7 +2,6 @@ package ese.gnomemsr2009;
 
 import java.util.ArrayList;
 
-
 public class NetworkBuilder 
 {
 	public String networkBuilder(ArrayList<String> developers, ArrayList<String> developers2, ArrayList<String> developers3, ArrayList<Integer> edges, int num)

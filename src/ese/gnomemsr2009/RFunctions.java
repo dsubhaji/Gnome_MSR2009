@@ -838,7 +838,6 @@ public class RFunctions
 		}
 		
 		
-		
 	}
 	/*
 	 * Input: Two arraylists, the list of independent vars, and the transformation

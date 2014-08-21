@@ -51,7 +51,6 @@ public class BatchProcess {
 		CSVReader reader = new CSVReader(new FileReader(dirName+"/product-names.csv"), ',', '\"', 1);
 		String [] nextLine;
 		
-		
 		while ((nextLine = reader.readNext()) != null) 
 		{
 			if(nextLine[1].isEmpty()||nextLine[1].trim().isEmpty()||nextLine[1]==null||nextLine[1].trim().equals("none"))

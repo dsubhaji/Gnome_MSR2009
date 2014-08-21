@@ -179,6 +179,7 @@ public class IOFormatter
 			System.out.println("5. Generate Project Data Summary in CSV Format for a Given Set of Products");
 			System.out.print  ("Please Enter Your Choice (1 to 5): ");
 			
+			
 			try
 			{
 				choice = user_input.nextInt();

@@ -2409,7 +2409,6 @@ public class DatabaseAccessorGnome
 					"group by b.bugid " +
 					"order by timestampdiff(second, MIN(b.bug_when), MAX(b.bug_when))/3600 asc " 
 					);
-			
 			float intSpan = 0.0f;
 			
 			while(rs.next())
