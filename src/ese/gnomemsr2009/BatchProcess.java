@@ -196,90 +196,63 @@ public class BatchProcess {
 	 * Input: ArrayList of the product names, start and end dates listed on the csv file read in createDir()
 	 * Output: a bunch of files on the respective product directory
 	 */
-	public void batchQueries(int a) throws Exception
+	public void batchQueries(int a, String product, String startD, String endD) throws Exception
 	{
-		int prodCount = productNames.size();
 		DatabaseAccessorGnome da = Controller.da;
 		IOFormatter io = new IOFormatter();
 		RFunctions rf = Controller.rf;
 		
-		for(int i = 0; i < prodCount; i++)
+		if(a==2)
 		{
-			if(a==2)
-			{
-				da.generateOwnersDCN(productNames.get(i), startDates.get(i), endDates.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-				da.generateOwnersDAN(productNames.get(i), startDates.get(i), endDates.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
-				da.generateOwnersModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
-			} else if (a==1)
-			{
-				da.generateDCN(productNames.get(i), startDates.get(i), endDates.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-				da.generateDAN(productNames.get(i), startDates.get(i), endDates.get(i));
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
-				da.generateCommenterModel(productNames.get(i), startDates.get(i), endDates.get(i), dirName);
-				io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-dev-details.csv");
-			}
-			
-			da.generateBugModel(productNames.get(i), startDates.get(i), endDates.get(i));
-			io.writeFile(da.getFileContent(), dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-bug-details.csv");
-			
-			File file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DCN.net");
-			if(file.exists()) 
-			{
-				System.out.println("\nGenerating DCN Metrics File for " + productNames.get(i));
-				rf.DCNMetrics(dirName, productNames.get(i));
-			}
-			else System.out.println("\nCan't find DCN File for: "+productNames.get(i));
-			
-			file = new File(dirName+"/"+productNames.get(i)+"/"+productNames.get(i)+"-DAN.net");
-			if(file.exists())
-			{
-				System.out.println("\nGenerating DAN Metrics File for " + productNames.get(i));
-				rf.DANMetrics(dirName, productNames.get(i));
-			}
-			else System.out.println("\nCan't find DAN File for: "+productNames.get(i));
+			da.generateOwnersDCN(product, startD, endD);
+			io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-DCN.net");
+			da.generateOwnersDAN(product, startD, endD);
+			io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-DAN.net");
+			da.generateOwnersModel(product, startD, endD, dirName);
+			io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-dev-details.csv");
+		} else if (a==1)
+		{
+			da.generateDCN(product, startD, endD);
+			io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-DCN.net");
+			da.generateDAN(product, startD, endD);
+			io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-DAN.net");
+			da.generateCommenterModel(product, startD, endD, dirName);
+			io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-dev-details.csv");
 		}
-		System.out.println("\nGenerating Product Summary.");
-		da.projectSummary(productNames, dirName, false);
-		io.writeFile(da.getFileContent(), dirName+"/project-summary.csv");
+			
+		da.generateBugModel(product, startD, endD);
+		io.writeFile(da.getFileContent(), dirName+"/"+product+"/"+product+"-bug-details.csv");
+			
+		File file = new File(dirName+"/"+product+"/"+product+"-DCN.net");
+		if(file.exists()) 
+		{
+			System.out.println("\nGenerating DCN Metrics File for " + product);
+			rf.DCNMetrics(dirName, product);
+		}
+		else System.out.println("\nCan't find DCN File for: "+product);
+		
+		file = new File(dirName+"/"+product+"/"+product+"-DAN.net");
+		if(file.exists())
+		{
+			System.out.println("\nGenerating DAN Metrics File for " + product);
+			rf.DANMetrics(dirName, product);
+		}
+		else System.out.println("\nCan't find DAN File for: "+product);
 	}
 	
 	/* descRegAndCor(ArrayList<String>, ArrayList<String>, ArrayList<String)
 	 * Input: ArrayList of the product names, start and end dates listed on the csv file read in createDir()
 	 * Output: Similar to batchQueries but only outputs linear regression, variables description and correlation
 	 */
-	public void descRegAndCor(int a) throws Exception
-	{
-		int prodCount = productNames.size();
-		DatabaseAccessorGnome da = Controller.da;
-		IOFormatter io = new IOFormatter();
+	public void descRegAndCor(int a, String product) throws Exception
+	{	
 		RFunctions rf = Controller.rf;
-		
-		//File theDir = new File(dirName+"/results/");
-		//if (!theDir.exists()) theDir.mkdir();
-		
-		for(int i = 0; i < prodCount; i++)
+		if(a == 1) 
 		{
-			long timeStart = System.nanoTime();
-			System.out.println("\nSTARTING: "+productNames.get(i));
-			
-			//System.out.println(variables);
-			if(a == 1) 
-			{
-				rf.linRegression(modelType, variables, varTransform, dirName, productNames.get(i));
-				rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
-			}
-			if(a == 2) rf.eigenVal(modelType, variables, varTransform, parameters, dirName, productNames.get(i));
-			
-			
-			long timeEnd = System.nanoTime();
-			System.out.println("");
-			System.out.println(productNames.get(i)+" ENDED");
-			System.out.println("TIME TAKEN: " + (((float)(timeEnd - timeStart)/1000000000)/60) + " minutes");
+			rf.linRegression(modelType, variables, varTransform, dirName, product);
+			rf.varDescAndCor(modelType, variables, varTransform, dirName, product);
 		}
+		if(a == 2) rf.eigenVal(modelType, variables, varTransform, parameters, dirName, product);
 	}
 	
 	public boolean checkSubFolder()
@@ -407,29 +380,6 @@ public class BatchProcess {
 	 * Input: String of the directory
 	 * Function: Executes the various methods if all the dependent variable, independent variables and model type are legal
 	 */
-	
-	public void batch(String s, int i) throws Exception
-	{
-		createDir(s);
-		switch(i)
-		{
-			case 100:	if(checkVars(s, 1)) batchQueries(2);
-						break;
-			case 1: 	if(checkVars(s, 1)) batchQueries(1);
-						break;
-			case 200:
-			case 2: 	if(checkVars(s, 2)&&checkSubFolder()) descRegAndCor(1);
-						break;
-			case 300:
-			case 3:		if(factorAnalysis(s, 1)&&checkSubFolder()) descRegAndCor(2);
-						break;
-			case 4: 
-			default:break;	
-		}
-		
-	}
-	
-	
 	public void singleServices(String s, int a) throws Exception
 	{
 		createDir(s);
@@ -523,6 +473,16 @@ public class BatchProcess {
 					case 1200:
 					case 12:	if(factorAnalysis(s, 2)&&checkSubFolder()) rf.varDescAndCor(modelType, variables, varTransform, dirName, productNames.get(i));
 								break;
+					case 1300:	if(checkVars(s, 1)) batchQueries(2, productNames.get(i), startDates.get(i), endDates.get(i));
+								break;
+					case 13:	if(checkVars(s, 1)) batchQueries(1, productNames.get(i), startDates.get(i), endDates.get(i));
+								break;
+					case 1400:
+					case 14:	if(checkVars(s, 2)&&checkSubFolder()) descRegAndCor(1, productNames.get(i));
+								break;
+					case 1500:
+					case 15:	if(factorAnalysis(s, 1)&&checkSubFolder()) descRegAndCor(2, productNames.get(i));
+								break;
 					default:	System.out.println("Not Implemented Yet!");
 								break;
 				}
@@ -534,7 +494,7 @@ public class BatchProcess {
 				System.out.println("");
 			}
 			
-			if(a==8||a==800)
+			if(a==8||a==800||a==13||a==1300)
 			{
 				System.out.println("\nGenerating Product Summary.");
 				da.projectSummary(productNames, dirName, false);
