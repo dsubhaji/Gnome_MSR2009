@@ -192,5 +192,34 @@ public class NetworkBuilder
 		return matrix.toString();
 	}
 	
+	public String ownersModelGnome(ArrayList<String> owners, ArrayList<String> assignedTo, ArrayList<String> avgInterestSpan, ArrayList<String> mostParameters, ArrayList<String> otherParameters)
+	{
+		StringBuilder matrix = new StringBuilder();
+		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, "
+				+ "comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, "
+				+ "average-interest-span, median-interest-span, congruence");
+		matrix.append("\n");
+		String tempString = "0";
+		for(int i = 0; i < owners.size(); i++)
+		{
+			matrix.append(owners.get(i) + ", ");
+			matrix.append(mostParameters.get(i) + ", ");
+			
+			for(int j = 0; j < assignedTo.size(); j++)
+			{
+				if(owners.get(i).equals(assignedTo.get(j)))
+				{
+					tempString = avgInterestSpan.get(j);
+				}
+			}
+			matrix.append(tempString + ", ");
+			matrix.append(otherParameters.get(i) + ", ");
+			matrix.append("\n");
+			tempString = "0";
+		}
+		
+		return matrix.toString();
+	}
+	
 	
 }

@@ -24,6 +24,7 @@ public class DatabaseAccessorGnome
 	Statement s ;
 	Statement s2;
 	
+	
 	private NetworkBuilder nb = new NetworkBuilder();
 	
 	
@@ -874,7 +875,7 @@ public class DatabaseAccessorGnome
 		
 		while(rs.next())
 		{
-			distinctBug_id.add(rs.getString("(trim(' ' from replace(a.bug_id, '\n', '')))"));
+			distinctBug_id.add(rs.getString("(trim(' ' from replace(bug_id, '\n', '')))"));
 		}
 		
 		rs = s.executeQuery(
@@ -1975,54 +1976,25 @@ public class DatabaseAccessorGnome
 			
 		}
 		
-		StringBuilder matrix = new StringBuilder();
-		
-		/*RFunctions rf = Controller.rf;
-		ArrayList<String> dcnParameters = rf.nwParameters(dirName, product, owners, true);
-		
-		ArrayList<String> danParameters = rf.nwParameters(dirName, product, owners, true);*/
-		
-		//Column Headers
-		//matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, average-interest-span, median-interest-span, degree, betweenness, closeness, clustcoeff, eigencentrality, pagerank");
-		matrix.append("developer, bugs-owned, bugs-commented, comment-span, comments-on-owned, "
-				+ "comments-on-nonowned, noof-activities, average-elapsed-time, median-elapsed-time, "
-				+ "average-interest-span, median-interest-span, congruence");
-				//+ "dcn.degree, dcn.betweenness, dcn.clustcoeff, dcn.eigencentrality, dcn.closeness, dcn.pagerank, "
-				//+ "dan.degree, dan.betweenness, dan.clustcoeff, dan.eigencentrality, dan.closeness, dan.pagerank");
-		matrix.append("\n");
-		
-		String tempString = "0";
-		
+		ArrayList<String> mostParameters = new ArrayList<String>();
+		ArrayList<String> otherParameters = new ArrayList<String>();
 		for(int i = 0; i < owners.size(); i++)
 		{
-			matrix.append(owners.get(i) + ", ");
-			matrix.append(bugsOwned.get(i) + ", ");
-			matrix.append(bugsCommented.get(i) + ", ");
-			matrix.append(bugsCommentSpan.get(i) + ", ");
-			matrix.append(commentsOnOwned.get(i) + ", ");
-			matrix.append(commentsOffOwned.get(i) + ", ");
-			matrix.append(noOfActivities.get(i) + ", ");
-			
-			for(int j = 0; j < assignedTo.size(); j++)
-			{
-				if(owners.get(i).equals(assignedTo.get(j)))
-				{
-					tempString = avgInterestSpan.get(j);
-				}
-			}
-			matrix.append(avgElapsedTime.get(i) + ", ");
-			
-			matrix.append(medianElapsedTime.get(i) + ", ");
-			matrix.append(tempString + ", ");
-			matrix.append(medianInterestSpan.get(i) + ", ");
-			matrix.append(congruency.get(i));
-			//matrix.append(dcnParameters.get(i) + ", ");
-			//matrix.append(danParameters.get(i));
-			matrix.append("\n");
-			tempString = "0";
+			mostParameters.add(bugsOwned.get(i) + ", "
+								+ bugsCommented.get(i) + ", "
+								+ bugsCommentSpan.get(i) + ", "
+								+ commentsOnOwned.get(i) + ", "
+								+ commentsOffOwned.get(i) + ", "
+								+ noOfActivities.get(i) + ", "
+								+ avgElapsedTime.get(i) + ", "
+								+ medianElapsedTime.get(i) + ", "
+								);
+			otherParameters.add(medianInterestSpan.get(i) + ", "
+								+ congruency.get(i));
 		}
 		
-		fileContent = matrix.toString();
+		fileContent = nb.ownersModelGnome(owners, assignedTo, avgInterestSpan, mostParameters, otherParameters);
+		
 		System.out.println("");
 		System.out.println("Generating .CSV File.");
 	}
